@@ -1,0 +1,12 @@
+/* src/styles/radius.css */
+@theme {
+  /* Reusable radius tokens recommended by UI_GUIDELINE.md */
+  --radius-xs: 4px;
+  --radius-sm: 8px; /* Small */
+  --radius-md: 12px; /* Medium */
+  --radius-lg: 16px; /* Large (Inputs & Buttons) */
+  --radius-xl: 20px; /* XL (Cards & Charts) */
+  --radius-2xl: 24px; /* 2XL (Modals) */
+  --radius-3xl: 28px; /* 3XL (Large Cards) */
+  --radius-full: 9999px; /* Full (Pills & Circular shapes) */
+}

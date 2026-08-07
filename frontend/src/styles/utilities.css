@@ -1,0 +1,175 @@
+/* src/styles/utilities.css */
+
+/* Alignment and layout utilities */
+@utility flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Page boundaries */
+@utility page-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-4);
+  padding-right: var(--spacing-4);
+  max-width: 1280px;
+  @media (min-width: 768px) {
+    padding-left: var(--spacing-6);
+    padding-right: var(--spacing-6);
+  }
+  @media (min-width: 1024px) {
+    padding-left: var(--spacing-8);
+    padding-right: var(--spacing-8);
+  }
+}
+
+/* Section height pads */
+@utility section-container {
+  padding-top: var(--spacing-12);
+  padding-bottom: var(--spacing-12);
+  @media (min-width: 1024px) {
+    padding-top: var(--spacing-16);
+    padding-bottom: var(--spacing-16);
+  }
+}
+
+/* Width clamps */
+@utility responsive-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+  @media (min-width: 640px) {
+    max-width: 640px;
+  }
+  @media (min-width: 768px) {
+    max-width: 768px;
+  }
+  @media (min-width: 1024px) {
+    max-width: 1024px;
+  }
+  @media (min-width: 1280px) {
+    max-width: 1280px;
+  }
+}
+
+/* Text balance to prevent orphan words */
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Gradient text utilities */
+@utility gradient-text {
+  background-image: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+@utility gradient-text-hero {
+  background-image: var(--gradient-hero);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Gradient background utilities */
+@utility bg-gradient-primary {
+  background-image: var(--gradient-primary);
+}
+
+@utility bg-gradient-secondary {
+  background-image: var(--gradient-secondary);
+}
+
+@utility bg-gradient-hero {
+  background-image: var(--gradient-hero);
+}
+
+/* Claymorphism core container surfaces */
+@utility clay-surface {
+  background: var(--card);
+  border: var(--clay-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Claymorphism interactive clickable card surface */
+@utility clay-surface-interactive {
+  background: var(--card);
+  border: var(--clay-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform var(--transition-duration-normal) var(--transition-timing-function-ease-out-smooth),
+    box-shadow var(--transition-duration-normal) var(--transition-timing-function-ease-out-smooth);
+
+  &:hover {
+    transform: translateY(-4px) scale(1.015);
+    box-shadow:
+      var(--shadow-lg),
+      0 8px 24px rgba(124, 58, 237, 0.05);
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(1.002);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* Floating Card for regular cards */
+@utility floating-card {
+  box-shadow: var(--shadow-md);
+  transform: translateY(0);
+  transition:
+    transform var(--transition-duration-normal) var(--transition-timing-function-ease-out-smooth),
+    box-shadow var(--transition-duration-normal) var(--transition-timing-function-ease-out-smooth);
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-floating);
+  }
+}
+
+/* Soft Border utility */
+@utility soft-border {
+  border: 1px solid var(--border);
+}
+
+/* Glass Accent (Frosted glass effects) */
+@utility glass-accent {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  .dark & {
+    background: rgba(24, 22, 40, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* Standard transition utility */
+@utility transition-all-smooth {
+  transition-property: var(--transition-property-default);
+  transition-duration: var(--transition-duration-normal);
+  transition-timing-function: var(--transition-timing-function-ease-out-smooth);
+}

@@ -1,0 +1,61 @@
+/* src/styles/animations.css */
+@theme {
+  /* Reusable transition duration tokens (Framer Motion friendly) */
+  --transition-duration-fast: 150ms;
+  --transition-duration-normal: 250ms;
+  --transition-duration-slow: 350ms;
+
+  /* Easing curves for elegant and natural micro-animations (No bounce) */
+  --transition-timing-function-ease-out-smooth: cubic-bezier(0.16, 1, 0.3, 1); /* Out Quint */
+  --transition-timing-function-ease-in-out-smooth: cubic-bezier(
+    0.76,
+    0,
+    0.24,
+    1
+  ); /* In-Out Quart */
+
+  /* Preset Transitions */
+  --transition-property-default:
+    color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow,
+    transform, filter, backdrop-filter;
+
+  /* Animations */
+  --animate-fade-in: fade-in var(--transition-duration-fast)
+    var(--transition-timing-function-ease-out-smooth);
+  --animate-slide-up: slide-up var(--transition-duration-normal)
+    var(--transition-timing-function-ease-out-smooth);
+  --animate-scale-in: scale-in var(--transition-duration-normal)
+    var(--transition-timing-function-ease-out-smooth);
+}
+
+/* Keyframes definitions */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

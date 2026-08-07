@@ -1,0 +1,154 @@
+/* src/styles/variables.css */
+:root {
+  /* Core Brand Colors (Hex & HSL compatible) */
+  --primary-color-h: 262;
+  --primary-color-s: 83%;
+  --primary-color-l: 58%; /* #7C3AED */
+
+  --primary: hsl(var(--primary-color-h), var(--primary-color-s), var(--primary-color-l));
+  --primary-hover: hsl(var(--primary-color-h), var(--primary-color-s), 48%); /* #6D28D9 */
+  --primary-light: hsl(var(--primary-color-h), var(--primary-color-s), 96%); /* #F5F3FF */
+
+  --secondary: hsl(242, 78%, 60%); /* Indigo #4F46E5 */
+  --secondary-hover: hsl(242, 78%, 52%);
+  --secondary-light: hsl(242, 78%, 96%);
+
+  /* Accents */
+  --accent: hsl(327, 85%, 60%); /* Soft Pink #EC4899 */
+  --accent-pink: hsl(327, 85%, 60%);
+  --accent-emerald: hsl(158, 82%, 40%); /* Emerald #10B981 */
+  --accent-sky: hsl(199, 89%, 48%); /* Sky Blue #0EA5E9 */
+
+  /* Semantic Status */
+  --success: hsl(158, 82%, 40%);
+  --warning: hsl(35, 92%, 50%); /* Amber #F59E0B */
+  --danger: hsl(0, 84%, 60%); /* Red #EF4444 */
+  --info: hsl(217, 91%, 60%); /* Blue #3B82F6 */
+
+  /* Surfaces & Backgrounds */
+  --background: #f7f7fb; /* Premium Light Background */
+  --surface: #fafafc;
+  --card: #ffffff; /* Pure White Card background for Claymorphism */
+  --border: #e4e4e7;
+  --muted: #f1f5f9;
+
+  /* Typography Text Colors */
+  --text-primary: #0f172a; /* Dark Slate */
+  --text-secondary: #475569; /* Slate */
+  --text-muted: #94a3b8; /* Muted Slate */
+
+  /* Common Utils */
+  --white: #ffffff;
+  --black: #000000;
+  --overlay: rgba(15, 23, 42, 0.4);
+  --scrollbar-thumb: rgba(124, 58, 237, 0.18);
+  --scrollbar-thumb-hover: rgba(124, 58, 237, 0.35);
+  --scrollbar-track: rgba(247, 247, 251, 0.8);
+
+  --focus-ring: hsl(var(--primary-color-h), var(--primary-color-s), 70%);
+  --selection-bg: rgba(124, 58, 237, 0.15);
+  --selection-text: hsl(var(--primary-color-h), var(--primary-color-s), 40%);
+
+  --hover-bg: rgba(124, 58, 237, 0.04);
+  --active-bg: rgba(124, 58, 237, 0.08);
+  --disabled: #e2e8f0;
+  --skeleton: #e2e8f0;
+
+  /* Reusable Gradients */
+  --gradient-primary: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+  --gradient-secondary: linear-gradient(135deg, #8b5cf6 0%, #4f46e5 100%);
+  --gradient-hero: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+
+  /* Claymorphism Styling Variables */
+  --clay-highlight: rgba(255, 255, 255, 0.7);
+  --clay-inner-shadow:
+    inset 0 -5px 10px rgba(0, 0, 0, 0.04), inset 0 5px 10px rgba(255, 255, 255, 0.9);
+  --clay-border: 1px solid rgba(255, 255, 255, 0.6);
+
+  /* shadcn/ui Standard System Mappings */
+  --foreground: #0f172a;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary-foreground: #ffffff;
+  --secondary-foreground: #0f172a;
+  --muted-foreground: #94a3b8;
+  --accent-foreground: #0f172a;
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: #ffffff;
+  --input: #e4e4e7;
+  --ring: hsl(var(--primary-color-h), var(--primary-color-s), var(--primary-color-l));
+}
+
+.dark {
+  /* Core Brand Colors (Dark Mode) */
+  --primary: hsl(var(--primary-color-h), 85%, 70%); /* #A78BFA */
+  --primary-hover: hsl(var(--primary-color-h), var(--primary-color-s), var(--primary-color-l));
+  --primary-light: hsl(var(--primary-color-h), 50%, 15%);
+
+  --secondary: hsl(242, 85%, 75%);
+  --secondary-hover: hsl(242, 78%, 60%);
+  --secondary-light: hsl(242, 50%, 15%);
+
+  /* Accents */
+  --accent: hsl(327, 85%, 70%);
+  --accent-pink: hsl(327, 85%, 70%);
+  --accent-emerald: hsl(158, 75%, 55%);
+  --accent-sky: hsl(199, 89%, 65%);
+
+  /* Semantic Status */
+  --success: hsl(158, 75%, 55%);
+  --warning: hsl(35, 92%, 60%);
+  --danger: hsl(0, 84%, 70%);
+  --info: hsl(217, 91%, 70%);
+
+  /* Surfaces & Backgrounds */
+  --background: #0b0a0f; /* Premium Deep Dark Purple-Grey */
+  --surface: #12101e;
+  --card: #181628;
+  --border: #2d2a3f;
+  --muted: #1e1b30;
+
+  /* Typography Text Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+
+  /* Common Utils */
+  --overlay: rgba(0, 0, 0, 0.75);
+  --scrollbar-thumb: rgba(167, 139, 250, 0.18);
+  --scrollbar-thumb-hover: rgba(167, 139, 250, 0.35);
+  --scrollbar-track: rgba(11, 10, 15, 0.8);
+
+  --focus-ring: hsl(var(--primary-color-h), 80%, 75%);
+  --selection-bg: rgba(167, 139, 250, 0.25);
+  --selection-text: #f8fafc;
+
+  --hover-bg: rgba(167, 139, 250, 0.08);
+  --active-bg: rgba(167, 139, 250, 0.15);
+  --disabled: #1e293b;
+  --skeleton: #1e293b;
+
+  /* Reusable Gradients (Dark) */
+  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  --gradient-secondary: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  --gradient-hero: linear-gradient(135deg, #8b5cf6 0%, #f472b6 100%);
+
+  /* Claymorphism Styling Variables (Dark) */
+  --clay-highlight: rgba(255, 255, 255, 0.08);
+  --clay-inner-shadow:
+    inset 0 -5px 10px rgba(0, 0, 0, 0.4), inset 0 5px 10px rgba(255, 255, 255, 0.05);
+  --clay-border: 1px solid rgba(255, 255, 255, 0.08);
+
+  /* shadcn/ui Standard System Mappings (Dark) */
+  --foreground: #f8fafc;
+  --card-foreground: #f8fafc;
+  --popover: #181628;
+  --popover-foreground: #f8fafc;
+  --primary-foreground: #0b0a0f;
+  --secondary-foreground: #f8fafc;
+  --muted-foreground: #64748b;
+  --accent-foreground: #f8fafc;
+  --destructive-foreground: #0b0a0f;
+  --input: #2d2a3f;
+}

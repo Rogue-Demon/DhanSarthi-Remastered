@@ -1,0 +1,14 @@
+export { default as InvestmentLayout } from './InvestmentLayout';
+export { default as Portfolio } from './Portfolio';
+export { default as Stocks } from './Stocks';
+export { default as MutualFunds } from './MutualFunds';
+export { default as SIP } from './SIP';
+export { default as FixedDeposit } from './FixedDeposit';
+export { default as RecurringDeposit } from './RecurringDeposit';
+export { default as Gold } from './Gold';
+export { default as Bonds } from './Bonds';
+export { default as PPF } from './PPF';
+export { default as NPS } from './NPS';
+export { default as InvestmentSidebar } from './InvestmentSidebar';
+export { default as InvestmentHeader } from './InvestmentHeader';
+export { default as InvestmentBreadcrumb } from './InvestmentBreadcrumb';

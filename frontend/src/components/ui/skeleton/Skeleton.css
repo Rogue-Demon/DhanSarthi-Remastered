@@ -1,0 +1,37 @@
+.skeleton-base {
+  background: var(--skeleton-base, #e2e8f0);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md, 0.5rem);
+}
+
+/* Shimmer effect */
+.skeleton-base::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  height: 100%;
+  width: 150%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--skeleton-highlight, rgba(255, 255, 255, 0.4)),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+/* Reduced motion fallback – no animation */
+.skeleton-reduced::after {
+  display: none;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
