@@ -20,6 +20,10 @@ def create_application() -> FastAPI:
     )
     application.include_router(api_router, prefix=settings.api_v1_prefix)
 
+    @application.get("/", tags=["root"])
+    def root() -> dict[str, str]:
+        return {"message": "Welcome to DhanSarthi API. Go to /docs for the API documentation."}
+
     @application.get("/health", response_model=HealthResponse, tags=["health"])
     def health_check() -> HealthResponse:
         return HealthResponse(status="ok")
@@ -40,4 +44,4 @@ def create_application() -> FastAPI:
     return application
 
 
-app = create_application()
+app = create_application()  # Trigger reload after env update
