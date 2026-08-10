@@ -29,6 +29,7 @@ from app.services.investment_service import InvestmentService
 from app.services.loan_service import LoanService
 from app.services.goal_service import GoalService
 from app.services.budget_service import BudgetService
+from app.services.financial_service import FinancialService
 
 __all__ = [
     "IncomeService",
@@ -40,4 +41,6 @@ __all__ = [
     "LoanService",
     "GoalService",
     "BudgetService",
+    "FinancialService",
 ]
+
