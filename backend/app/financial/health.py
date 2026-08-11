@@ -94,10 +94,11 @@ def calculate_financial_metrics(
         nw_res = calculate_net_worth(input_data.net_worth_input)
 
     debt_res: DebtAnalysisResult | None = None
-    if input_data.net_worth_input is not None:
+    if input_data.net_worth_input is not None or input_data.loans:
         gross_inc = cf_res.total_income if cf_res else Decimal("0")
+        liabs = input_data.net_worth_input.liabilities if input_data.net_worth_input else []
         debt_res = analyze_debt(
-            liabilities=input_data.net_worth_input.liabilities,
+            liabilities=liabs,
             loans=input_data.loans,
             gross_monthly_income=gross_inc,
             reference_date=ref_date,

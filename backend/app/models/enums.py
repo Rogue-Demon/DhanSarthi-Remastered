@@ -186,3 +186,28 @@ class MessageRole(str, enum.Enum):
     ASSISTANT = "ASSISTANT"
 
 
+class DocumentStatus(str, enum.Enum):
+    """Lifecycle state of a user-uploaded financial document."""
+
+    UPLOADED = "UPLOADED"
+    PROCESSING = "PROCESSING"
+    EXTRACTED = "EXTRACTED"
+    REVIEW_REQUIRED = "REVIEW_REQUIRED"
+    CONFIRMED = "CONFIRMED"
+    FAILED = "FAILED"
+    REJECTED = "REJECTED"
+
+
+class DocumentType(str, enum.Enum):
+    """Classification of a user-uploaded financial document."""
+
+    BANK_STATEMENT = "BANK_STATEMENT"
+    SALARY_SLIP = "SALARY_SLIP"
+    LOAN_STATEMENT = "LOAN_STATEMENT"
+    INVESTMENT_STATEMENT = "INVESTMENT_STATEMENT"
+    TAX_DOCUMENT = "TAX_DOCUMENT"
+    BILL = "BILL"
+    UNKNOWN = "UNKNOWN"
+
+
+

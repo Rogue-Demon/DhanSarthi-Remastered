@@ -133,9 +133,10 @@ class TestChatPipeline:
         captured_history = []
         original_build = AIContextBuilder.build_context
 
-        def capturing_build(self_inner, question, full_context, retrieved_docs, conversation_history=None):
-            captured_history.extend(conversation_history or [])
-            return original_build(self_inner, question, full_context, retrieved_docs, conversation_history)
+        def capturing_build(self_inner, *args, **kwargs):
+            history = kwargs.get("conversation_history") or (args[3] if len(args) > 3 else None)
+            captured_history.extend(history or [])
+            return original_build(self_inner, *args, **kwargs)
 
         with patch.object(AIContextBuilder, "build_context", capturing_build):
             svc = _build_service(db_session)

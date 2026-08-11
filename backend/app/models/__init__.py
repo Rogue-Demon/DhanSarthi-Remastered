@@ -23,6 +23,7 @@ from app.models.goal import Goal
 from app.models.budget import Budget
 from app.models.knowledge import KnowledgeDocument, KnowledgeChunk
 from app.models.conversation import Conversation, ConversationMessage
+from app.models.financial_document import FinancialDocument, DocumentExtraction
 
 __all__ = [
     "User",
@@ -42,4 +43,6 @@ __all__ = [
     "KnowledgeChunk",
     "Conversation",
     "ConversationMessage",
+    "FinancialDocument",
+    "DocumentExtraction",
 ]

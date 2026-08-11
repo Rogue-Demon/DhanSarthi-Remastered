@@ -46,6 +46,7 @@ from app.financial import (
     IncomeItemInput,
     InvestmentItemInput,
     LiabilityItemInput,
+    LoanInput,
     NetWorthInput,
     NetWorthResult,
     PortfolioInput,
@@ -242,6 +243,16 @@ class FinancialContextService:
             for inv in investments
         ]
 
+        loan_inputs = [
+            LoanInput(
+                principal=l.principal_amount,
+                annual_interest_rate_percent=l.interest_rate * Decimal("100"),
+                tenure_months=l.tenure,
+                loan_type=l.loan_type,
+            )
+            for l in loans if l.status == LoanStatus.ACTIVE
+        ]
+
         # Build monthly essential expenses for emergency fund calculation.
         monthly_essential = sum(
             (exp.amount for exp in expenses if getattr(exp, "is_essential", False)),
@@ -290,6 +301,7 @@ class FinancialContextService:
         metrics_input = FinancialMetricsInput(
             cash_flow_input=cf_input,
             net_worth_input=nw_input,
+            loans=loan_inputs,
             portfolio_input=port_input,
             budget_input=budget_input,
             monthly_essential_expenses=monthly_essential if monthly_essential > Decimal("0") else None,

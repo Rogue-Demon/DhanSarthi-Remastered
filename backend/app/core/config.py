@@ -36,6 +36,16 @@ class Settings(BaseSettings):
     ai_max_history_messages: int = Field(default=20, validation_alias="AI_MAX_HISTORY_MESSAGES")
     ai_request_timeout_seconds: int = Field(default=60, validation_alias="AI_REQUEST_TIMEOUT_SECONDS")
     ai_max_message_length: int = Field(default=2000, validation_alias="AI_MAX_MESSAGE_LENGTH")
+    max_document_size_mb: int = Field(default=10, validation_alias="MAX_DOCUMENT_SIZE_MB")
+    document_storage_path: str = Field(default="storage/documents", validation_alias="DOCUMENT_STORAGE_PATH")
+    document_max_pages: int = Field(default=100, validation_alias="DOCUMENT_MAX_PAGES")
+    document_classification_threshold: float = Field(default=0.6, validation_alias="DOCUMENT_CLASSIFICATION_THRESHOLD")
+    dti_threshold_high: float = Field(default=36.0, validation_alias="DTI_THRESHOLD_HIGH")
+    dti_threshold_very_high: float = Field(default=50.0, validation_alias="DTI_THRESHOLD_VERY_HIGH")
+    emergency_fund_target_months: int = Field(default=6, validation_alias="EMERGENCY_FUND_TARGET_MONTHS")
+    emergency_fund_warning_months: int = Field(default=3, validation_alias="EMERGENCY_FUND_WARNING_MONTHS")
+    budget_utilization_warning_percent: float = Field(default=85.0, validation_alias="BUDGET_UTILIZATION_WARNING_PERCENT")
+    investment_concentration_threshold: float = Field(default=50.0, validation_alias="INVESTMENT_CONCENTRATION_THRESHOLD")
 
 
     @property
