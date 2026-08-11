@@ -1,14 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/utils';
+import React, { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { cn } from '@/utils'
 
 export function MenuGroup({ label, children }) {
   return (
     <div className="flex flex-col gap-1 py-1">
-      {label && <span className="px-3 py-1.5 text-xs font-bold text-text-muted select-none">{label}</span>}
+      {label && (
+        <span className="px-3 py-1.5 text-xs font-bold text-text-muted select-none">{label}</span>
+      )}
       {children}
     </div>
-  );
+  )
 }
 
 export function MenuItem({ children, onClick, className, destructive = false, ...props }) {
@@ -25,7 +27,7 @@ export function MenuItem({ children, onClick, className, destructive = false, ..
     >
       {children}
     </button>
-  );
+  )
 }
 
 export const Dropdown = ({
@@ -35,26 +37,26 @@ export const Dropdown = ({
   align = 'left', // left, right
   ...props
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef(null)
 
-  const toggle = () => setIsOpen(!isOpen);
+  const toggle = () => setIsOpen(!isOpen)
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
+    }
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleOutsideClick);
+      document.addEventListener('mousedown', handleOutsideClick)
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-    };
-  }, [isOpen]);
+      document.removeEventListener('mousedown', handleOutsideClick)
+    }
+  }, [isOpen])
 
   return (
     <div ref={containerRef} className="relative inline-block" {...props}>
@@ -74,12 +76,30 @@ export const Dropdown = ({
               className
             )}
           >
-            {menuItems}
+            {React.Children.map(menuItems, (item) => {
+              if (React.isValidElement(item)) {
+                const orig = item.props.onClick
+                return React.cloneElement(item, {
+                  onClick: (e) => {
+                    try {
+                      if (orig) orig(e)
+                    } catch (err) {
+                      // swallow handler errors so menu still closes
+
+                      console.error(err)
+                    }
+                    setIsOpen(false)
+                  },
+                })
+              }
+
+              return item
+            })}
           </motion.div>
         )}
       </AnimatePresence>
     </div>
-  );
-};
+  )
+}
 
-export default Dropdown;
+export default Dropdown

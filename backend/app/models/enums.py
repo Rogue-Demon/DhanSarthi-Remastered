@@ -138,3 +138,51 @@ class BudgetPeriod(str, enum.Enum):
     MONTHLY = "MONTHLY"
     YEARLY = "YEARLY"
     CUSTOM = "CUSTOM"
+
+
+class KnowledgeAuthority(str, enum.Enum):
+    """Publishing authority classification for RAG documents."""
+
+    GOVERNMENT = "GOVERNMENT"
+    REGULATOR = "REGULATOR"
+    OFFICIAL_INSTITUTION = "OFFICIAL_INSTITUTION"
+    APPROVED_EDUCATIONAL = "APPROVED_EDUCATIONAL"
+    GENERAL = "GENERAL"
+
+
+class KnowledgeCategory(str, enum.Enum):
+    """Taxonomy of general financial knowledge."""
+
+    TAX = "TAX"
+    INVESTMENT = "INVESTMENT"
+    LOAN = "LOAN"
+    SAVINGS = "SAVINGS"
+    BUDGETING = "BUDGETING"
+    FINANCIAL_PLANNING = "FINANCIAL_PLANNING"
+    GENERAL_FINANCE = "GENERAL_FINANCE"
+
+
+class KnowledgeDocumentStatus(str, enum.Enum):
+    """Lifecycle state of a RAG knowledge document."""
+
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    DRAFT = "DRAFT"
+    ARCHIVED = "ARCHIVED"
+
+
+class ConversationStatus(str, enum.Enum):
+    """Lifecycle state of an AI conversation thread."""
+
+    ACTIVE = "ACTIVE"
+    ARCHIVED = "ARCHIVED"
+    DELETED = "DELETED"
+
+
+class MessageRole(str, enum.Enum):
+    """Role of a participant in a conversation message."""
+
+    USER = "USER"
+    ASSISTANT = "ASSISTANT"
+
+

@@ -14,7 +14,10 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
+from app.models.enums import AssetType
+
 from app.financial import (
+    AssetItemInput,
     BudgetAnalysisInput,
     BudgetAnalysisResult,
     BudgetCategoryInput,
@@ -144,8 +147,8 @@ class FinancialService:
             AssetItemInput(
                 name=a.name,
                 asset_type=a.asset_type,
-                current_value=a.current_value,
-                is_liquid=a.is_liquid,
+                current_value=a.value,
+                is_liquid=(a.asset_type in (AssetType.CASH, AssetType.BANK_BALANCE)),
             )
             for a in assets
         ]
@@ -154,8 +157,8 @@ class FinancialService:
             LiabilityItemInput(
                 name=l.name,
                 liability_type=l.liability_type,
-                outstanding_balance=l.outstanding_balance,
-                monthly_payment=l.monthly_payment or Decimal("0"),
+                outstanding_balance=l.outstanding_amount,
+                monthly_payment=Decimal("0"),
             )
             for l in liabilities
         ]
@@ -178,8 +181,8 @@ class FinancialService:
             LiabilityItemInput(
                 name=l.name,
                 liability_type=l.liability_type,
-                outstanding_balance=l.outstanding_balance,
-                monthly_payment=l.monthly_payment or Decimal("0"),
+                outstanding_balance=l.outstanding_amount,
+                monthly_payment=Decimal("0"),
             )
             for l in liabilities
         ]
@@ -204,10 +207,10 @@ class FinancialService:
             InvestmentItemInput(
                 name=inv.name,
                 investment_type=inv.investment_type,
-                invested_amount=inv.invested_amount,
+                invested_amount=inv.principal,
                 current_value=inv.current_value,
                 purchase_date=inv.purchase_date,
-                units=inv.units,
+                units=inv.quantity,
             )
             for inv in investments
         ]
@@ -294,8 +297,8 @@ class FinancialService:
                 AssetItemInput(
                     name=a.name,
                     asset_type=a.asset_type,
-                    current_value=a.current_value,
-                    is_liquid=a.is_liquid,
+                    current_value=a.value,
+                    is_liquid=(a.asset_type in (AssetType.CASH, AssetType.BANK_BALANCE)),
                 )
                 for a in self._asset_repo.list_for_user(user_id)
             ],
@@ -303,8 +306,8 @@ class FinancialService:
                 LiabilityItemInput(
                     name=l.name,
                     liability_type=l.liability_type,
-                    outstanding_balance=l.outstanding_balance,
-                    monthly_payment=l.monthly_payment or Decimal("0"),
+                    outstanding_balance=l.outstanding_amount,
+                    monthly_payment=Decimal("0"),
                 )
                 for l in self._liability_repo.list_for_user(user_id)
             ],
@@ -316,7 +319,7 @@ class FinancialService:
                 InvestmentItemInput(
                     name=inv.name,
                     investment_type=inv.investment_type,
-                    invested_amount=inv.invested_amount,
+                    invested_amount=inv.principal,
                     current_value=inv.current_value,
                 )
                 for inv in self._investment_repo.list_for_user(user_id)

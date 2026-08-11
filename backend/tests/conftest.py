@@ -6,6 +6,9 @@ os.environ["DATABASE_URL"] = "sqlite+pysqlite:///:memory:"
 
 import pytest
 from sqlalchemy.orm import Session
+
+# Import all models to ensure they are registered in Base.metadata
+import app.models
 from app.core.database import Base, engine, SessionLocal
 
 @pytest.fixture(scope="session", autouse=True)

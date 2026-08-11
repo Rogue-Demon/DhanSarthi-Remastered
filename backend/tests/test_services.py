@@ -50,11 +50,7 @@ from app.services.budget_service import BudgetService
 
 _counter = itertools.count(1)
 
-@pytest.fixture(scope="module", autouse=True)
-def setup_svc_db():
-    Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
+
 
 
 @pytest.fixture
