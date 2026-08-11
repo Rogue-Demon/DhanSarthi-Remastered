@@ -86,6 +86,10 @@ class AIContext(BaseModel):
         default_factory=list,
         description="Recent conversation turns for context continuity.",
     )
+    live_market_data: Optional[Any] = Field(
+        default=None,
+        description="Current or recently updated numerical market information (stocks, NAVs, FX rates, indices).",
+    )
     question: str = Field(..., description="The user's original input question.")
 
 

@@ -47,6 +47,20 @@ class Settings(BaseSettings):
     budget_utilization_warning_percent: float = Field(default=85.0, validation_alias="BUDGET_UTILIZATION_WARNING_PERCENT")
     investment_concentration_threshold: float = Field(default=50.0, validation_alias="INVESTMENT_CONCENTRATION_THRESHOLD")
 
+    # Market Data Provider Layer Config
+    market_data_provider: str = Field(default="mock", validation_alias="MARKET_DATA_PROVIDER")
+    stock_data_api_key: str | None = Field(default=None, validation_alias="STOCK_DATA_API_KEY")
+    stock_data_provider: str = Field(default="mock", validation_alias="STOCK_DATA_PROVIDER")
+    mutual_fund_provider: str = Field(default="mock", validation_alias="MUTUAL_FUND_PROVIDER")
+    fx_provider: str = Field(default="mock", validation_alias="FX_PROVIDER")
+    index_provider: str = Field(default="mock", validation_alias="INDEX_PROVIDER")
+    interest_rate_provider: str = Field(default="mock", validation_alias="INTEREST_RATE_PROVIDER")
+    market_data_cache_ttl_stock: int = Field(default=300, validation_alias="MARKET_DATA_CACHE_TTL_STOCK")
+    market_data_cache_ttl_nav: int = Field(default=43200, validation_alias="MARKET_DATA_CACHE_TTL_NAV")
+    market_data_cache_ttl_fx: int = Field(default=3600, validation_alias="MARKET_DATA_CACHE_TTL_FX")
+    market_data_cache_ttl_index: int = Field(default=300, validation_alias="MARKET_DATA_CACHE_TTL_INDEX")
+    market_data_cache_ttl_rate: int = Field(default=86400, validation_alias="MARKET_DATA_CACHE_TTL_RATE")
+
 
     @property
     def cors_origins_list(self) -> list[str]:

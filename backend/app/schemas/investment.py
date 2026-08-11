@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.models.enums import InvestmentTransactionType, InvestmentType
 
@@ -60,6 +60,39 @@ class InvestmentResponse(BaseModel):
     purchase_date: Optional[date] = None
     created_at: datetime
     updated_at: datetime
+    ticker_symbol: Optional[str] = None
+    institution: Optional[str] = None
+    notes: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def extract_metadata(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            meta = data.get("investment_metadata") or {}
+            if isinstance(meta, dict):
+                data.setdefault("ticker_symbol", meta.get("ticker_symbol"))
+                data.setdefault("institution", meta.get("institution"))
+                data.setdefault("notes", meta.get("notes"))
+        elif hasattr(data, "investment_metadata"):
+            meta = data.investment_metadata or {}
+            if isinstance(meta, dict):
+                d = {
+                    "id": data.id,
+                    "user_id": data.user_id,
+                    "name": data.name,
+                    "investment_type": data.investment_type,
+                    "invested_amount": data.principal,
+                    "current_value": data.current_value,
+                    "units": data.quantity,
+                    "purchase_date": data.purchase_date,
+                    "created_at": data.created_at,
+                    "updated_at": data.updated_at,
+                    "ticker_symbol": meta.get("ticker_symbol"),
+                    "institution": meta.get("institution"),
+                    "notes": meta.get("notes"),
+                }
+                return d
+        return data
 
 
 class InvestmentCreate(BaseModel):

@@ -221,6 +221,17 @@ def get_financial_intelligence_service(db: Session = Depends(get_db)) -> Financi
     return FinancialIntelligenceService(db)
 
 
+from app.market_data.service import MarketDataService
+from app.market_data.cache import MarketDataCache
+
+# Global cache instance for the application lifecycle
+market_data_cache = MarketDataCache()
+
+
+def get_market_data_service() -> MarketDataService:
+    return MarketDataService(cache=market_data_cache)
+
+
 def get_ai_advisor_service(
     db: Session = Depends(get_db),
     llm_provider=Depends(get_llm_provider),
@@ -230,6 +241,7 @@ def get_ai_advisor_service(
     dashboard_service=Depends(get_dashboard_service),
     conversation_service=Depends(get_conversation_service),
     financial_intelligence_service=Depends(get_financial_intelligence_service),
+    market_data_service=Depends(get_market_data_service),
 ) -> AIAdvisorService:
     return AIAdvisorService(
         db=db,
@@ -240,6 +252,7 @@ def get_ai_advisor_service(
         dashboard_service=dashboard_service,
         conversation_service=conversation_service,
         financial_intelligence_service=financial_intelligence_service,
+        market_data_service=market_data_service,
     )
 
 
