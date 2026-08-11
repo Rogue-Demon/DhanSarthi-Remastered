@@ -74,6 +74,10 @@ class AIContext(BaseModel):
         default=None,
         description="De-identified personal financial aggregates.",
     )
+    financial_intelligence: Optional[Any] = Field(
+        default=None,
+        description="Structured financial intelligence insights and indicators.",
+    )
     retrieved_knowledge: List[RetrievedDocument] = Field(
         default_factory=list,
         description="Trusted general financial rules/knowledge from RAG.",

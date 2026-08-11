@@ -17,6 +17,7 @@ from app.api.v1.financial import router as financial_router
 from app.api.v1.dashboard import dashboard_router, context_router
 from app.api.v1.ai import router as ai_router
 from app.api.v1.documents import router as documents_router
+from app.api.v1.financial_intelligence import router as financial_intelligence_router
 
 api_router = APIRouter()
 
@@ -36,4 +37,5 @@ api_router.include_router(dashboard_router)
 api_router.include_router(context_router)
 api_router.include_router(ai_router)
 api_router.include_router(documents_router)
+api_router.include_router(financial_intelligence_router)
 

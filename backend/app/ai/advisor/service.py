@@ -44,6 +44,7 @@ from app.ai.schemas.advisor import (
 from app.core.config import settings
 from app.services.conversation_service import ConversationService
 from app.services.dashboard_service import DashboardService
+from app.services.financial_intelligence_service import FinancialIntelligenceService
 
 
 class AIAdvisorService:
@@ -58,6 +59,7 @@ class AIAdvisorService:
         context_builder: AIContextBuilder,
         dashboard_service: DashboardService,
         conversation_service: Optional[ConversationService] = None,
+        financial_intelligence_service: Optional[FinancialIntelligenceService] = None,
     ) -> None:
         self._db = db
         self._llm = llm_provider
@@ -66,6 +68,7 @@ class AIAdvisorService:
         self._builder = context_builder
         self._dash = dashboard_service
         self._conv = conversation_service
+        self._intel = financial_intelligence_service
 
     # ------------------------------------------------------------------
     # Legacy single-endpoint advisor (Phase 9 compatibility)
@@ -88,11 +91,20 @@ class AIAdvisorService:
         # RAG retrieval
         retrieved_docs = await self._rag.retrieve(query=request.message)
 
+        # Financial intelligence
+        financial_intelligence = None
+        if self._intel is not None:
+            try:
+                financial_intelligence = self._intel.build_summary(user_id=user_id)
+            except Exception:
+                pass
+
         # Build context (no history in stateless mode)
         ai_context = self._builder.build_context(
             question=request.message,
             full_context=full_facts,
             retrieved_docs=retrieved_docs,
+            financial_intelligence=financial_intelligence,
         )
         prompt = self._builder.build_prompt(context=ai_context)
 
@@ -180,12 +192,21 @@ class AIAdvisorService:
         except Exception:
             retrieved_docs = []  # RAG failure is non-fatal; proceed without knowledge
 
+        # Financial intelligence
+        financial_intelligence = None
+        if self._intel is not None:
+            try:
+                financial_intelligence = self._intel.build_summary(user_id=user_id)
+            except Exception:
+                pass
+
         # 6. Build AIContext with history
         ai_context = self._builder.build_context(
             question=request.message,
             full_context=full_facts,
             retrieved_docs=retrieved_docs,
             conversation_history=history,
+            financial_intelligence=financial_intelligence,
         )
         prompt = self._builder.build_prompt(context=ai_context)
 

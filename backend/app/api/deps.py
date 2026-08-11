@@ -33,6 +33,7 @@ from app.services import (
     TransactionService,
     DocumentService,
     FinancialDocumentImportService,
+    FinancialIntelligenceService,
 )
 from app.ai.advisor.service import AIAdvisorService
 from app.ai.context.builder import AIContextBuilder
@@ -216,6 +217,10 @@ def get_context_builder() -> AIContextBuilder:
     return AIContextBuilder()
 
 
+def get_financial_intelligence_service(db: Session = Depends(get_db)) -> FinancialIntelligenceService:
+    return FinancialIntelligenceService(db)
+
+
 def get_ai_advisor_service(
     db: Session = Depends(get_db),
     llm_provider=Depends(get_llm_provider),
@@ -224,6 +229,7 @@ def get_ai_advisor_service(
     context_builder=Depends(get_context_builder),
     dashboard_service=Depends(get_dashboard_service),
     conversation_service=Depends(get_conversation_service),
+    financial_intelligence_service=Depends(get_financial_intelligence_service),
 ) -> AIAdvisorService:
     return AIAdvisorService(
         db=db,
@@ -233,6 +239,7 @@ def get_ai_advisor_service(
         context_builder=context_builder,
         dashboard_service=dashboard_service,
         conversation_service=conversation_service,
+        financial_intelligence_service=financial_intelligence_service,
     )
 
 

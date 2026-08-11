@@ -63,6 +63,32 @@ def analyze_debt(
         total_liabilities_balance += l.outstanding_balance
         total_monthly_emi += l.monthly_payment
 
+    if loans:
+        for loan in loans:
+            if loan.principal < Decimal("0"):
+                raise InvalidFinancialInput(
+                    f"Loan principal cannot be negative: {loan.principal}",
+                    details={"principal": str(loan.principal)},
+                )
+            p = loan.principal
+            rate = loan.annual_interest_rate_percent
+            months = loan.tenure_months
+
+            if p > Decimal("0") and months > 0:
+                if rate > Decimal("0"):
+                    r = rate / Decimal("12") / Decimal("100")
+                    try:
+                        import math
+                        power = Decimal(str(math.pow(1 + float(r), months)))
+                        emi = p * r * power / (power - 1)
+                        emi = emi.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                    except Exception:
+                        emi = p / Decimal(months)
+                else:
+                    emi = p / Decimal(months)
+                total_monthly_emi += emi
+                total_liabilities_balance += p
+
     if gross_monthly_income > Decimal("0"):
         raw_dti = (total_monthly_emi / gross_monthly_income) * Decimal("100")
         dti_percent = raw_dti.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)

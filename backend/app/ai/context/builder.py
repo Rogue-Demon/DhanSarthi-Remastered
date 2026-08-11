@@ -37,6 +37,7 @@ class AIContextBuilder:
         full_context: DashboardResponse,
         retrieved_docs: List[RetrievedDocument],
         conversation_history: Optional[List] = None,
+        financial_intelligence: Optional[Any] = None,
     ) -> AIContext:
         """
         Produce structured AIContext, filtering out irrelevant financial categories.
@@ -154,6 +155,7 @@ class AIContextBuilder:
 
         return AIContext(
             user_financial_context=filtered,
+            financial_intelligence=financial_intelligence,
             retrieved_knowledge=retrieved_docs,
             conversation_history=history_schemas,
             question=question,
@@ -173,6 +175,15 @@ class AIContextBuilder:
             # Exclude context_version and internal de-identified parameters
             serialized = context.user_financial_context.model_dump(mode="json")
             facts_json = json.dumps(serialized, indent=2)
+
+        # Serialize financial intelligence to JSON
+        intel_json = ""
+        if context.financial_intelligence is not None:
+            if hasattr(context.financial_intelligence, "model_dump"):
+                serialized_intel = context.financial_intelligence.model_dump(mode="json")
+            else:
+                serialized_intel = context.financial_intelligence
+            intel_json = json.dumps(serialized_intel, indent=2)
 
         # Format general knowledge citations
         knowledge_blocks = []
@@ -201,7 +212,7 @@ class AIContextBuilder:
             "System Instructions:\n"
             "  - You are DhanSarthi, a personalized smart financial advisor.\n"
             "  - Provide personal, clear, and actionable financial guidance based ONLY on the provided context.\n"
-            "  - DO NOT execute numerical or financial calculations yourself. The calculations provided under the User Financial Facts section are deterministic and absolute. Use them as the ground truth.\n"
+            "  - DO NOT execute numerical or financial calculations yourself. The calculations and insights provided under the User Financial Facts and Financial Intelligence Insights sections are deterministic and absolute. Use them as the ground truth.\n"
             "  - If information required to answer the user's question is missing from the User Financial Facts, state that clearly and list your assumptions. Do NOT invent financial numbers.\n"
             "  - Use Retrieved General Knowledge for tax guidelines, loan terms, and educational finance policies.\n"
             "  - Act in an informational and advisory capacity. Do NOT guarantee investment returns or loan approvals.\n"
@@ -209,6 +220,8 @@ class AIContextBuilder:
             "  - Real-time market data (stock prices, live NAV, live interest rates) is NOT available. State this clearly if asked.\n\n"
             "User Financial Facts (Authenticated & Query-Filtered):\n"
             f"```json\n{facts_json}\n```\n\n"
+            "Financial Intelligence Insights (Calculated Deterministically):\n"
+            f"```json\n{intel_json}\n```\n\n"
             "Retrieved General Knowledge:\n"
             f"{knowledge_text}\n\n"
             "Recent Conversation History:\n"
