@@ -130,6 +130,49 @@ def _register_exception_handlers(application: FastAPI) -> None:
             content={"detail": f"Failed to retrieve general financial knowledge: {exc.message}"},
         )
 
+    from app.documents.exceptions import (
+        UnsupportedFileTypeError,
+        FileTooLargeError,
+        DuplicateDocumentError,
+        DocumentAccessDeniedError,
+    )
+
+    @application.exception_handler(UnsupportedFileTypeError)
+    async def unsupported_file_type_handler(
+        _request: Request, exc: UnsupportedFileTypeError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            content={"detail": exc.message},
+        )
+
+    @application.exception_handler(FileTooLargeError)
+    async def file_too_large_handler(
+        _request: Request, exc: FileTooLargeError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            content={"detail": exc.message},
+        )
+
+    @application.exception_handler(DuplicateDocumentError)
+    async def duplicate_document_handler(
+        _request: Request, exc: DuplicateDocumentError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={"detail": exc.message},
+        )
+
+    @application.exception_handler(DocumentAccessDeniedError)
+    async def document_access_denied_handler(
+        _request: Request, exc: DocumentAccessDeniedError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"detail": exc.message},
+        )
+
     @application.exception_handler(DhanSarthiError)
     async def application_error_handler(
         _request: Request, exc: DhanSarthiError
@@ -138,6 +181,7 @@ def _register_exception_handlers(application: FastAPI) -> None:
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"detail": exc.message},
         )
+
 
 
 

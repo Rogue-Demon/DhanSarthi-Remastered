@@ -35,6 +35,8 @@ from app.services.profile_service import ProfileService
 from app.services.financial_context_service import FinancialContextService
 from app.services.dashboard_service import DashboardService
 from app.services.conversation_service import ConversationService
+from app.services.document_service import DocumentService
+from app.services.document_import_service import FinancialDocumentImportService
 
 __all__ = [
     "AuthService",
@@ -52,5 +54,7 @@ __all__ = [
     "FinancialContextService",
     "DashboardService",
     "ConversationService",
+    "DocumentService",
+    "FinancialDocumentImportService",
 ]
 

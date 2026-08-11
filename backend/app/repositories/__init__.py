@@ -31,6 +31,7 @@ from app.repositories.loan_repository import LoanRepository
 from app.repositories.loan_payment_repository import LoanPaymentRepository
 from app.repositories.goal_repository import GoalRepository
 from app.repositories.budget_repository import BudgetRepository
+from app.repositories.document_repository import DocumentRepository, ExtractionRepository
 
 __all__ = [
     "BaseRepository",
@@ -47,4 +48,6 @@ __all__ = [
     "LoanPaymentRepository",
     "GoalRepository",
     "BudgetRepository",
+    "DocumentRepository",
+    "ExtractionRepository",
 ]

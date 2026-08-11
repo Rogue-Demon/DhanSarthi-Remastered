@@ -31,6 +31,8 @@ from app.services import (
     LoanService,
     ProfileService,
     TransactionService,
+    DocumentService,
+    FinancialDocumentImportService,
 )
 from app.ai.advisor.service import AIAdvisorService
 from app.ai.context.builder import AIContextBuilder
@@ -232,3 +234,12 @@ def get_ai_advisor_service(
         dashboard_service=dashboard_service,
         conversation_service=conversation_service,
     )
+
+
+def get_document_service(db: Session = Depends(get_db)) -> DocumentService:
+    return DocumentService(db)
+
+
+def get_document_import_service(db: Session = Depends(get_db)) -> FinancialDocumentImportService:
+    return FinancialDocumentImportService(db)
+
