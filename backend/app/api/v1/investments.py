@@ -68,6 +68,14 @@ def create_investment(
 
     purchase_date = data.purchase_date if data.purchase_date else date_cls.today()
 
+    meta = {}
+    if data.ticker_symbol:
+        meta["ticker_symbol"] = data.ticker_symbol
+    if data.institution:
+        meta["institution"] = data.institution
+    if data.notes:
+        meta["notes"] = data.notes
+
     investment = service.create_investment(
         user_id,
         name=data.name,
@@ -76,6 +84,7 @@ def create_investment(
         current_value=data.current_value,
         purchase_date=purchase_date,
         quantity=data.units,
+        investment_metadata=meta if meta else None,
     )
     return InvestmentResponse.model_validate(investment)
 
@@ -104,6 +113,18 @@ def update_investment(
         update_fields["principal"] = update_fields.pop("invested_amount")
     if "units" in update_fields:
         update_fields["quantity"] = update_fields.pop("units")
+
+    # Map ticker_symbol, notes, and institution into investment_metadata
+    meta = {}
+    if "ticker_symbol" in update_fields:
+        meta["ticker_symbol"] = update_fields.pop("ticker_symbol")
+    if "institution" in update_fields:
+        meta["institution"] = update_fields.pop("institution")
+    if "notes" in update_fields:
+        meta["notes"] = update_fields.pop("notes")
+
+    if meta:
+        update_fields["investment_metadata"] = meta
 
     investment = service.update_investment(investment_id, user_id, **update_fields)
     return InvestmentResponse.model_validate(investment)

@@ -21,6 +21,7 @@ Transaction strategy:
 from __future__ import annotations
 
 import asyncio
+import re
 import time
 import uuid
 from typing import List, Optional
@@ -45,6 +46,7 @@ from app.core.config import settings
 from app.services.conversation_service import ConversationService
 from app.services.dashboard_service import DashboardService
 from app.services.financial_intelligence_service import FinancialIntelligenceService
+from app.market_data.service import MarketDataService
 
 
 class AIAdvisorService:
@@ -60,6 +62,7 @@ class AIAdvisorService:
         dashboard_service: DashboardService,
         conversation_service: Optional[ConversationService] = None,
         financial_intelligence_service: Optional[FinancialIntelligenceService] = None,
+        market_data_service: Optional[MarketDataService] = None,
     ) -> None:
         self._db = db
         self._llm = llm_provider
@@ -69,6 +72,7 @@ class AIAdvisorService:
         self._dash = dashboard_service
         self._conv = conversation_service
         self._intel = financial_intelligence_service
+        self._market = market_data_service
 
     # ------------------------------------------------------------------
     # Legacy single-endpoint advisor (Phase 9 compatibility)
@@ -99,12 +103,16 @@ class AIAdvisorService:
             except Exception:
                 pass
 
+        # Retrieve live market data
+        live_market_data = await self._retrieve_live_market_data(request.message, user_id)
+
         # Build context (no history in stateless mode)
         ai_context = self._builder.build_context(
             question=request.message,
             full_context=full_facts,
             retrieved_docs=retrieved_docs,
             financial_intelligence=financial_intelligence,
+            live_market_data=live_market_data,
         )
         prompt = self._builder.build_prompt(context=ai_context)
 
@@ -200,6 +208,9 @@ class AIAdvisorService:
             except Exception:
                 pass
 
+        # Retrieve live market data
+        live_market_data = await self._retrieve_live_market_data(request.message, user_id)
+
         # 6. Build AIContext with history
         ai_context = self._builder.build_context(
             question=request.message,
@@ -207,6 +218,7 @@ class AIAdvisorService:
             retrieved_docs=retrieved_docs,
             conversation_history=history,
             financial_intelligence=financial_intelligence,
+            live_market_data=live_market_data,
         )
         prompt = self._builder.build_prompt(context=ai_context)
 
@@ -286,3 +298,97 @@ class AIAdvisorService:
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=f"AI provider error: {str(exc)}",
             )
+
+    async def _retrieve_live_market_data(
+        self, question: str, user_id: int
+    ) -> Optional[dict]:
+        if self._market is None:
+            return None
+
+        live_data = {}
+        q = question.lower()
+
+        # 1. Check if user is asking about portfolio value
+        if any(kw in q for kw in ["portfolio worth", "portfolio value", "my investments worth", "my holdings worth"]):
+            try:
+                est = await self._market.calculate_estimated_portfolio(user_id, self._db)
+                live_data["portfolio_estimation"] = est
+            except Exception:
+                pass
+
+        # 2. Extract FX rates (e.g. USD to INR, EUR/INR)
+        fx_matches = re.findall(r"\b([A-Za-z]{3})\s*(?:to|/|in)\s*([A-Za-z]{3})\b", question)
+        if fx_matches:
+            rates = []
+            for base, quote in fx_matches[:2]:  # Limit to 2 pairs
+                try:
+                    r = await self._market.get_exchange_rate(base, quote)
+                    rates.append(r.model_dump())
+                except Exception:
+                    pass
+            if rates:
+                live_data["exchange_rates"] = rates
+
+        # 3. Extract mutual fund scheme IDs (5 to 8 digit numbers)
+        mf_matches = re.findall(r"\b([0-9]{5,8})\b", question)
+        if mf_matches:
+            funds = []
+            for scheme_id in mf_matches[:3]:
+                try:
+                    nav = await self._market.get_mutual_fund_nav(scheme_id)
+                    funds.append(nav.model_dump())
+                except Exception:
+                    pass
+            if funds:
+                live_data["mutual_funds"] = funds
+
+        # 4. Extract stock symbols (uppercase, e.g. RELIANCE.NS, TCS, MSFT)
+        # Exclude common abbreviations
+        exclude_set = {"USD", "INR", "EUR", "RAG", "SIP", "NAV", "DTI", "FD", "RD", "EMI", "AI", "BSE", "NSE", "GDP"}
+        stock_matches = re.findall(r"\b([A-Z]{2,10}(?:\.[A-Z]{2})?)\b", question)
+        stocks = []
+        for sym in stock_matches:
+            if sym not in exclude_set and len(stocks) < 3:
+                try:
+                    quote = await self._market.get_stock_quote(sym)
+                    stocks.append(quote.model_dump())
+                except Exception:
+                    pass
+        if stocks:
+            live_data["stocks"] = stocks
+
+        # 5. Extract indices
+        indices = []
+        if "nifty" in q:
+            try:
+                idx = await self._market.get_market_index("NIFTY_50")
+                indices.append(idx.model_dump())
+            except Exception:
+                pass
+        if "sensex" in q:
+            try:
+                idx = await self._market.get_market_index("SENSEX")
+                indices.append(idx.model_dump())
+            except Exception:
+                pass
+        if indices:
+            live_data["indices"] = indices
+
+        # 6. Extract interest rates
+        rates = []
+        if "repo rate" in q:
+            try:
+                rate = await self._market.get_interest_rate("IN", "Repo Rate")
+                rates.append(rate.model_dump())
+            except Exception:
+                pass
+        if "savings rate" in q:
+            try:
+                rate = await self._market.get_interest_rate("IN", "Savings Deposit Rate")
+                rates.append(rate.model_dump())
+            except Exception:
+                pass
+        if rates:
+            live_data["interest_rates"] = rates
+
+        return live_data if live_data else None
