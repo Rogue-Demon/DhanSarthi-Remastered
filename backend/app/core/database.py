@@ -24,6 +24,9 @@ class Base(DeclarativeBase):
     """
 
 
+from sqlalchemy.pool import StaticPool
+
+
 def _build_engine_kwargs() -> dict:
     """Return keyword arguments appropriate for the configured database driver.
 
@@ -33,7 +36,10 @@ def _build_engine_kwargs() -> dict:
     changes.
     """
     kwargs: dict = {"pool_pre_ping": True}
-    if not settings.database_url.startswith("sqlite"):
+    if settings.database_url.startswith("sqlite"):
+        kwargs["connect_args"] = {"check_same_thread": False}
+        kwargs["poolclass"] = StaticPool
+    else:
         kwargs["pool_size"] = settings.database_pool_size
         kwargs["max_overflow"] = settings.database_max_overflow
     return kwargs

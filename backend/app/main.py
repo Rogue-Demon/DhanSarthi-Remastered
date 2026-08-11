@@ -61,6 +61,75 @@ def _register_exception_handlers(application: FastAPI) -> None:
             content={"detail": "A database error occurred. Please try again later."},
         )
 
+    from app.financial.exceptions import FinancialEngineError
+
+    @application.exception_handler(FinancialEngineError)
+    async def financial_engine_error_handler(
+        _request: Request, exc: FinancialEngineError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": exc.message},
+        )
+
+    from app.services.auth_service import AuthenticationError, InactiveUserError
+    from app.ai.exceptions import AIConfigurationError, AIProviderError, AISafetyError, RAGRetrievalError
+
+    @application.exception_handler(AuthenticationError)
+    async def authentication_error_handler(
+        _request: Request, exc: AuthenticationError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": exc.message},
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    @application.exception_handler(InactiveUserError)
+    async def inactive_user_error_handler(
+        _request: Request, exc: InactiveUserError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"detail": exc.message},
+        )
+
+    @application.exception_handler(AIConfigurationError)
+    async def ai_configuration_error_handler(
+        _request: Request, exc: AIConfigurationError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": f"AI Advisor is misconfigured: {exc.message}"},
+        )
+
+    @application.exception_handler(AIProviderError)
+    async def ai_provider_error_handler(
+        _request: Request, exc: AIProviderError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            content={"detail": f"AI service provider error: {exc.message}"},
+        )
+
+    @application.exception_handler(AISafetyError)
+    async def ai_safety_error_handler(
+        _request: Request, exc: AISafetyError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": f"Safety boundary check failed: {exc.message}"},
+        )
+
+    @application.exception_handler(RAGRetrievalError)
+    async def rag_retrieval_error_handler(
+        _request: Request, exc: RAGRetrievalError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": f"Failed to retrieve general financial knowledge: {exc.message}"},
+        )
+
     @application.exception_handler(DhanSarthiError)
     async def application_error_handler(
         _request: Request, exc: DhanSarthiError
@@ -69,6 +138,8 @@ def _register_exception_handlers(application: FastAPI) -> None:
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"detail": exc.message},
         )
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -84,7 +155,7 @@ def create_application() -> FastAPI:
         allow_origins=settings.cors_origins_list,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_headers=["Authorization", "Content-Type", "X-User-ID"],
     )
 
     application.include_router(api_router, prefix=settings.api_v1_prefix)

@@ -16,8 +16,27 @@ class Settings(BaseSettings):
     cors_origins: str = Field(default="http://localhost:5173", validation_alias="CORS_ORIGINS")
     ai_provider_api_key: str | None = Field(default=None, validation_alias="AI_PROVIDER_API_KEY")
     embedding_provider_api_key: str | None = Field(default=None, validation_alias="EMBEDDING_PROVIDER_API_KEY")
+    ai_provider: str = Field(default="mock", validation_alias="AI_PROVIDER")
+    ai_model: str = Field(default="meta-llama/Meta-Llama-3-8B-Instruct", validation_alias="AI_MODEL")
+    ai_max_tokens: int = Field(default=1024, validation_alias="AI_MAX_TOKENS")
+    ai_temperature: float = Field(default=0.2, validation_alias="AI_TEMPERATURE")
+    rag_top_k: int = Field(default=5, validation_alias="RAG_TOP_K")
+    rag_similarity_threshold: float = Field(default=0.3, validation_alias="RAG_SIMILARITY_THRESHOLD")
+    rag_max_context_tokens: int = Field(default=2000, validation_alias="RAG_MAX_CONTEXT_TOKENS")
+    rag_chunk_size: int = Field(default=500, validation_alias="RAG_CHUNK_SIZE")
+    rag_chunk_overlap: int = Field(default=50, validation_alias="RAG_CHUNK_OVERLAP")
+    embedding_provider: str = Field(default="mock", validation_alias="EMBEDDING_PROVIDER")
+    embedding_model: str = Field(default="sentence-transformers/all-MiniLM-L6-v2", validation_alias="EMBEDDING_MODEL")
+    embedding_dimension: int = Field(default=384, validation_alias="EMBEDDING_DIMENSION")
     storage_bucket: str | None = Field(default=None, validation_alias="STORAGE_BUCKET")
     secret_key: str | None = Field(default=None, validation_alias="SECRET_KEY")
+    auth_jwt_secret: str | None = Field(default=None, validation_alias="AUTH_JWT_SECRET")
+    auth_jwt_algorithm: str = Field(default="HS256", validation_alias="AUTH_JWT_ALGORITHM")
+    auth_access_token_expire_minutes: int = Field(default=30, validation_alias="AUTH_ACCESS_TOKEN_EXPIRE_MINUTES")
+    ai_max_history_messages: int = Field(default=20, validation_alias="AI_MAX_HISTORY_MESSAGES")
+    ai_request_timeout_seconds: int = Field(default=60, validation_alias="AI_REQUEST_TIMEOUT_SECONDS")
+    ai_max_message_length: int = Field(default=2000, validation_alias="AI_MAX_MESSAGE_LENGTH")
+
 
     @property
     def cors_origins_list(self) -> list[str]:

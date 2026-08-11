@@ -21,6 +21,8 @@ from app.models.investment import Investment, InvestmentTransaction
 from app.models.loan import Loan, LoanPayment
 from app.models.goal import Goal
 from app.models.budget import Budget
+from app.models.knowledge import KnowledgeDocument, KnowledgeChunk
+from app.models.conversation import Conversation, ConversationMessage
 
 __all__ = [
     "User",
@@ -36,4 +38,8 @@ __all__ = [
     "LoanPayment",
     "Goal",
     "Budget",
+    "KnowledgeDocument",
+    "KnowledgeChunk",
+    "Conversation",
+    "ConversationMessage",
 ]
