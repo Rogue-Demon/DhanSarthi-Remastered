@@ -11,6 +11,8 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.api.deps import get_current_user
+from app.models.user import User
 from app.schemas.auth import (
     AuthenticatedUserResponse,
     LoginRequest,
@@ -78,3 +80,34 @@ def login(
     user = service.authenticate(email=data.email, password=data.password)
     token_data = service.create_token_for_user(user)
     return TokenResponse(**token_data)
+
+
+# ---------------------------------------------------------------------------
+# POST /logout
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/logout",
+    status_code=status.HTTP_200_OK,
+    summary="Log out the current user session",
+)
+def logout(current_user: User = Depends(get_current_user)) -> dict[str, str]:
+    """Terminate the current user session."""
+    return {"detail": "Logged out successfully."}
+
+
+# ---------------------------------------------------------------------------
+# GET /me
+# ---------------------------------------------------------------------------
+
+
+@router.get(
+    "/me",
+    response_model=AuthenticatedUserResponse,
+    summary="Get currently authenticated user",
+)
+def get_me(current_user: User = Depends(get_current_user)) -> AuthenticatedUserResponse:
+    """Return the currently authenticated user based on the Bearer token."""
+    return AuthenticatedUserResponse.model_validate(current_user)
+

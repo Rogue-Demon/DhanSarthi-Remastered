@@ -274,3 +274,38 @@ class TestTokenSecurity:
         response = client.get("/api/v1/profile", headers=headers)
         assert response.status_code == 403
         assert response.json()["detail"] == "User account is inactive."
+
+    def test_get_me_success(self, client: TestClient):
+        # Register and login
+        client.post(
+            "/api/v1/auth/register",
+            json={"email": "getme@example.com", "password": "password123"},
+        )
+        login_resp = client.post(
+            "/api/v1/auth/login",
+            json={"email": "getme@example.com", "password": "password123"},
+        )
+        token = login_resp.json()["access_token"]
+
+        headers = {"Authorization": f"Bearer {token}"}
+        response = client.get("/api/v1/auth/me", headers=headers)
+        assert response.status_code == 200
+        assert response.json()["email"] == "getme@example.com"
+
+    def test_logout_success(self, client: TestClient):
+        # Register and login
+        client.post(
+            "/api/v1/auth/register",
+            json={"email": "logoutuser@example.com", "password": "password123"},
+        )
+        login_resp = client.post(
+            "/api/v1/auth/login",
+            json={"email": "logoutuser@example.com", "password": "password123"},
+        )
+        token = login_resp.json()["access_token"]
+
+        headers = {"Authorization": f"Bearer {token}"}
+        response = client.post("/api/v1/auth/logout", headers=headers)
+        assert response.status_code == 200
+        assert response.json()["detail"] == "Logged out successfully."
+
