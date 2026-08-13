@@ -1,1 +1,34 @@
+# Environment files (contain credentials, secret keys)
 .env
+.env.*
+env/
+venv/
+.venv/
+ENV/
+
+# Python cache & compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.pyre/
+.pytype/
+pip-log.txt
+pip-delete-this-directory.txt
+.ipynb_checkpoints
+
+# Dynamic application storage (user uploaded confidential files)
+storage/
+app/storage/
+*.db
+*.sqlite
+*.sqlite3
+
+# OS & IDE configurations
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

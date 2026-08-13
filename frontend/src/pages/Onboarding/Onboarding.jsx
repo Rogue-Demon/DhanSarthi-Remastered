@@ -1,21 +1,21 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion, useReducedMotion } from 'framer-motion';
-import { Button } from '@/components/ui';
-import { Logo } from '@/components/common';
-import { PageTransition, FadeIn, ScaleIn } from '@/components/motion';
-import { onboardingConfig } from '@/config/onboarding.config';
-import { ROUTE_PATHS } from '@/constants';
-import * as LucideIcons from 'lucide-react';
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Button } from '@/components/ui'
+import { Logo } from '@/components/common'
+import { PageTransition, FadeIn, ScaleIn } from '@/components/motion'
+import { onboardingConfig } from '@/config/onboarding.config'
+import { ROUTE_PATHS } from '@/constants'
+import * as LucideIcons from 'lucide-react'
 
 export function Onboarding() {
-  const navigate = useNavigate();
-  const shouldReduceMotion = useReducedMotion();
-  const welcomeData = onboardingConfig.welcome;
+  const navigate = useNavigate()
+  const shouldReduceMotion = useReducedMotion()
+  const welcomeData = onboardingConfig.welcome
 
   const handleGetStarted = () => {
-    navigate(ROUTE_PATHS.SELECT_PROFILE);
-  };
+    navigate(ROUTE_PATHS.REGISTER)
+  }
 
   // Logo animation variants
   const logoVariants = {
@@ -29,7 +29,7 @@ export function Onboarding() {
         ease: 'easeInOut',
       },
     },
-  };
+  }
 
   // Main container entrance variants
   const containerVariants = {
@@ -41,7 +41,7 @@ export function Onboarding() {
         delayChildren: 0.1,
       },
     },
-  };
+  }
 
   return (
     <PageTransition className="min-h-screen flex items-center justify-center p-4 md:p-8 bg-background overflow-hidden relative">
@@ -59,7 +59,7 @@ export function Onboarding() {
         {/* Left Side: Brand & Call to Action */}
         <div className="flex-1 flex flex-col items-start text-left gap-6 md:gap-8 max-w-lg z-10">
           {/* Logo & Brand Label */}
-          <motion.div 
+          <motion.div
             className="flex items-center gap-3"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -156,11 +156,17 @@ export function Onboarding() {
                     <p className="text-xs font-black text-text-primary">Portfolio Peak</p>
                   </div>
                 </div>
-                <span className="text-xs font-black text-success bg-success/10 px-2 py-0.5 rounded-full">+12.4%</span>
+                <span className="text-xs font-black text-success bg-success/10 px-2 py-0.5 rounded-full">
+                  +12.4%
+                </span>
               </div>
               <div className="h-16 w-full flex items-end gap-1.5 pt-2">
                 {[40, 55, 45, 60, 75, 65, 85].map((val, idx) => (
-                  <div key={idx} className="flex-1 bg-muted rounded-md relative overflow-hidden" style={{ height: '100%' }}>
+                  <div
+                    key={idx}
+                    className="flex-1 bg-muted rounded-md relative overflow-hidden"
+                    style={{ height: '100%' }}
+                  >
                     <motion.div
                       initial={{ height: 0 }}
                       animate={{ height: `${val}%` }}
@@ -204,7 +210,9 @@ export function Onboarding() {
             >
               <div className="flex items-start justify-between">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">AI Financial Advisor</span>
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+                    AI Financial Advisor
+                  </span>
                   <h3 className="text-base font-black text-text-primary">Wealth Forecast</h3>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
@@ -218,7 +226,8 @@ export function Onboarding() {
                   <LucideIcons.Sparkles className="h-3 w-3" />
                 </div>
                 <p className="text-[11px] font-bold text-primary leading-normal text-left">
-                  "Based on your savings goals, selecting a Working Professional profile will optimize tax planning."
+                  "Based on your savings goals, selecting a Working Professional profile will
+                  optimize tax planning."
                 </p>
               </div>
 
@@ -231,7 +240,7 @@ export function Onboarding() {
         </div>
       </motion.div>
     </PageTransition>
-  );
+  )
 }
 
-export default Onboarding;
+export default Onboarding

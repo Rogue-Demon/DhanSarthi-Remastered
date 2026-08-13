@@ -192,7 +192,7 @@ export function Login() {
       <div className="text-center text-xs font-bold text-text-muted mt-2 border-t border-border/40 pt-4 flex items-center justify-center gap-1.5">
         <span>Don't have an account?</span>
         <Link
-          to={ROUTE_PATHS.REGISTER}
+          to={ROUTE_PATHS.ONBOARDING}
           className="text-primary hover:underline font-extrabold focus:outline-none focus:ring-1 focus:ring-primary rounded px-1"
         >
           Register Now

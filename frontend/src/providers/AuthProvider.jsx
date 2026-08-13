@@ -3,6 +3,7 @@ import { AuthContext } from '@/contexts'
 import { STORAGE_KEYS } from '@/constants'
 import { apiClient, ENDPOINTS } from '@/services/api'
 import { useProfileStore } from '@/store'
+import { helpers } from '@/utils'
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -22,6 +23,17 @@ export function AuthProvider({ children }) {
 
       try {
         const userData = await apiClient.get(ENDPOINTS.auth.me)
+        try {
+          const profileData = await apiClient.get(ENDPOINTS.profile.get)
+          userData.profile = profileData
+          if (profileData && profileData.persona) {
+            const frontendPersona = helpers.mapBackendToFrontendPersona(profileData.persona)
+            useProfileStore.getState().setProfile(frontendPersona)
+            useProfileStore.getState().completeOnboarding()
+          }
+        } catch (profileErr) {
+          console.error('Failed to fetch user profile:', profileErr)
+        }
         setUser(userData)
         setStatus('AUTHENTICATED')
       } catch (err) {
@@ -48,6 +60,17 @@ export function AuthProvider({ children }) {
 
       // Fetch user profile
       const userData = await apiClient.get(ENDPOINTS.auth.me)
+      try {
+        const profileData = await apiClient.get(ENDPOINTS.profile.get)
+        userData.profile = profileData
+        if (profileData && profileData.persona) {
+          const frontendPersona = helpers.mapBackendToFrontendPersona(profileData.persona)
+          useProfileStore.getState().setProfile(frontendPersona)
+          useProfileStore.getState().completeOnboarding()
+        }
+      } catch (profileErr) {
+        console.error('Failed to fetch user profile in login:', profileErr)
+      }
       setUser(userData)
       setStatus('AUTHENTICATED')
       return userData
@@ -97,6 +120,14 @@ export function AuthProvider({ children }) {
   const isAuthenticated = status === 'AUTHENTICATED'
   const loading = status === 'INITIALIZING'
 
+  const updateLocalProfile = (updatedProfile) => {
+    setUser((prev) => (prev ? { ...prev, profile: updatedProfile } : null))
+    if (updatedProfile && updatedProfile.persona) {
+      const frontendPersona = helpers.mapBackendToFrontendPersona(updatedProfile.persona)
+      useProfileStore.getState().setProfile(frontendPersona)
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -108,6 +139,7 @@ export function AuthProvider({ children }) {
         login,
         register,
         logout,
+        updateLocalProfile,
       }}
     >
       {children}

@@ -52,6 +52,8 @@ class Profile(Base, TimestampMixin):
         nullable=True,
     )
     financial_preferences: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    occupation: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     user: Mapped[User] = relationship(  # type: ignore[name-defined]
         "User", back_populates="profile"

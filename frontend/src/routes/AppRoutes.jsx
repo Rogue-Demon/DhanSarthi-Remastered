@@ -1,77 +1,76 @@
-import React, { lazy } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import LazyLoader from './LazyLoader';
-import ProtectedRoute from './ProtectedRoute';
-import PublicRoute from './PublicRoute';
+import React, { lazy } from 'react'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
+import LazyLoader from './LazyLoader'
+import ProtectedRoute from './ProtectedRoute'
+import PublicRoute from './PublicRoute'
 
-import { RootLayout, DashboardLayout, AuthLayout } from '@/layouts';
-import NotFound from './NotFound';
+import { RootLayout, DashboardLayout, AuthLayout } from '@/layouts'
+import NotFound from './NotFound'
 
 // Lazy loading page components
-const Dashboard = lazy(() => import('@/pages/Dashboard/Dashboard'));
-const Profile = lazy(() => import('@/pages/Profile/Profile'));
+const Dashboard = lazy(() => import('@/pages/Dashboard/Dashboard'))
+const Profile = lazy(() => import('@/pages/Profile/Profile'))
 
-
-
-const SettingsLayout = lazy(() => import('@/pages/Settings/SettingsLayout'));
-const SettingsProfile = lazy(() => import('@/pages/Settings/ProfileSettings'));
-const SettingsAppearance = lazy(() => import('@/pages/Settings/AppearanceSettings'));
-const SettingsNotifications = lazy(() => import('@/pages/Settings/NotificationSettings'));
-const SettingsPreferences = lazy(() => import('@/pages/Settings/PreferencesSettings'));
-const SettingsPrivacy = lazy(() => import('@/pages/Settings/PrivacySettings'));
-const SettingsSecurity = lazy(() => import('@/pages/Settings/SecuritySettings'));
-const SettingsLanguage = lazy(() => import('@/pages/Settings/LanguageSettings'));
-const SettingsAccessibility = lazy(() => import('@/pages/Settings/AccessibilitySettings'));
-const SettingsDataExport = lazy(() => import('@/pages/Settings/DataExportSettings'));
-const SettingsIntegrations = lazy(() => import('@/pages/Settings/IntegrationsSettings'));
-const SettingsAbout = lazy(() => import('@/pages/Settings/AboutSettings'));
-const Auth = lazy(() => import('@/pages/Auth/Auth'));
-const Onboarding = lazy(() => import('@/pages/Onboarding/Onboarding'));
-const SelectProfile = lazy(() => import('@/pages/Onboarding/SelectProfile'));
+const SettingsLayout = lazy(() => import('@/pages/Settings/SettingsLayout'))
+const SettingsProfile = lazy(() => import('@/pages/Settings/ProfileSettings'))
+const SettingsAppearance = lazy(() => import('@/pages/Settings/AppearanceSettings'))
+const SettingsNotifications = lazy(() => import('@/pages/Settings/NotificationSettings'))
+const SettingsPreferences = lazy(() => import('@/pages/Settings/PreferencesSettings'))
+const SettingsPrivacy = lazy(() => import('@/pages/Settings/PrivacySettings'))
+const SettingsSecurity = lazy(() => import('@/pages/Settings/SecuritySettings'))
+const SettingsLanguage = lazy(() => import('@/pages/Settings/LanguageSettings'))
+const SettingsAccessibility = lazy(() => import('@/pages/Settings/AccessibilitySettings'))
+const SettingsDataExport = lazy(() => import('@/pages/Settings/DataExportSettings'))
+const SettingsIntegrations = lazy(() => import('@/pages/Settings/IntegrationsSettings'))
+const SettingsAbout = lazy(() => import('@/pages/Settings/AboutSettings'))
+const Login = lazy(() => import('@/pages/Auth/Login'))
+const Register = lazy(() => import('@/pages/Auth/Register'))
+const Onboarding = lazy(() => import('@/pages/Onboarding/Onboarding'))
+const SelectProfile = lazy(() => import('@/pages/Onboarding/SelectProfile'))
 
 // Lazy loading nested Finance subpage components
-const FinanceLayout = lazy(() => import('@/pages/Finance/FinanceLayout'));
-const FinanceOverview = lazy(() => import('@/pages/Finance/Overview'));
-const FinanceIncome = lazy(() => import('@/pages/Finance/Income'));
-const FinanceExpenses = lazy(() => import('@/pages/Finance/Expenses'));
-const FinanceAssets = lazy(() => import('@/pages/Finance/Assets'));
-const FinanceLiabilities = lazy(() => import('@/pages/Finance/Liabilities'));
-const FinanceBudget = lazy(() => import('@/pages/Finance/Budget'));
-const FinanceCashFlow = lazy(() => import('@/pages/Finance/CashFlow'));
-const FinanceGoals = lazy(() => import('@/pages/Finance/Goals'));
+const FinanceLayout = lazy(() => import('@/pages/Finance/FinanceLayout'))
+const FinanceOverview = lazy(() => import('@/pages/Finance/Overview'))
+const FinanceIncome = lazy(() => import('@/pages/Finance/Income'))
+const FinanceExpenses = lazy(() => import('@/pages/Finance/Expenses'))
+const FinanceAssets = lazy(() => import('@/pages/Finance/Assets'))
+const FinanceLiabilities = lazy(() => import('@/pages/Finance/Liabilities'))
+const FinanceBudget = lazy(() => import('@/pages/Finance/Budget'))
+const FinanceCashFlow = lazy(() => import('@/pages/Finance/CashFlow'))
+const FinanceGoals = lazy(() => import('@/pages/Finance/Goals'))
 
 // Lazy loading nested Investments subpage components
-const InvestmentLayout = lazy(() => import('@/pages/Investments/InvestmentLayout'));
-const InvestmentPortfolio = lazy(() => import('@/pages/Investments/Portfolio'));
-const InvestmentStocks = lazy(() => import('@/pages/Investments/Stocks'));
-const InvestmentMutualFunds = lazy(() => import('@/pages/Investments/MutualFunds'));
-const InvestmentSIP = lazy(() => import('@/pages/Investments/SIP'));
-const InvestmentFixedDeposit = lazy(() => import('@/pages/Investments/FixedDeposit'));
-const InvestmentRecurringDeposit = lazy(() => import('@/pages/Investments/RecurringDeposit'));
-const InvestmentGold = lazy(() => import('@/pages/Investments/Gold'));
-const InvestmentBonds = lazy(() => import('@/pages/Investments/Bonds'));
-const InvestmentPPF = lazy(() => import('@/pages/Investments/PPF'));
-const InvestmentNPS = lazy(() => import('@/pages/Investments/NPS'));
+const InvestmentLayout = lazy(() => import('@/pages/Investments/InvestmentLayout'))
+const InvestmentPortfolio = lazy(() => import('@/pages/Investments/Portfolio'))
+const InvestmentStocks = lazy(() => import('@/pages/Investments/Stocks'))
+const InvestmentMutualFunds = lazy(() => import('@/pages/Investments/MutualFunds'))
+const InvestmentSIP = lazy(() => import('@/pages/Investments/SIP'))
+const InvestmentFixedDeposit = lazy(() => import('@/pages/Investments/FixedDeposit'))
+const InvestmentRecurringDeposit = lazy(() => import('@/pages/Investments/RecurringDeposit'))
+const InvestmentGold = lazy(() => import('@/pages/Investments/Gold'))
+const InvestmentBonds = lazy(() => import('@/pages/Investments/Bonds'))
+const InvestmentPPF = lazy(() => import('@/pages/Investments/PPF'))
+const InvestmentNPS = lazy(() => import('@/pages/Investments/NPS'))
 
 // Lazy loading nested AI Advisor subpage components
-const AIAdvisorLayout = lazy(() => import('@/pages/AIAdvisor/AIAdvisorLayout'));
-const AIChat = lazy(() => import('@/pages/AIAdvisor/Chat'));
-const AIHistory = lazy(() => import('@/pages/AIAdvisor/History'));
-const AISavedConversations = lazy(() => import('@/pages/AIAdvisor/SavedConversations'));
-const AITemplates = lazy(() => import('@/pages/AIAdvisor/Templates'));
-const AISettings = lazy(() => import('@/pages/AIAdvisor/Settings'));
+const AIAdvisorLayout = lazy(() => import('@/pages/AIAdvisor/AIAdvisorLayout'))
+const AIChat = lazy(() => import('@/pages/AIAdvisor/Chat'))
+const AIHistory = lazy(() => import('@/pages/AIAdvisor/History'))
+const AISavedConversations = lazy(() => import('@/pages/AIAdvisor/SavedConversations'))
+const AITemplates = lazy(() => import('@/pages/AIAdvisor/Templates'))
+const AISettings = lazy(() => import('@/pages/AIAdvisor/Settings'))
 
 // Lazy loading nested Reports subpage components
-const ReportsLayout = lazy(() => import('@/pages/Reports/ReportsLayout'));
-const ReportsOverview = lazy(() => import('@/pages/Reports/Overview'));
-const ReportsDaily = lazy(() => import('@/pages/Reports/Daily'));
-const ReportsWeekly = lazy(() => import('@/pages/Reports/Weekly'));
-const ReportsMonthly = lazy(() => import('@/pages/Reports/Monthly'));
-const ReportsAnnual = lazy(() => import('@/pages/Reports/Annual'));
-const ReportsGoals = lazy(() => import('@/pages/Reports/Goals'));
-const ReportsTrends = lazy(() => import('@/pages/Reports/Trends'));
-const ReportsExport = lazy(() => import('@/pages/Reports/Export'));
-const ReportsSettings = lazy(() => import('@/pages/Reports/Settings'));
+const ReportsLayout = lazy(() => import('@/pages/Reports/ReportsLayout'))
+const ReportsOverview = lazy(() => import('@/pages/Reports/Overview'))
+const ReportsDaily = lazy(() => import('@/pages/Reports/Daily'))
+const ReportsWeekly = lazy(() => import('@/pages/Reports/Weekly'))
+const ReportsMonthly = lazy(() => import('@/pages/Reports/Monthly'))
+const ReportsAnnual = lazy(() => import('@/pages/Reports/Annual'))
+const ReportsGoals = lazy(() => import('@/pages/Reports/Goals'))
+const ReportsTrends = lazy(() => import('@/pages/Reports/Trends'))
+const ReportsExport = lazy(() => import('@/pages/Reports/Export'))
+const ReportsSettings = lazy(() => import('@/pages/Reports/Settings'))
 
 export const router = createBrowserRouter([
   {
@@ -279,7 +278,7 @@ export const router = createBrowserRouter([
             path: 'settings',
             element: <LazyLoader component={SettingsLayout} />,
             children: [
-              { path: '', element: <Navigate to='profile' replace /> },
+              { path: '', element: <Navigate to="profile" replace /> },
               { path: 'profile', element: <LazyLoader component={SettingsProfile} /> },
               { path: 'appearance', element: <LazyLoader component={SettingsAppearance} /> },
               { path: 'notifications', element: <LazyLoader component={SettingsNotifications} /> },
@@ -305,7 +304,15 @@ export const router = createBrowserRouter([
         children: [
           {
             path: 'auth',
-            element: <LazyLoader component={Auth} />,
+            element: <Navigate to="/login" replace />,
+          },
+          {
+            path: 'login',
+            element: <LazyLoader component={Login} />,
+          },
+          {
+            path: 'register',
+            element: <LazyLoader component={Register} />,
           },
         ],
       },
@@ -315,6 +322,6 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+])
 
-export default router;
+export default router

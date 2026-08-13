@@ -194,12 +194,19 @@ def _register_exception_handlers(application: FastAPI) -> None:
 def create_application() -> FastAPI:
     application = FastAPI(title=settings.app_name, version="0.1.0")
 
+    origins = list(settings.cors_origins_list)
+    for port in range(5173, 5185):
+        for host in ["localhost", "127.0.0.1"]:
+            default_origin = f"http://{host}:{port}"
+            if default_origin not in origins:
+                origins.append(default_origin)
+
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins_list,
+        allow_origins=origins,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type", "X-User-ID"],
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     application.include_router(api_router, prefix=settings.api_v1_prefix)
@@ -241,4 +248,4 @@ def create_application() -> FastAPI:
     return application
 
 
-app = create_application()
+app = create_application()  # Force reload for port 5432 update

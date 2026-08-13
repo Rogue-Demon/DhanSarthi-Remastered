@@ -46,11 +46,10 @@ export function Register() {
     setLoading(true)
     try {
       await register(email.trim(), password)
-      // Registration successful! Redirect to login page and pass success details
-      navigate(ROUTE_PATHS.LOGIN, {
+      // Registration successful! Redirect to profile selection page
+      navigate(ROUTE_PATHS.SELECT_PROFILE, {
         state: {
           registeredEmail: email.trim(),
-          successMessage: 'Account created successfully! Please sign in using your credentials.',
         },
       })
     } catch (err) {

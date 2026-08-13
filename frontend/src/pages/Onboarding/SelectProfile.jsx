@@ -1,55 +1,76 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { useProfile } from '@/hooks';
-import { getProfilesList } from '@/config/profiles.config';
-import { onboardingConfig } from '@/config/onboarding.config';
-import { ROUTE_PATHS, PROFILES } from '@/constants';
-import { Button } from '@/components/ui';
-import { ProfileCard } from '@/components/profile';
-import { PageTransition, StaggerContainer, StaggerItem, FadeIn, ScaleIn } from '@/components/motion';
-import * as LucideIcons from 'lucide-react';
-import { Logo } from '@/components/common';
+import React, { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { useProfile, useAuth } from '@/hooks'
+import { helpers } from '@/utils'
+import { apiClient, ENDPOINTS } from '@/services/api'
+import { getProfilesList } from '@/config/profiles.config'
+import { onboardingConfig } from '@/config/onboarding.config'
+import { ROUTE_PATHS, PROFILES } from '@/constants'
+import { Button } from '@/components/ui'
+import { ProfileCard } from '@/components/profile'
+import { PageTransition, StaggerContainer, StaggerItem, FadeIn, ScaleIn } from '@/components/motion'
+import * as LucideIcons from 'lucide-react'
+import { Logo } from '@/components/common'
 
 export function SelectProfile() {
-  const navigate = useNavigate();
-  const shouldReduceMotion = useReducedMotion();
-  const { profile, setProfile, completeOnboarding } = useProfile();
-  
-  // Track onboarding step: 'select' or 'confirm'
-  const [subStep, setSubStep] = useState('select');
-  // Temporary selection until confirmed
-  const [selectedProfileName, setSelectedProfileName] = useState(profile || PROFILES.STUDENT);
+  const navigate = useNavigate()
+  const location = useLocation()
+  const shouldReduceMotion = useReducedMotion()
+  const { profile, setProfile, completeOnboarding } = useProfile()
+  const { user } = useAuth()
 
-  const profilesList = getProfilesList();
-  const currentProfileConfig = profilesList.find((p) => p.name === selectedProfileName);
+  // Track onboarding step: 'select' or 'confirm'
+  const [subStep, setSubStep] = useState('select')
+  // Temporary selection until confirmed
+  const [selectedProfileName, setSelectedProfileName] = useState(profile || PROFILES.STUDENT)
+
+  const profilesList = getProfilesList()
+  const currentProfileConfig = profilesList.find((p) => p.name === selectedProfileName)
 
   const handleCardClick = (name) => {
-    setSelectedProfileName(name);
-  };
+    setSelectedProfileName(name)
+  }
 
   const handleNext = () => {
     if (subStep === 'select') {
       // Set store profile but don't mark onboarding complete yet
-      setProfile(selectedProfileName);
-      setSubStep('confirm');
+      setProfile(selectedProfileName)
+      setSubStep('confirm')
     }
-  };
+  }
 
   const handleBack = () => {
     if (subStep === 'confirm') {
-      setSubStep('select');
+      setSubStep('select')
     } else {
-      navigate(ROUTE_PATHS.ONBOARDING);
+      navigate(ROUTE_PATHS.ONBOARDING)
     }
-  };
+  }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     // Complete onboarding and redirect to dashboard
-    setProfile(selectedProfileName);
-    completeOnboarding();
-    navigate(ROUTE_PATHS.DASHBOARD, { replace: true });
-  };
+    setProfile(selectedProfileName)
+    completeOnboarding()
+
+    if (user) {
+      try {
+        const backendPersona = helpers.mapFrontendToBackendPersona(selectedProfileName)
+        await apiClient.patch(ENDPOINTS.profile.update, { persona: backendPersona })
+      } catch (err) {
+        console.error('Failed to save onboarded persona to backend:', err)
+      }
+      navigate(ROUTE_PATHS.DASHBOARD, { replace: true })
+    } else {
+      navigate(ROUTE_PATHS.LOGIN, {
+        state: {
+          registeredEmail: location.state?.registeredEmail || '',
+          successMessage: 'Profile selected successfully! Please sign in to access your dashboard.',
+        },
+        replace: true,
+      })
+    }
+  }
 
   return (
     <PageTransition className="min-h-screen flex flex-col justify-between p-4 md:p-8 bg-background relative overflow-hidden">
@@ -59,7 +80,10 @@ export function SelectProfile() {
 
       {/* Header Bar */}
       <header className="max-w-6xl w-full mx-auto flex items-center justify-between z-10 py-2">
-        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate(ROUTE_PATHS.ONBOARDING)}>
+        <div
+          className="flex items-center gap-2.5 cursor-pointer"
+          onClick={() => navigate(ROUTE_PATHS.ONBOARDING)}
+        >
           <Logo size="md" />
           <span className="text-lg font-black tracking-tight bg-gradient-primary bg-clip-text text-transparent">
             धनSarthi
@@ -70,24 +94,39 @@ export function SelectProfile() {
         <div className="flex items-center gap-2">
           {[
             { step: 1, label: 'Welcome', active: false, done: true },
-            { step: 2, label: 'Profile', active: subStep === 'select', done: subStep === 'confirm' },
+            {
+              step: 2,
+              label: 'Profile',
+              active: subStep === 'select',
+              done: subStep === 'confirm',
+            },
             { step: 3, label: 'Confirm', active: subStep === 'confirm', done: false },
           ].map((item, idx) => (
             <React.Fragment key={item.step}>
-              {idx > 0 && <div className={`w-6 h-[2px] rounded-full ${item.active || item.done ? 'bg-primary' : 'bg-border'}`} />}
+              {idx > 0 && (
+                <div
+                  className={`w-6 h-[2px] rounded-full ${item.active || item.done ? 'bg-primary' : 'bg-border'}`}
+                />
+              )}
               <div className="flex items-center gap-1.5">
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all duration-300 ${
                     item.active
                       ? 'bg-primary text-white ring-4 ring-primary/20 scale-110'
                       : item.done
-                      ? 'bg-success text-white'
-                      : 'bg-muted text-text-muted border border-border'
+                        ? 'bg-success text-white'
+                        : 'bg-muted text-text-muted border border-border'
                   }`}
                 >
-                  {item.done ? <LucideIcons.Check className="h-3.5 w-3.5 stroke-[3px]" /> : item.step}
+                  {item.done ? (
+                    <LucideIcons.Check className="h-3.5 w-3.5 stroke-[3px]" />
+                  ) : (
+                    item.step
+                  )}
                 </div>
-                <span className={`text-xs font-bold hidden sm:inline ${item.active ? 'text-primary' : 'text-text-muted'}`}>
+                <span
+                  className={`text-xs font-bold hidden sm:inline ${item.active ? 'text-primary' : 'text-text-muted'}`}
+                >
                   {item.label}
                 </span>
               </div>
@@ -118,12 +157,16 @@ export function SelectProfile() {
                   Choose your Financial Profile
                 </h2>
                 <p className="text-sm md:text-base text-text-secondary font-medium">
-                  We'll customize your widgets, analytics charts, and AI advisors based on how you manage your capital.
+                  We'll customize your widgets, analytics charts, and AI advisors based on how you
+                  manage your capital.
                 </p>
               </div>
 
               {/* Cards Grid */}
-              <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full px-2" staggerDelay={0.08}>
+              <StaggerContainer
+                className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full px-2"
+                staggerDelay={0.08}
+              >
                 {profilesList.map((prof) => (
                   <StaggerItem key={prof.name} className="h-full">
                     <ProfileCard
@@ -270,11 +313,12 @@ export function SelectProfile() {
       {/* Footer copyright */}
       <footer className="max-w-6xl w-full mx-auto text-center py-4 border-t border-border/60 z-10">
         <p className="text-xs font-bold text-text-muted">
-          &copy; {new Date().getFullYear()} {onboardingConfig.welcome.heading.split(' ').slice(0, 1)} DhanSarthi. All Rights Reserved.
+          &copy; {new Date().getFullYear()}{' '}
+          {onboardingConfig.welcome.heading.split(' ').slice(0, 1)} DhanSarthi. All Rights Reserved.
         </p>
       </footer>
     </PageTransition>
-  );
+  )
 }
 
-export default SelectProfile;
+export default SelectProfile

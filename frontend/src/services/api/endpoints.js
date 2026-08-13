@@ -7,7 +7,7 @@ export const ENDPOINTS = {
   },
   profile: {
     get: '/profile',
-    update: '/profile/update',
+    update: '/profile',
   },
   finance: {
     overview: '/finance/overview',
@@ -25,6 +25,6 @@ export const ENDPOINTS = {
   reports: {
     get: '/reports/download',
   },
-};
+}
 
-export default ENDPOINTS;
+export default ENDPOINTS

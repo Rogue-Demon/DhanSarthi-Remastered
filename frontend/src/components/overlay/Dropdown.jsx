@@ -35,6 +35,7 @@ export const Dropdown = ({
   menuItems = [], // Array of items or customized nodes
   className,
   align = 'left', // left, right
+  direction = 'down', // down, up
   ...props
 }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -66,13 +67,14 @@ export const Dropdown = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            initial={{ opacity: 0, y: direction === 'up' ? -8 : 8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.96 }}
+            exit={{ opacity: 0, y: direction === 'up' ? -8 : 8, scale: 0.96 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
             className={cn(
               'absolute z-40 bg-card border border-border shadow-modal rounded-xl p-1.5 min-w-[180px] clay-surface flex flex-col gap-1',
               align === 'right' ? 'right-0' : 'left-0',
+              direction === 'up' ? 'bottom-full mb-2.5' : 'mt-1.5',
               className
             )}
           >

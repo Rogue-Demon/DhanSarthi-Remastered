@@ -22,6 +22,10 @@ class ProfileResponse(BaseModel):
     country: str
     currency: str
     risk_profile: Optional[RiskProfile] = None
+    phone: Optional[str] = Field(default=None, max_length=20)
+    occupation: Optional[str] = Field(default=None, max_length=100)
+    phone: Optional[str] = None
+    occupation: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -44,3 +48,5 @@ class ProfileUpdate(BaseModel):
     country: Optional[str] = Field(default=None, max_length=10)
     currency: Optional[str] = Field(default=None, max_length=10)
     risk_profile: Optional[RiskProfile] = None
+    phone: Optional[str] = Field(default=None, max_length=20)
+    occupation: Optional[str] = Field(default=None, max_length=100)

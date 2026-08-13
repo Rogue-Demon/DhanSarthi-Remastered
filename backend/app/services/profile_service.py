@@ -62,9 +62,9 @@ class ProfileService:
             profile = Profile(user_id=user_id, persona=persona)
             self._repo.add(profile)
 
-        allowed = {"persona", "display_name", "country", "currency", "risk_profile"}
+        allowed = {"persona", "display_name", "country", "currency", "risk_profile", "phone", "occupation"}
         for key, value in fields.items():
-            if key in allowed and value is not None:
+            if key in allowed:
                 setattr(profile, key, value)
 
         with handle_db_exceptions(resource="Profile"):

@@ -1,20 +1,24 @@
-import React, { useContext } from 'react'
-import { useProfile } from '@/hooks'
-import { AuthContext } from '@/contexts'
+import React from 'react'
+import { useProfile, useAuth } from '@/hooks'
 import Dropdown, { MenuItem } from '@/components/overlay/Dropdown'
 import Avatar from '@/components/ui/Avatar'
 import { cn } from '@/utils'
+import { useNavigate } from 'react-router-dom'
 
 export function ProfileMenu({ className, ...props }) {
   const { profile } = useProfile()
-  const { logout } = useContext(AuthContext)
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const displayName = user?.profile?.display_name || user?.email?.split('@')[0] || 'User'
+  const email = user?.email || ''
 
   const menuItems = [
     <div key="header" className="px-3 py-2 flex flex-col border-b border-border select-none">
-      <span className="text-sm font-bold text-text-primary">Shreyanshu</span>
-      <span className="text-xs text-text-muted">{profile}</span>
+      <span className="text-sm font-bold text-text-primary">{displayName}</span>
+      <span className="text-xs text-text-muted">{email}</span>
     </div>,
-    <MenuItem key="profile" className="mt-1">
+    <MenuItem key="profile" className="mt-1" onClick={() => navigate('/profile')}>
       <svg
         className="h-4 w-4"
         fill="none"
@@ -30,7 +34,7 @@ export function ProfileMenu({ className, ...props }) {
       </svg>
       My Profile
     </MenuItem>,
-    <MenuItem key="settings">
+    <MenuItem key="settings" onClick={() => navigate('/settings')}>
       <svg
         className="h-4 w-4"
         fill="none"
@@ -73,7 +77,7 @@ export function ProfileMenu({ className, ...props }) {
       {...props}
     >
       <div className="flex items-center gap-2 cursor-pointer select-none">
-        <Avatar name="Shreyanshu" size="sm" />
+        <Avatar name={displayName} size="sm" />
       </div>
     </Dropdown>
   )
