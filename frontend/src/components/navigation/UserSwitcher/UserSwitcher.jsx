@@ -4,12 +4,14 @@ import { PROFILES } from '@/constants'
 import Dropdown, { MenuItem } from '@/components/overlay/Dropdown'
 import Avatar from '@/components/ui/Avatar'
 import { cn, helpers } from '@/utils'
+import { Lock } from 'lucide-react'
 import { apiClient, ENDPOINTS } from '@/services/api'
 
 export function UserSwitcher({ collapsed = false, className, ...props }) {
   const { profile, setProfile } = useProfile()
   const { user, updateLocalProfile } = useAuth()
 
+  /* eslint-disable-next-line no-unused-vars */
   const handleProfileChange = async (selected) => {
     setProfile(selected)
     if (user) {
@@ -23,17 +25,25 @@ export function UserSwitcher({ collapsed = false, className, ...props }) {
     }
   }
 
-  const dropdownItems = Object.values(PROFILES).map((p) => (
-    <MenuItem
-      key={p}
-      onClick={() => handleProfileChange(p)}
-      className={cn(p === profile && 'text-primary bg-primary/5 font-bold')}
-    >
-      <div className="flex flex-col">
-        <span className="text-sm">{p}</span>
-      </div>
-    </MenuItem>
-  ))
+  const dropdownItems = Object.values(PROFILES).map((p) => {
+    const isActive = p === profile
+    return (
+      <MenuItem
+        key={p}
+        disabled={!isActive}
+        onClick={isActive ? undefined : () => {}}
+        className={cn(
+          'flex items-center justify-between w-full text-left',
+          isActive
+            ? 'text-primary bg-primary/5 font-bold cursor-default'
+            : 'text-text-muted/50 cursor-not-allowed opacity-50 hover:bg-transparent hover:text-text-muted/50'
+        )}
+      >
+        <span className="text-sm font-semibold">{p}</span>
+        {!isActive && <Lock size={12} className="text-text-muted/50" />}
+      </MenuItem>
+    )
+  })
 
   const displayName = user?.profile?.display_name || user?.email?.split('@')[0] || 'User'
 

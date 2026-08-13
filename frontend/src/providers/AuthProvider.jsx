@@ -61,7 +61,24 @@ export function AuthProvider({ children }) {
       // Fetch user profile
       const userData = await apiClient.get(ENDPOINTS.auth.me)
       try {
-        const profileData = await apiClient.get(ENDPOINTS.profile.get)
+        let profileData = await apiClient.get(ENDPOINTS.profile.get)
+
+        // Sync local pre-login onboarding profile selection with backend if different
+        const localProfile = useProfileStore.getState().profile
+        if (localProfile && profileData && profileData.persona) {
+          const backendLocalPersona = helpers.mapFrontendToBackendPersona(localProfile)
+          if (profileData.persona !== backendLocalPersona) {
+            try {
+              const updatedProfile = await apiClient.patch(ENDPOINTS.profile.update, {
+                persona: backendLocalPersona,
+              })
+              profileData = updatedProfile
+            } catch (patchErr) {
+              console.error('Failed to sync local profile selection to backend:', patchErr)
+            }
+          }
+        }
+
         userData.profile = profileData
         if (profileData && profileData.persona) {
           const frontendPersona = helpers.mapBackendToFrontendPersona(profileData.persona)
