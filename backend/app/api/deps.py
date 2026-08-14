@@ -263,3 +263,11 @@ def get_document_service(db: Session = Depends(get_db)) -> DocumentService:
 def get_document_import_service(db: Session = Depends(get_db)) -> FinancialDocumentImportService:
     return FinancialDocumentImportService(db)
 
+
+from app.services.report_service import ReportService
+
+
+def get_report_service(db: Session = Depends(get_db)) -> ReportService:
+    return ReportService(db)
+
+

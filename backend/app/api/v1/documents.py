@@ -136,23 +136,7 @@ async def process_document(
     Categorizes the document and extracts transaction/metadata fields.
     """
     extraction = await doc_service.process_document(document_id=document_id, user_id=user_id)
-    
-    # Map model attributes to list representation schemas
-    fields_list = [ExtractedFieldSchema.model_validate(f) for f in (extraction.extracted_fields or [])]
-    txs_list = [TransactionCandidateSchema.model_validate(t) for t in (extraction.extracted_transactions or [])]
-
-    return ExtractionResponse(
-        document_id=extraction.document_id,
-        document_type=extraction.document_type,
-        classification_confidence=extraction.classification_confidence or 0.0,
-        fields=fields_list,
-        transactions=txs_list,
-        warnings=extraction.warnings or [],
-        raw_page_count=extraction.raw_page_count or 1,
-        period_start=extraction.period_start,
-        period_end=extraction.period_end,
-        ocr_required=extraction.document.status == "REVIEW_REQUIRED" and not extracted_text_found(extraction)
-    )
+    return _build_extraction_response(extraction)
 
 
 @router.get(
@@ -167,22 +151,7 @@ def get_extraction(
 ) -> ExtractionResponse:
     """Get the extracted fields and transaction candidates for user review."""
     extraction = doc_service.get_extraction(document_id=document_id, user_id=user_id)
-    
-    fields_list = [ExtractedFieldSchema.model_validate(f) for f in (extraction.extracted_fields or [])]
-    txs_list = [TransactionCandidateSchema.model_validate(t) for t in (extraction.extracted_transactions or [])]
-
-    return ExtractionResponse(
-        document_id=extraction.document_id,
-        document_type=extraction.document_type,
-        classification_confidence=extraction.classification_confidence or 0.0,
-        fields=fields_list,
-        transactions=txs_list,
-        warnings=extraction.warnings or [],
-        raw_page_count=extraction.raw_page_count or 1,
-        period_start=extraction.period_start,
-        period_end=extraction.period_end,
-        ocr_required=extraction.document.status == "REVIEW_REQUIRED" and not extracted_text_found(extraction)
-    )
+    return _build_extraction_response(extraction)
 
 
 # ---------------------------------------------------------------------------
@@ -221,3 +190,148 @@ def extracted_text_found(extraction) -> bool:
     """Checks if text content was successfully recovered during parsing."""
     # If the document status is review required, but we extracted fields, it is not OCR required.
     return bool(extraction.extracted_fields) or bool(extraction.extracted_transactions)
+
+
+def _build_extraction_response(extraction) -> ExtractionResponse:
+    import datetime
+    import re
+    from decimal import Decimal
+    from app.models.enums import DocumentType
+    from app.documents.mapping_registry import default_mapping_registry
+    from app.schemas.document import (
+        IncomeCandidateSchema,
+        ExpenseCandidateSchema,
+        AssetCandidateSchema,
+        LiabilityCandidateSchema,
+        MappedFieldExplanationSchema,
+    )
+
+    candidate_field_names = {"net_salary", "total_amount", "amount_due", "outstanding_balance", "current_value"}
+    fields_list = [
+        ExtractedFieldSchema.model_validate(f)
+        for f in (extraction.extracted_fields or [])
+        if f["name"] not in candidate_field_names
+    ]
+    txs_list = [TransactionCandidateSchema.model_validate(t) for t in (extraction.extracted_transactions or [])]
+
+    fields_map = {f["name"]: f for f in (extraction.extracted_fields or [])}
+    doc_type = extraction.document_type
+
+    income_candidates = []
+    expense_candidates = []
+    asset_candidates = []
+    liability_candidates = []
+    field_explanations = []
+
+    # Salary Slip candidate construction
+    if doc_type == DocumentType.SALARY_SLIP:
+        if "net_salary" in fields_map:
+            net_val = Decimal(str(fields_map["net_salary"]["value"]))
+            emp_val = fields_map.get("employer", {}).get("value", "Employer")
+            
+            p_end = extraction.period_end
+            if not p_end and "salary_period" in fields_map:
+                p_str = str(fields_map["salary_period"].get("value", ""))
+                m = re.search(r"([a-zA-Z]+)\s*(\d{4})", p_str)
+                if m:
+                    month_names = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+                    m_prefix = m.group(1).lower()[:3]
+                    yr = int(m.group(2))
+                    if m_prefix in month_names:
+                        m_idx = month_names.index(m_prefix) + 1
+                        p_end = datetime.date(yr, m_idx, 1)
+
+            if not p_end:
+                p_end = datetime.date.today()
+
+            income_candidates.append(
+                IncomeCandidateSchema(
+                    candidate_id="net_salary",
+                    source=f"Salary ({emp_val})" if emp_val != "Employer" else "Salary Slip Import",
+                    amount=net_val,
+                    income_date=p_end,
+                    category="Salary",
+                    description="Imported Net Salary from document"
+                )
+            )
+
+    # Bill candidate construction
+    elif doc_type == DocumentType.BILL:
+        if "total_amount" in fields_map:
+            tot_val = Decimal(str(fields_map["total_amount"]["value"]))
+            vendor_val = fields_map.get("vendor", {}).get("value", "Biller")
+            b_date = extraction.period_end or datetime.date.today()
+            expense_candidates.append(
+                ExpenseCandidateSchema(
+                    candidate_id="total_amount",
+                    merchant=vendor_val,
+                    amount=tot_val,
+                    expense_date=b_date,
+                    category="Utilities",
+                    description="Imported Utility Bill"
+                )
+            )
+
+    # Loan Statement candidate construction
+    elif doc_type == DocumentType.LOAN_STATEMENT:
+        if "outstanding_balance" in fields_map:
+            bal_val = Decimal(str(fields_map["outstanding_balance"]["value"]))
+            lender_val = fields_map.get("lender", {}).get("value", "Lender")
+            rate_val = fields_map.get("interest_rate", {}).get("value")
+            rate_dec = Decimal(str(rate_val)) if rate_val else None
+            liability_candidates.append(
+                LiabilityCandidateSchema(
+                    candidate_id="outstanding_balance",
+                    name=f"Loan ({lender_val})" if lender_val != "Lender" else "Loan Obligation",
+                    amount=bal_val,
+                    liability_type="PERSONAL_DEBT",
+                    interest_rate=rate_dec,
+                    institution=lender_val if lender_val != "Lender" else None
+                )
+            )
+
+    # Investment Statement candidate construction
+    elif doc_type == DocumentType.INVESTMENT_STATEMENT:
+        if "current_value" in fields_map:
+            val = Decimal(str(fields_map["current_value"]["value"]))
+            scheme_val = fields_map.get("scheme_name", {}).get("value", "Investment Portfolio")
+            asset_candidates.append(
+                AssetCandidateSchema(
+                    candidate_id="current_value",
+                    name=scheme_val,
+                    value=val,
+                    asset_type="BANK_BALANCE",
+                    description="Imported Holding"
+                )
+            )
+
+    # Field explanations
+    for f in (extraction.extracted_fields or []):
+        f_name = f["name"]
+        rule = default_mapping_registry.get_rule(doc_type, f_name)
+        field_explanations.append(
+            MappedFieldExplanationSchema(
+                field_name=f_name,
+                status="SUPPORTED" if rule.behavior != "UNSUPPORTED" else "UNSUPPORTED",
+                destination=rule.destination_type.value,
+                explanation=rule.explanation
+            )
+        )
+
+    return ExtractionResponse(
+        document_id=extraction.document_id,
+        document_type=extraction.document_type,
+        classification_confidence=extraction.classification_confidence or 0.0,
+        fields=fields_list,
+        transactions=txs_list,
+        income_candidates=income_candidates,
+        expense_candidates=expense_candidates,
+        asset_candidates=asset_candidates,
+        liability_candidates=liability_candidates,
+        field_explanations=field_explanations,
+        warnings=extraction.warnings or [],
+        raw_page_count=extraction.raw_page_count or 1,
+        period_start=extraction.period_start,
+        period_end=extraction.period_end,
+        ocr_required=extraction.document.status == "REVIEW_REQUIRED" and not extracted_text_found(extraction),
+    )

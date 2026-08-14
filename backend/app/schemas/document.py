@@ -66,6 +66,69 @@ class TransactionCandidateSchema(BaseModel):
     confidence: float = 1.0
 
 
+class IncomeCandidateSchema(BaseModel):
+    """Candidate schema for Income creation."""
+
+    candidate_id: str = Field(default_factory=lambda: datetime.now().strftime("%Y%m%d%H%M%S%f"))
+    source: str
+    amount: Decimal
+    income_date: date
+    category: str = "Salary"
+    currency: str = "INR"
+    frequency: str = "MONTHLY"
+    description: Optional[str] = None
+    confidence: float = 1.0
+
+
+class ExpenseCandidateSchema(BaseModel):
+    """Candidate schema for Expense creation."""
+
+    candidate_id: str = Field(default_factory=lambda: datetime.now().strftime("%Y%m%d%H%M%S%f"))
+    merchant: str
+    amount: Decimal
+    expense_date: date
+    category: str = "Utilities"
+    currency: str = "INR"
+    description: Optional[str] = None
+    confidence: float = 1.0
+
+
+class AssetCandidateSchema(BaseModel):
+    """Candidate schema for Asset creation."""
+
+    candidate_id: str = Field(default_factory=lambda: datetime.now().strftime("%Y%m%d%H%M%S%f"))
+    name: str
+    value: Decimal
+    asset_type: str = "BANK_BALANCE"
+    institution: Optional[str] = None
+    maturity_date: Optional[date] = None
+    description: Optional[str] = None
+    confidence: float = 1.0
+
+
+class LiabilityCandidateSchema(BaseModel):
+    """Candidate schema for Liability creation."""
+
+    candidate_id: str = Field(default_factory=lambda: datetime.now().strftime("%Y%m%d%H%M%S%f"))
+    name: str
+    amount: Decimal
+    liability_type: str = "PERSONAL_DEBT"
+    interest_rate: Optional[Decimal] = None
+    monthly_payment: Optional[Decimal] = None
+    institution: Optional[str] = None
+    description: Optional[str] = None
+    confidence: float = 1.0
+
+
+class MappedFieldExplanationSchema(BaseModel):
+    """Explanation schema reporting how an extracted field was mapped or why it was skipped."""
+
+    field_name: str
+    status: str = Field(..., description="Field status (SUPPORTED, IMPORTED, SKIPPED, REVIEW_ONLY, UNSUPPORTED, DUPLICATE)")
+    destination: str = Field(..., description="Financial destination (INCOME, EXPENSE, ASSET, LIABILITY, METADATA, REVIEW_ONLY, UNSUPPORTED)")
+    explanation: str = Field(..., description="Human-readable reason description.")
+
+
 class ExtractionResponse(BaseModel):
     """Review schema exposing extracted metadata, candidates, and warnings."""
 
@@ -76,6 +139,11 @@ class ExtractionResponse(BaseModel):
     classification_confidence: float
     fields: List[ExtractedFieldSchema] = Field(default_factory=list)
     transactions: List[TransactionCandidateSchema] = Field(default_factory=list)
+    income_candidates: List[IncomeCandidateSchema] = Field(default_factory=list)
+    expense_candidates: List[ExpenseCandidateSchema] = Field(default_factory=list)
+    asset_candidates: List[AssetCandidateSchema] = Field(default_factory=list)
+    liability_candidates: List[LiabilityCandidateSchema] = Field(default_factory=list)
+    field_explanations: List[MappedFieldExplanationSchema] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
     raw_page_count: int = 1
     period_start: Optional[date] = None
@@ -94,6 +162,22 @@ class ConfirmationRequest(BaseModel):
         default_factory=list,
         description="UUID candidate_ids of transactions to import."
     )
+    confirmed_income: List[IncomeCandidateSchema] = Field(
+        default_factory=list,
+        description="Approved Income candidate objects."
+    )
+    confirmed_expenses: List[ExpenseCandidateSchema] = Field(
+        default_factory=list,
+        description="Approved Expense candidate objects."
+    )
+    confirmed_assets: List[AssetCandidateSchema] = Field(
+        default_factory=list,
+        description="Approved Asset candidate objects."
+    )
+    confirmed_liabilities: List[LiabilityCandidateSchema] = Field(
+        default_factory=list,
+        description="Approved Liability candidate objects."
+    )
 
 
 class ConfirmationResponse(BaseModel):
@@ -101,5 +185,12 @@ class ConfirmationResponse(BaseModel):
 
     imported_fields_count: int
     imported_transactions_count: int
+    imported_income_count: int = 0
+    imported_expense_count: int = 0
+    imported_asset_count: int = 0
+    imported_liability_count: int = 0
+    imported_metadata_count: int = 0
     warnings: List[str] = Field(default_factory=list)
+    field_explanations: List[MappedFieldExplanationSchema] = Field(default_factory=list)
     status: DocumentStatus = Field(..., description="Updated status of the document.")
+

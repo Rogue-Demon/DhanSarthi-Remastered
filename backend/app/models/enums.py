@@ -210,4 +210,16 @@ class DocumentType(str, enum.Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class FinancialReportType(str, enum.Enum):
+    """Supported financial statement report types in DhanSarthi."""
+
+    MONTHLY_EXECUTIVE = "monthly_executive"
+    ANNUAL_TAX_SUMMARY = "annual_tax_summary"
+    EXPENSE_BREAKDOWN = "expense_breakdown"
+    NET_WORTH_STATEMENT = "net_worth_statement"
+    GOAL_FEASIBILITY = "goal_feasibility"
+    DEBT_SNOWBALL = "debt_snowball"
+
+
+
 

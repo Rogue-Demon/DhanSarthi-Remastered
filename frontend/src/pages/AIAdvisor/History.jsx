@@ -1,19 +1,45 @@
-import React, { useState } from 'react';
-import { placeholderConversations } from '@/config';
-import { motion, useReducedMotion } from 'framer-motion';
-import { Badge, Button } from '@/components/ui';
-import * as LucideIcons from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Badge, Button } from '@/components/ui'
+import * as LucideIcons from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useConversationList, useDeleteConversation } from '@/hooks/useAI'
 
+/**
+ * History Page — shows all of the user's past AI conversations.
+ * Data is fetched from the real backend (GET /ai/conversations).
+ */
 export function History() {
-  const shouldReduceMotion = useReducedMotion();
-  const navigate = useNavigate();
-  const [search, setSearch] = useState('');
+  const shouldReduceMotion = useReducedMotion()
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
 
-  const filtered = placeholderConversations.filter((c) =>
-    c.title.toLowerCase().includes(search.toLowerCase()) ||
-    c.preview.toLowerCase().includes(search.toLowerCase())
-  );
+  // ── Real backend data ─────────────────────────────────────────────────────
+  const { data: convList, isLoading, isError } = useConversationList({ limit: 100 })
+  const conversations = convList?.items ?? []
+  const deleteMutation = useDeleteConversation()
+
+  // Client-side search filter on title
+  const filtered = conversations.filter((c) => c.title.toLowerCase().includes(search.toLowerCase()))
+
+  const handleOpen = (id) => navigate(`/ai-advisor/chat/${id}`)
+
+  const handleDelete = (e, id) => {
+    e.stopPropagation()
+    if (!window.confirm('Delete this conversation? This cannot be undone.')) return
+    deleteMutation.mutate(id)
+  }
+
+  const formatDate = (isoString) => {
+    if (!isoString) return ''
+    const d = new Date(isoString)
+    const now = new Date()
+    const diffDays = Math.floor((now - d) / 86_400_000)
+    if (diffDays === 0) return 'Today'
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays < 7) return `${diffDays} days ago`
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
 
   return (
     <motion.div
@@ -22,6 +48,7 @@ export function History() {
       transition={{ duration: 0.3 }}
       className="flex flex-col gap-6 p-4 md:p-6 w-full h-full overflow-y-auto scrollbar-none text-left select-none max-w-4xl mx-auto"
     >
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h3 className="text-lg font-black text-text-primary uppercase tracking-wider leading-none">
@@ -45,19 +72,64 @@ export function History() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {/* Loading skeleton */}
+      {isLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="clay-surface bg-card p-5 border border-border/40 rounded-2xl shadow-card flex flex-col gap-3"
+            >
+              <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
+              <div className="h-3 w-full rounded bg-muted animate-pulse" />
+              <div className="h-3 w-2/3 rounded bg-muted animate-pulse" />
+              <div className="flex justify-between pt-2 border-t border-border/40">
+                <div className="h-3 w-20 rounded bg-muted animate-pulse" />
+                <div className="h-5 w-20 rounded bg-muted animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Error state */}
+      {isError && !isLoading && (
+        <div className="clay-surface bg-card border-2 border-danger/20 rounded-3xl p-10 shadow-floating text-center flex flex-col items-center justify-center gap-4 max-w-md mx-auto my-10">
+          <div className="h-14 w-14 rounded-2xl bg-danger/10 border border-danger/20 flex items-center justify-center text-danger">
+            <LucideIcons.AlertCircle className="h-7 w-7" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <h4 className="text-sm font-black text-text-primary uppercase tracking-wider">
+              Failed to Load History
+            </h4>
+            <p className="text-xs font-bold text-text-muted max-w-[280px] leading-relaxed mt-1">
+              Could not retrieve your conversation history. Please try again later.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && !isError && filtered.length === 0 && (
         <div className="clay-surface bg-card border-2 border-white/60 rounded-3xl p-10 shadow-floating text-center flex flex-col items-center justify-center gap-4 max-w-md mx-auto my-10">
           <div className="h-14 w-14 rounded-2xl bg-muted border flex items-center justify-center text-text-muted">
             <LucideIcons.History className="h-7 w-7" />
           </div>
           <div className="flex flex-col gap-1">
-            <h4 className="text-sm font-black text-text-primary uppercase tracking-wider">No History Found</h4>
+            <h4 className="text-sm font-black text-text-primary uppercase tracking-wider">
+              {search ? 'No History Found' : 'No Conversations Yet'}
+            </h4>
             <p className="text-xs font-bold text-text-muted max-w-[280px] leading-relaxed mt-1">
-              No previous conversations match your search criteria.
+              {search
+                ? 'No previous conversations match your search criteria.'
+                : 'Start a new conversation from the sidebar to begin.'}
             </p>
           </div>
         </div>
-      ) : (
+      )}
+
+      {/* Conversation Grid */}
+      {!isLoading && !isError && filtered.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((conv, idx) => (
             <motion.div
@@ -65,46 +137,65 @@ export function History() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: idx * 0.04 }}
-              className="clay-surface bg-card p-5 border border-white/60 dark:border-white/5 shadow-card hover:border-primary/30 transition-all flex flex-col justify-between gap-4 group text-left"
+              className="clay-surface bg-card p-5 border border-white/60 dark:border-white/5 shadow-card hover:border-primary/30 transition-all flex flex-col justify-between gap-4 group text-left cursor-pointer"
+              onClick={() => handleOpen(conv.id)}
             >
               <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-text-primary group-hover:text-primary transition-colors">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-black text-text-primary group-hover:text-primary transition-colors truncate">
                     {conv.title}
                   </span>
-                  <div className="flex items-center gap-1.5">
-                    {conv.pinned && (
-                      <LucideIcons.Pin className="h-3.5 w-3.5 text-primary" title="Pinned" />
-                    )}
-                    {conv.favorite && (
-                      <LucideIcons.Star className="h-3.5 w-3.5 text-warning fill-warning" title="Favorite" />
-                    )}
-                  </div>
+                  <Badge
+                    variant="secondary"
+                    className="text-[9px] font-black shrink-0 bg-primary/10 text-primary border-primary/20 px-2 py-0.5"
+                  >
+                    {conv.message_count} msg{conv.message_count !== 1 ? 's' : ''}
+                  </Badge>
                 </div>
-
                 <p className="text-xs font-medium text-text-muted leading-relaxed line-clamp-2">
-                  "{conv.preview}"
+                  {conv.status === 'active' ? 'Active conversation' : 'Archived conversation'}
                 </p>
               </div>
 
               <div className="flex items-center justify-between pt-2 border-t border-border/40 text-[10px] font-bold text-text-muted">
-                <span>{conv.date}</span>
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  className="p-0 text-primary font-black uppercase tracking-wider hover:bg-transparent"
-                  onClick={() => navigate('/ai-advisor/chat')}
-                  iconRight={<LucideIcons.ArrowRight className="h-3 w-3" />}
-                >
-                  Open Chat
-                </Button>
+                <span>{formatDate(conv.updated_at)}</span>
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={(e) => handleDelete(e, conv.id)}
+                    disabled={deleteMutation.isPending}
+                    className="p-1 rounded hover:bg-danger/10 text-text-muted hover:text-danger transition-colors"
+                    title="Delete conversation"
+                  >
+                    <LucideIcons.Trash2 className="h-3 w-3" />
+                  </button>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    className="p-0 text-primary font-black uppercase tracking-wider hover:bg-transparent"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleOpen(conv.id)
+                    }}
+                    iconRight={<LucideIcons.ArrowRight className="h-3 w-3" />}
+                  >
+                    Open Chat
+                  </Button>
+                </div>
               </div>
             </motion.div>
           ))}
         </div>
       )}
+
+      {/* Summary footer */}
+      {!isLoading && !isError && conversations.length > 0 && (
+        <p className="text-[10px] font-bold text-text-muted text-center">
+          Showing {filtered.length} of {convList?.total ?? conversations.length} conversation
+          {(convList?.total ?? conversations.length) !== 1 ? 's' : ''}
+        </p>
+      )}
     </motion.div>
-  );
+  )
 }
 
-export default History;
+export default History

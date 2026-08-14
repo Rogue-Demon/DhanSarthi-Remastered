@@ -10,6 +10,7 @@ import NotFound from './NotFound'
 // Lazy loading page components
 const Dashboard = lazy(() => import('@/pages/Dashboard/Dashboard'))
 const Profile = lazy(() => import('@/pages/Profile/Profile'))
+const Documents = lazy(() => import('@/pages/Documents/Documents'))
 
 const SettingsLayout = lazy(() => import('@/pages/Settings/SettingsLayout'))
 const SettingsProfile = lazy(() => import('@/pages/Settings/ProfileSettings'))
@@ -105,6 +106,10 @@ export const router = createBrowserRouter([
           {
             path: 'profile',
             element: <LazyLoader component={Profile} />,
+          },
+          {
+            path: 'documents',
+            element: <LazyLoader component={Documents} />,
           },
           {
             path: 'finance',
@@ -208,6 +213,10 @@ export const router = createBrowserRouter([
               },
               {
                 path: 'chat',
+                element: <LazyLoader component={AIChat} />,
+              },
+              {
+                path: 'chat/:conversationId',
                 element: <LazyLoader component={AIChat} />,
               },
               {

@@ -22,6 +22,7 @@ from app.api.deps import (
     get_conversation_service,
     get_current_user_id,
 )
+from app.ai.rate_limiter import enforce_ai_rate_limit
 from app.ai.schemas.advisor import (
     AIAdvisorRequest,
     AIAdvisorResponse,
@@ -55,6 +56,7 @@ async def get_ai_guidance(
     Authentication is required. The advisor's response will be personalized using
     the user's private financial data, but is strictly advisory.
     """
+    enforce_ai_rate_limit(user_id)
     return await ai_service.get_guidance(user_id=user_id, request=request)
 
 
@@ -172,17 +174,19 @@ async def send_message(
 
     Flow:
       1. Authenticate user.
-      2. Verify conversation ownership.
-      3. Store user message (committed before LLM call).
-      4. Build financial context (uses current_user.id only).
-      5. Retrieve RAG knowledge.
-      6. Retrieve conversation history.
-      7. Build AI context.
-      8. Call LLM with timeout.
-      9. Validate response safety.
-      10. Store assistant message.
-      11. Return structured response with citations.
+      2. Rate limit check.
+      3. Verify conversation ownership.
+      4. Store user message (committed before LLM call).
+      5. Build financial context (uses current_user.id only).
+      6. Retrieve RAG knowledge.
+      7. Retrieve conversation history.
+      8. Build AI context.
+      9. Call LLM with timeout.
+      10. Validate response safety.
+      11. Store assistant message.
+      12. Return structured response with citations.
     """
+    enforce_ai_rate_limit(user_id)
     return await ai_service.send_chat_message(
         user_id=user_id,
         conversation_id=conversation_id,

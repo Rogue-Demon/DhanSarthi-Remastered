@@ -1,19 +1,33 @@
-import React, { useState } from 'react';
-import { useProfile } from '@/hooks';
-import { motion, useReducedMotion } from 'framer-motion';
-import { Button, Badge } from '@/components/ui';
-import * as LucideIcons from 'lucide-react';
+import { useState } from 'react'
+import { useProfile, useAuth } from '@/hooks'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Button, Badge } from '@/components/ui'
 
 export function ProfileSettings() {
-  const { profile, profileConfig } = useProfile();
-  const shouldReduceMotion = useReducedMotion();
+  const { profile } = useProfile()
+  const { user } = useAuth()
+  const shouldReduceMotion = useReducedMotion()
 
-  const [name, setName] = useState('Shreyanshu');
-  const [email, setEmail] = useState('shreyanshu@dhansarthi.app');
-  const [occupation, setOccupation] = useState('Software Engineer');
-  const [currency, setCurrency] = useState('INR (₹)');
-  const [timezone, setTimezone] = useState('Asia/Kolkata (IST)');
-  const [country, setCountry] = useState('India 🇮🇳');
+  const initialName =
+    user?.profile?.display_name ||
+    user?.display_name ||
+    user?.email?.split('@')[0] ||
+    'Valued Member'
+  const initialEmail = user?.email || 'user@dhansarthi.app'
+
+  const [prevUser, setPrevUser] = useState(user)
+  const [name, setName] = useState(initialName)
+  const [email, setEmail] = useState(initialEmail)
+  const [occupation, setOccupation] = useState('Software Engineer')
+  const [currency] = useState('INR (₹)')
+  const [timezone] = useState('Asia/Kolkata (IST)')
+  const [country] = useState('India 🇮🇳')
+
+  if (user !== prevUser) {
+    setPrevUser(user)
+    setName(initialName)
+    setEmail(initialEmail)
+  }
 
   return (
     <motion.div
@@ -32,16 +46,18 @@ export function ProfileSettings() {
       </div>
 
       <div className="clay-surface bg-card p-6 border border-white/60 dark:border-white/5 rounded-2xl shadow-card flex flex-col gap-6">
-        
         {/* Avatar Row */}
         <div className="flex items-center gap-4 border-b border-border/60 pb-6">
           <div className="h-16 w-16 rounded-2xl bg-gradient-primary flex items-center justify-center text-white text-xl font-black shadow-floating shrink-0">
-            S
+            {(name?.[0] || 'V').toUpperCase()}
           </div>
           <div className="flex flex-col gap-1 text-left">
             <div className="flex items-center gap-2">
               <span className="text-base font-black text-text-primary">{name}</span>
-              <Badge variant="secondary" className="text-[8px] font-bold py-0.5 px-2 bg-primary/10 text-primary border-primary/20 rounded">
+              <Badge
+                variant="secondary"
+                className="text-[8px] font-bold py-0.5 px-2 bg-primary/10 text-primary border-primary/20 rounded"
+              >
                 {profile} Mode
               </Badge>
             </div>
@@ -52,7 +68,9 @@ export function ProfileSettings() {
         {/* Form Inputs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">Full Name</label>
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">
+              Full Name
+            </label>
             <input
               type="text"
               value={name}
@@ -62,7 +80,9 @@ export function ProfileSettings() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">Email Address</label>
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">
+              Email Address
+            </label>
             <input
               type="email"
               value={email}
@@ -72,7 +92,9 @@ export function ProfileSettings() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">Occupation</label>
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">
+              Occupation
+            </label>
             <input
               type="text"
               value={occupation}
@@ -82,7 +104,9 @@ export function ProfileSettings() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">Primary Currency</label>
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">
+              Primary Currency
+            </label>
             <input
               type="text"
               value={currency}
@@ -92,7 +116,9 @@ export function ProfileSettings() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">Timezone</label>
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">
+              Timezone
+            </label>
             <input
               type="text"
               value={timezone}
@@ -102,7 +128,9 @@ export function ProfileSettings() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">Country</label>
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-wider">
+              Country
+            </label>
             <input
               type="text"
               value={country}
@@ -122,7 +150,7 @@ export function ProfileSettings() {
         </div>
       </div>
     </motion.div>
-  );
+  )
 }
 
-export default ProfileSettings;
+export default ProfileSettings

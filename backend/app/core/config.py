@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     ai_max_history_messages: int = Field(default=20, validation_alias="AI_MAX_HISTORY_MESSAGES")
     ai_request_timeout_seconds: int = Field(default=60, validation_alias="AI_REQUEST_TIMEOUT_SECONDS")
     ai_max_message_length: int = Field(default=2000, validation_alias="AI_MAX_MESSAGE_LENGTH")
+    ai_rate_limit_requests: int = Field(default=30, validation_alias="AI_RATE_LIMIT_REQUESTS")
+    ai_rate_limit_window_seconds: int = Field(default=60, validation_alias="AI_RATE_LIMIT_WINDOW_SECONDS")
     max_document_size_mb: int = Field(default=10, validation_alias="MAX_DOCUMENT_SIZE_MB")
     document_storage_path: str = Field(default="storage/documents", validation_alias="DOCUMENT_STORAGE_PATH")
     document_max_pages: int = Field(default=100, validation_alias="DOCUMENT_MAX_PAGES")

@@ -19,6 +19,7 @@ from app.api.v1.ai import router as ai_router
 from app.api.v1.documents import router as documents_router
 from app.api.v1.financial_intelligence import router as financial_intelligence_router
 from app.api.v1.market import router as market_router
+from app.api.v1.reports import router as reports_router
 
 api_router = APIRouter()
 
@@ -40,4 +41,6 @@ api_router.include_router(ai_router)
 api_router.include_router(documents_router)
 api_router.include_router(financial_intelligence_router)
 api_router.include_router(market_router)
+api_router.include_router(reports_router)
+
 

@@ -1,8 +1,8 @@
-import React from 'react';
-import { useProfile } from '@/hooks';
-import { Badge, Button } from '@/components/ui';
-import * as LucideIcons from 'lucide-react';
-import { cn } from '@/utils';
+import React from 'react'
+import { useProfile, useAuth } from '@/hooks'
+import { Badge, Button } from '@/components/ui'
+import * as LucideIcons from 'lucide-react'
+import { cn } from '@/utils'
 
 /**
  * DashboardHeader Component
@@ -11,13 +11,14 @@ import { cn } from '@/utils';
  * and quick actions placeholder (e.g. widget customize button, search bar).
  */
 export function DashboardHeader({ className, ...props }) {
-  const { profile, profileConfig } = useProfile();
+  const { profile, profileConfig } = useProfile()
+  const { user } = useAuth()
 
   // Format today's date beautifully
   const getFormattedDate = () => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date().toLocaleDateString('en-US', options);
-  };
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+    return new Date().toLocaleDateString('en-US', options)
+  }
 
   return (
     <div
@@ -31,7 +32,12 @@ export function DashboardHeader({ className, ...props }) {
       <div className="flex flex-col text-left gap-1">
         <div className="flex flex-wrap items-center gap-2.5">
           <h1 className="text-3xl font-black text-text-primary tracking-tight">
-            Welcome back, Shreyanshu!
+            Welcome back,{' '}
+            {user?.profile?.display_name ||
+              user?.display_name ||
+              user?.email?.split('@')[0] ||
+              'Valued Member'}
+            !
           </h1>
           {profileConfig && (
             <Badge
@@ -89,7 +95,7 @@ export function DashboardHeader({ className, ...props }) {
         </Button>
       </div>
     </div>
-  );
+  )
 }
 
-export default DashboardHeader;
+export default DashboardHeader

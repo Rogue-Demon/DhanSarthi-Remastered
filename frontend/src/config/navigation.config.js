@@ -19,6 +19,15 @@ export const navigationConfig = {
       featureFlag: null,
     },
     {
+      label: 'Documents',
+      icon: 'Files',
+      path: '/documents',
+      permission: null,
+      children: null,
+      badge: 'Auto-Extract',
+      featureFlag: null,
+    },
+    {
       label: 'Finance',
       icon: 'Wallet',
       path: '/finance',
@@ -81,6 +90,15 @@ export const navigationConfig = {
       permission: null,
       children: null,
       badge: null,
+      featureFlag: null,
+    },
+    {
+      label: 'Documents',
+      icon: 'Files',
+      path: '/documents',
+      permission: null,
+      children: null,
+      badge: 'Auto-Extract',
       featureFlag: null,
     },
     {
@@ -149,6 +167,15 @@ export const navigationConfig = {
       featureFlag: null,
     },
     {
+      label: 'Documents',
+      icon: 'Files',
+      path: '/documents',
+      permission: null,
+      children: null,
+      badge: 'Auto-Extract',
+      featureFlag: null,
+    },
+    {
       label: 'Finance',
       icon: 'Wallet',
       path: '/finance',
@@ -194,6 +221,6 @@ export const navigationConfig = {
       featureFlag: null,
     },
   ],
-};
+}
 
-export default navigationConfig;
+export default navigationConfig

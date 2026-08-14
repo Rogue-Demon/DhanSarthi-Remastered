@@ -1,0 +1,5 @@
+employer: Acme Corp
+gross salary: 100000
+net salary: 85000
+total deductions: 15000
+salary period: August 2026
