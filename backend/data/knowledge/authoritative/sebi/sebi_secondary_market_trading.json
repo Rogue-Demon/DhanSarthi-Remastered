@@ -1,0 +1,17 @@
+{
+  "title": "SEBI Secondary Market Framework and T+1 Settlement Cycle",
+  "topic": "secondary_market_trading",
+  "category": "STOCKS_AND_SECURITIES",
+  "authority": "SEBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Securities and Exchange Board of India (SEBI)",
+  "source_url": "https://www.sebi.gov.in/legal/circulars/sep-2021/t-1-settlement-cycle_52495.html",
+  "keywords": ["sebi", "t+1 settlement", "secondary market", "stock exchange", "nse", "bse", "clearing corporation"],
+  "content": "Indian equity secondary markets operate on a T+1 (Trade date + 1 working day) rolling settlement cycle enforced by SEBI. When shares are sold on T-day, pay-out of funds and securities settlement completes on the next working day (T+1). All stock brokers must issue contract notes within 24 hours of trade execution detailing brokerage, STT (Securities Transaction Tax), GST, and exchange transaction charges."
+}

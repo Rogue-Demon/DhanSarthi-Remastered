@@ -1,0 +1,17 @@
+{
+  "title": "SEBI Investor Protection Fund (IPF) Guidelines",
+  "topic": "investor_protection_fund",
+  "category": "INVESTOR_PROTECTION",
+  "authority": "SEBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Securities and Exchange Board of India (SEBI)",
+  "source_url": "https://www.sebi.gov.in/legal/circulars/may-2023/investor-protection-fund-of-stock-exchanges_71280.html",
+  "keywords": ["sebi", "ipf", "investor protection fund", "stock broker default", "compensation cap"],
+  "content": "Recognized stock exchanges (NSE, BSE) maintain an Investor Protection Fund (IPF) administered by trustees under SEBI guidelines. IPF compensates retail investors for genuine claims arising out of non-payment or default by a registered stockbroker up to specified limits (such as ₹25 lakh per investor on NSE/BSE). IPF does not compensate for normal market losses resulting from market price fluctuations."
+}

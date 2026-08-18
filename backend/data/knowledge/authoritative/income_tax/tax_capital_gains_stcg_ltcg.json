@@ -1,0 +1,17 @@
+{
+  "title": "Income Tax Rules on Capital Gains (STCG and LTCG)",
+  "topic": "tax_capital_gains_stcg_ltcg",
+  "category": "TAXATION",
+  "authority": "INCOME_TAX",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "FY2026-27",
+  "published_date": "2026-02-01",
+  "effective_date": "2026-04-01",
+  "document_type": "official_guidance",
+  "source": "Income Tax Department, Government of India",
+  "source_url": "https://incometaxindia.gov.in/Pages/tax-services/capital-gains.aspx",
+  "keywords": ["income tax", "capital gains", "stcg", "ltcg", "section 111a", "section 112a", "equity capital gains", "exemption limit"],
+  "content": "Capital gains arise upon the sale or transfer of a capital asset. Listed equity shares and equity-oriented mutual funds held for more than 12 months qualify as Long-Term Capital Assets. Under Section 112A, Long-Term Capital Gains (LTCG) on equity exceeding ₹1,25,000 in a financial year are taxed at 12.5% (without indexation). Short-Term Capital Gains (STCG) on equity held for 12 months or less are taxed at 20% under Section 111A. Debt mutual fund gains are taxed at applicable slab rates."
+}

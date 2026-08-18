@@ -31,6 +31,7 @@ export function ChatWorkspace({ conversationId = null, initialPrompt = '' }) {
   const [inputText, setInputText] = useState(initialPrompt || '')
   // Optimistic messages shown while the real response is loading
   const [optimisticMessages, setOptimisticMessages] = useState([])
+  const [expandedCalcMsgId, setExpandedCalcMsgId] = useState(null)
   const messagesEndRef = useRef(null)
 
   // ── Real data: load conversation messages when conversationId is set ──────
@@ -219,8 +220,9 @@ export function ChatWorkspace({ conversationId = null, initialPrompt = '' }) {
                     })
                   : msg.created_at
                 : ''
-              // Citations attached as metadata on the message (assistant only)
-              const sources = msg.message_metadata?.source_ids ?? []
+              const meta = msg.message_metadata || msg.metadata || {}
+              const citations = meta.citations ?? []
+              const sources = meta.source_ids ?? []
 
               return (
                 <motion.div
@@ -306,11 +308,106 @@ export function ChatWorkspace({ conversationId = null, initialPrompt = '' }) {
                         >
                           <LucideIcons.Bookmark className="h-3.5 w-3.5" />
                         </button>
-                        {sources.length > 0 && (
+                        {meta.data_completeness && (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 rounded px-1.5 py-0.5">
+                            <LucideIcons.CheckCircle2 className="h-3 w-3" />
+                            <span>Based on your financial data</span>
+                          </span>
+                        )}
+                        {meta.signals && meta.signals.length > 0 && (
+                          <div className="flex items-center gap-1 flex-wrap">
+                            {meta.signals.slice(0, 2).map((sig, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-600 bg-amber-500/10 border border-amber-500/20 rounded px-1.5 py-0.5"
+                                title={sig.evidence}
+                              >
+                                <LucideIcons.AlertTriangle className="h-2.5 w-2.5" />
+                                <span>{sig.title}</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {meta.health_score?.breakdown && meta.health_score.breakdown.length > 0 && (
+                          <button
+                            onClick={() =>
+                              setExpandedCalcMsgId(expandedCalcMsgId === msg.id ? null : msg.id)
+                            }
+                            className="inline-flex items-center gap-1 text-[9px] font-bold text-primary bg-primary/10 border border-primary/20 rounded px-1.5 py-0.5 hover:bg-primary/20 transition-colors"
+                          >
+                            <LucideIcons.Calculator className="h-3 w-3" />
+                            <span>How this was calculated</span>
+                            <LucideIcons.ChevronDown
+                              className={cn(
+                                'h-2.5 w-2.5 transition-transform',
+                                expandedCalcMsgId === msg.id && 'rotate-180'
+                              )}
+                            />
+                          </button>
+                        )}
+                        {citations.length > 0 ? (
+                          <div className="flex items-center gap-1.5 flex-wrap ml-1">
+                            {citations.slice(0, 3).map((cit, idx) => (
+                              <a
+                                key={idx}
+                                href={cit.source_url || '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[9px] font-bold text-accent bg-accent/10 border border-accent/20 rounded px-1.5 py-0.5 hover:bg-accent/20 transition-colors"
+                                title={cit.title}
+                              >
+                                <LucideIcons.ShieldCheck className="h-3 w-3" />
+                                <span>
+                                  {cit.authority || 'OFFICIAL'}: {cit.title}
+                                </span>
+                                {cit.source_url && (
+                                  <LucideIcons.ExternalLink className="h-2.5 w-2.5 opacity-70" />
+                                )}
+                              </a>
+                            ))}
+                          </div>
+                        ) : sources.length > 0 ? (
                           <span className="ml-1 text-[9px] font-bold text-text-muted border border-border/40 rounded px-1.5 py-0.5">
                             {sources.length} source{sources.length > 1 ? 's' : ''}
                           </span>
-                        )}
+                        ) : null}
+                      </div>
+                    )}
+
+                    {/* How Was This Calculated Accordion */}
+                    {!isUser && expandedCalcMsgId === msg.id && meta.health_score?.breakdown && (
+                      <div className="w-full mt-2 p-3 bg-muted/30 border border-border/60 rounded-xl flex flex-col gap-2 text-xs">
+                        <div className="flex items-center justify-between font-bold text-text-primary border-b border-border/40 pb-1.5">
+                          <span className="flex items-center gap-1.5">
+                            <LucideIcons.Calculator className="h-3.5 w-3.5 text-primary" />
+                            Deterministic Calculation Breakdown
+                          </span>
+                          {meta.health_score.overall_score !== null && (
+                            <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-black">
+                              Score: {meta.health_score.overall_score}/100 (
+                              {meta.health_score.status})
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-2 pt-1">
+                          {meta.health_score.breakdown.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="flex flex-col gap-0.5 bg-card/60 p-2 rounded-lg border border-border/30"
+                            >
+                              <div className="flex justify-between items-center font-bold text-[11px] text-text-primary">
+                                <span>{item.dimension}</span>
+                                <span className="text-text-muted">
+                                  Weight: {item.weight_percent}% | Score: {item.score ?? 'N/A'}
+                                </span>
+                              </div>
+                              <div className="text-[10px] font-mono text-primary/90 bg-primary/5 px-1.5 py-0.5 rounded">
+                                Formula: {item.formula}
+                              </div>
+                              <div className="text-[10px] text-text-muted">{item.explanation}</div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>

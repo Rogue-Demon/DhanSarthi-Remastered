@@ -23,6 +23,11 @@ class TextCleaner:
         if not raw_text:
             return ""
 
+        if isinstance(raw_text, list):
+            raw_text = "\n\n".join(str(item) for item in raw_text)
+        elif not isinstance(raw_text, str):
+            raw_text = str(raw_text)
+
         # Replace NULL characters and control chars (except newline/tab)
         text = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", raw_text)
 

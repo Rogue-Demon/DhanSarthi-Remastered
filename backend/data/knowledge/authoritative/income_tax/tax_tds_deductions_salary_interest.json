@@ -1,0 +1,17 @@
+{
+  "title": "Tax Deducted at Source (TDS) Provisions on Salary and Interest",
+  "topic": "tax_tds_deductions_salary_interest",
+  "category": "TAXATION",
+  "authority": "INCOME_TAX",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Income Tax Department, Government of India",
+  "source_url": "https://incometaxindia.gov.in/Pages/deposit-tds.aspx",
+  "keywords": ["income tax", "tds", "section 192", "section 194a", "form 26as", "ais", "form 15g 15h"],
+  "content": "Tax Deducted at Source (TDS) is a mechanism where tax is collected at the point of income origination. Section 192 mandates TDS on salary based on applicable slab rates. Section 194A mandates 10% TDS on bank interest income if total annual interest exceeds ₹40,000 (₹50,000 for senior citizens). Individuals with non-taxable total income can submit Form 15G (under 60 years) or Form 15H (senior citizens) to prevent TDS deduction on bank deposits. Taxpayers verify TDS credits via Form 26AS and Annual Information Statement (AIS)."
+}

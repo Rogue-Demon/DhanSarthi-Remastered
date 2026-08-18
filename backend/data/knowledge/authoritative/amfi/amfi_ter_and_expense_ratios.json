@@ -1,0 +1,17 @@
+{
+  "title": "AMFI & SEBI Regulatory Limits on Total Expense Ratio (TER)",
+  "topic": "amfi_ter_and_expense_ratios",
+  "category": "MUTUAL_FUNDS",
+  "authority": "AMFI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Association of Mutual Funds in India (AMFI)",
+  "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/expense-ratio.html",
+  "keywords": ["amfi", "total expense ratio", "ter", "management fees", "sebi limits", "aum slabs"],
+  "content": "Total Expense Ratio (TER) represents the annual percentage of fund assets used to cover administrative, management, advertising, and operational expenses of a mutual fund scheme. SEBI Regulation 52 prescribes statutory TER caps based on Assets Under Management (AUM) slabs: Equity schemes TER is capped at 2.25% for the first ₹500 crore AUM, stepping down incrementally as AUM scales higher. Index funds and ETFs have much lower statutory TER caps (0.75% maximum)."
+}

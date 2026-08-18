@@ -1,0 +1,17 @@
+{
+  "title": "SEBI Master Circular on Demat Accounts and Depository Participants",
+  "topic": "demat_and_trading_accounts",
+  "category": "STOCKS_AND_SECURITIES",
+  "authority": "SEBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Securities and Exchange Board of India (SEBI)",
+  "source_url": "https://www.sebi.gov.in/legal/master-circulars/feb-2023/master-circular-for-depositories_68087.html",
+  "keywords": ["sebi", "demat account", "nsdl", "cdsl", "depository participant", "bsda", "nomination"],
+  "content": "In India, shares and securities are held electronically in a Dematerialised (Demat) account managed by central depositories (NSDL or CDSL) registered with SEBI. Investors access demat services through registered Depository Participants (DPs). Basic Services Demat Accounts (BSDA) offer reduced or zero annual maintenance charges (AMC) for small investors with holding values under ₹2,00,000. SEBI mandates two-factor authentication (2FA) and mandatory nomination choice for all demat accounts."
+}

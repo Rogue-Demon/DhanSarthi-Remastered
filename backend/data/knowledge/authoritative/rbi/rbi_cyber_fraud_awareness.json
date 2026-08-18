@@ -1,0 +1,17 @@
+{
+  "title": "RBI Customer Protection Framework on Unauthorized Electronic Banking Transactions",
+  "topic": "cyber_fraud_awareness",
+  "category": "INVESTOR_PROTECTION",
+  "authority": "RBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Reserve Bank of India (RBI)",
+  "source_url": "https://www.rbi.org.in/scripts/BS_CircularIndexDisplay.aspx?Id=11040",
+  "keywords": ["rbi", "zero liability", "unauthorized transaction", "cyber fraud", "banking scam", "reporting timeline", "phishing"],
+  "content": "The RBI Customer Protection policy limits customer liability in unauthorized electronic banking transactions. Customers have ZERO liability if an unauthorized transaction occurs due to third-party breach or system deficiency where neither bank nor customer is at fault, provided the customer notifies the bank within 3 working days of receiving communication. If reporting occurs between 4 to 7 working days, customer liability is capped at ₹10,000 to ₹25,000 depending on account type. Banks must credit the disputed amount to the customer within 10 working days of notification."
+}

@@ -1,0 +1,17 @@
+{
+  "title": "AMFI Guidelines on Net Asset Value (NAV) Calculation and Cut-Off Timings",
+  "topic": "amfi_nav_calculation_principles",
+  "category": "MUTUAL_FUNDS",
+  "authority": "AMFI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Association of Mutual Funds in India (AMFI)",
+  "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/understanding-nav.html",
+  "keywords": ["amfi", "nav", "net asset value", "cut off timing", "realisation of funds", "amc"],
+  "content": "Net Asset Value (NAV) represents the per-unit market value of a mutual fund scheme, calculated as (Total Assets - Liabilities) / Total Outstanding Units. Under AMFI and SEBI regulations, NAV for subscription or redemption is determined by official cut-off timings (3:00 PM for equity/debt schemes, 1:30 PM for liquid funds). Applicable NAV depends on realization of funds in the scheme bank account before the cut-off deadline."
+}

@@ -1,0 +1,17 @@
+{
+  "title": "SEBI SCORES 2.0 Online Grievance Redressal System",
+  "topic": "scores_grievance_redressal",
+  "category": "INVESTOR_PROTECTION",
+  "authority": "SEBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Securities and Exchange Board of India (SEBI)",
+  "source_url": "https://scores.sebi.gov.in/",
+  "keywords": ["sebi", "scores", "scores 2.0", "grievance redressal", "investor complaint", "online dispute resolution"],
+  "content": "SEBI Complaints Redress System (SCORES 2.0) is a centralized online platform allowing investors to lodge grievances against listed companies, stock brokers, depository participants, mutual funds, or SEBI-registered intermediaries. Entities are mandated to resolve lodged complaints within 21 calendar days. Unresolved complaints are automatically reviewed by designated Monitoring Bodies or escalated to Online Dispute Resolution (ODR)."
+}

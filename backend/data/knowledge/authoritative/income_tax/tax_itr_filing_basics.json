@@ -1,0 +1,17 @@
+{
+  "title": "Basics of Income Tax Return (ITR) Filing and Forms Selection",
+  "topic": "tax_itr_filing_basics",
+  "category": "TAXATION",
+  "authority": "INCOME_TAX",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Income Tax Department, Government of India",
+  "source_url": "https://incometaxindia.gov.in/Pages/i-am/file-return.aspx",
+  "keywords": ["income tax", "itr 1 sahaj", "itr 2", "itr 3", "itr 4 sugam", "e-verification", "due date july 31"],
+  "content": "Individual taxpayers file ITR forms annually based on income sources: ITR-1 (Sahaj) applies to resident individuals with income up to ₹50 lakh from Salary, one House Property, and Interest income. ITR-2 applies to individuals having capital gains or multiple house properties. ITR-3 applies to individuals with business or professional income. ITR-4 (Sugam) applies to presumptive business income under Section 44AD/44ADA. Normal due date for non-audit individual ITR filing is July 31 following the financial year. Mandatory e-verification must be completed within 30 days of ITR submission."
+}

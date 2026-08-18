@@ -1,0 +1,17 @@
+{
+  "title": "SEBI Prohibition of Insider Trading (PIT) Regulations",
+  "topic": "insider_trading_prohibition",
+  "category": "STOCKS_AND_SECURITIES",
+  "authority": "SEBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Securities and Exchange Board of India (SEBI)",
+  "source_url": "https://www.sebi.gov.in/legal/regulations/jan-2015/sebi-prohibition-of-insider-trading-regulations-2015_28864.html",
+  "keywords": ["sebi", "insider trading", "upsid", "unpublished price sensitive information", "code of conduct"],
+  "content": "SEBI (Prohibition of Insider Trading) Regulations prohibition insiders, key managerial personnel, or connected persons from trading securities while in possession of Unpublished Price Sensitive Information (UPSI). Communicating, providing, or procuring access to UPSI is illegal except for legitimate business purposes. Listed companies must maintain structured digital databases (SDD) tracking UPSI sharing."
+}

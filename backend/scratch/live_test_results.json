@@ -1,0 +1,315 @@
+[
+  {
+    "label": "Test 1 \u2014 What is SIP?",
+    "query": "What is SIP?",
+    "response": "**Summary**\n\nA Systematic Investment Plan (SIP) is a fantastic way to invest in mutual funds. It allows you to invest a fixed amount of money at regular intervals, which helps you to invest wisely and avoid market timing risks. By investing a fixed amount regularly, you can take advantage of rupee cost averaging, which means you'll buy more units when prices are low and fewer units when prices are high.\n\n**Your Numbers**\n\nBased on your current financial situation, you have a total income of \u20b9100,000 and total expenses of \u20b940,000. This means you have a surplus of \u20b960,000 per month, which can be invested in a SIP.\n\n**Considerations**\n\nBefore investing in a SIP, consider the following:\n\n* You should have a clear investment goal and risk tolerance.\n* You should understand the fees associated with the SIP and the mutual fund scheme.\n* You should consider investing in a Direct Plan, which has lower Total Expense Ratio (TER) compared to Regular Plans.\n* You should also consider the Net Asset Value (NAV) of the mutual fund scheme, which is calculated based on the total assets and liabilities of the scheme.\n\n**Next Steps**\n\nIf you're interested in investing in a SIP, here are the next steps:\n\n1. **Choose a mutual fund scheme**: Select a scheme that aligns with your investment goals and risk tolerance.\n2. **Set up a SIP**: Invest a fixed amount of money at regular intervals, which can be daily, weekly, or monthly.\n3. **Monitor and adjust**: Regularly review your SIP investments and adjust your investment amount or scheme as needed.\n\nRemember, investing in a SIP is a long-term commitment. It's essential to be patient and consistent in your investments to achieve your financial goals.\n\n**Additional Information**\n\nFor more information on SIPs, you can refer to the knowledge sources provided:\n\n* AMFI Systematic Facilities: SIP, Systematic Transfer Plan (STP), and SWP\n* Understanding Systematic Investment Plans (SIP)\n* AMFI & SEBI Regulatory Limits on Total Expense Ratio (TER)\n\nPlease let me know if you have any further questions or if there's anything else I can help you with!",
+    "sources": [
+      {
+        "title": "AMFI Systematic Facilities: SIP, Systematic Transfer Plan (STP), and SWP",
+        "source": "Association of Mutual Funds in India (AMFI) (India)",
+        "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/systematic-investment-plan.html",
+        "document_id": "30",
+        "relevance_score": 0.88
+      },
+      {
+        "title": "Understanding Systematic Investment Plans (SIP)",
+        "source": "DhanSarthi Financial Education Series (India)",
+        "source_url": "https://dhansarthi.app/education/sip",
+        "document_id": "26",
+        "relevance_score": 0.8
+      },
+      {
+        "title": "AMFI Investor Guide: Direct Plans vs Regular Plans in Mutual Funds",
+        "source": "Association of Mutual Funds in India (AMFI) (India)",
+        "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/direct-plan.html",
+        "document_id": "28",
+        "relevance_score": 0.73
+      },
+      {
+        "title": "AMFI Guidelines on Net Asset Value (NAV) Calculation and Cut-Off Timings",
+        "source": "Association of Mutual Funds in India (AMFI) (India)",
+        "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/understanding-nav.html",
+        "document_id": "29",
+        "relevance_score": 0.63
+      },
+      {
+        "title": "AMFI & SEBI Regulatory Limits on Total Expense Ratio (TER)",
+        "source": "Association of Mutual Funds in India (AMFI) (India)",
+        "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/expense-ratio.html",
+        "document_id": "31",
+        "relevance_score": 0.63
+      }
+    ],
+    "metadata": {
+      "provider": "huggingface",
+      "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+      "response_time_ms": 28781,
+      "retrieval_count": 5,
+      "intent": "GENERAL_FINANCE",
+      "source_ids": [
+        "30",
+        "26",
+        "28",
+        "29",
+        "31"
+      ],
+      "citations": [
+        {
+          "document_id": "30",
+          "title": "AMFI Systematic Facilities: SIP, Systematic Transfer Plan (STP), and SWP",
+          "source": "Association of Mutual Funds in India (AMFI) (India)",
+          "authority": "AMFI",
+          "effective_date": "2026-01-01",
+          "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/systematic-investment-plan.html"
+        },
+        {
+          "document_id": "26",
+          "title": "Understanding Systematic Investment Plans (SIP)",
+          "source": "DhanSarthi Financial Education Series (India)",
+          "authority": "APPROVED_EDUCATIONAL",
+          "effective_date": "2026-01-01",
+          "source_url": "https://dhansarthi.app/education/sip"
+        },
+        {
+          "document_id": "28",
+          "title": "AMFI Investor Guide: Direct Plans vs Regular Plans in Mutual Funds",
+          "source": "Association of Mutual Funds in India (AMFI) (India)",
+          "authority": "AMFI",
+          "effective_date": "2026-01-01",
+          "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/direct-plan.html"
+        },
+        {
+          "document_id": "29",
+          "title": "AMFI Guidelines on Net Asset Value (NAV) Calculation and Cut-Off Timings",
+          "source": "Association of Mutual Funds in India (AMFI) (India)",
+          "authority": "AMFI",
+          "effective_date": "2026-01-01",
+          "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/understanding-nav.html"
+        },
+        {
+          "document_id": "31",
+          "title": "AMFI & SEBI Regulatory Limits on Total Expense Ratio (TER)",
+          "source": "Association of Mutual Funds in India (AMFI) (India)",
+          "authority": "AMFI",
+          "effective_date": "2026-01-01",
+          "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/expense-ratio.html"
+        }
+      ]
+    },
+    "status": "PASS"
+  },
+  {
+    "label": "Test 2 \u2014 What is a Mutual Fund?",
+    "query": "What is a mutual fund?",
+    "response": "**Summary**\n\nA mutual fund is a type of investment vehicle that pools money from multiple investors to purchase a diversified portfolio of stocks, bonds, or other securities. It's a great way to invest in a variety of assets with a single investment, which can help you spread risk and potentially earn higher returns.\n\n**Your Numbers**\n\nBased on your current financial situation, you have a total income of \u20b9100,000 and total expenses of \u20b940,000. This means you have a surplus of \u20b960,000 per month, which can be invested in a mutual fund.\n\n**Considerations**\n\nBefore investing in a mutual fund, consider the following:\n\n* You should have a clear investment goal and risk tolerance.\n* You should understand the fees associated with the mutual fund, including the Total Expense Ratio (TER).\n* You should consider investing in a Direct Plan, which has lower TER compared to Regular Plans.\n* You should also consider the Net Asset Value (NAV) of the mutual fund, which is calculated based on the total assets and liabilities of the scheme.\n\n**Next Steps**\n\nIf you're interested in investing in a mutual fund, here are the next steps:\n\n1. **Choose a mutual fund scheme**: Select a scheme that aligns with your investment goals and risk tolerance.\n2. **Understand the fees**: Familiarize yourself with the fees associated with the mutual fund, including the TER.\n3. **Invest wisely**: Consider investing in a Direct Plan and understand the NAV of the mutual fund scheme.\n\n**Additional Information**\n\nFor more information on mutual funds, you can refer to the knowledge sources provided:\n\n* Understanding Mutual Funds\n* AMFI Systematic Facilities: SIP, Systematic Transfer Plan (STP), and SWP\n* AMFI & SEBI Regulatory Limits on Total Expense Ratio (TER)\n\nPlease let me know if you have any further questions or if there's anything else I can help you with!",
+    "sources": [
+      {
+        "title": "AMFI Investor Guide: Direct Plans vs Regular Plans in Mutual Funds",
+        "source": "Association of Mutual Funds in India (AMFI) (India)",
+        "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/direct-plan.html",
+        "document_id": "28",
+        "relevance_score": 0.85
+      },
+      {
+        "title": "Understanding Mutual Funds",
+        "source": "DhanSarthi Financial Education Series (India)",
+        "source_url": "https://dhansarthi.app/education/mutual-funds",
+        "document_id": "21",
+        "relevance_score": 0.73
+      },
+      {
+        "title": "AMFI Systematic Facilities: SIP, Systematic Transfer Plan (STP), and SWP",
+        "source": "Association of Mutual Funds in India (AMFI) (India)",
+        "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/systematic-investment-plan.html",
+        "document_id": "30",
+        "relevance_score": 0.65
+      },
+      {
+        "title": "AMFI & SEBI Regulatory Limits on Total Expense Ratio (TER)",
+        "source": "Association of Mutual Funds in India (AMFI) (India)",
+        "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/expense-ratio.html",
+        "document_id": "31",
+        "relevance_score": 0.55
+      },
+      {
+        "title": "Understanding Financial Assets",
+        "source": "DhanSarthi Financial Education Series (India)",
+        "source_url": "https://dhansarthi.app/education/assets",
+        "document_id": "1",
+        "relevance_score": 0.48
+      }
+    ],
+    "metadata": {
+      "provider": "huggingface",
+      "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+      "response_time_ms": 19766,
+      "retrieval_count": 5,
+      "intent": "GENERAL_FINANCE",
+      "source_ids": [
+        "28",
+        "21",
+        "30",
+        "31",
+        "1"
+      ],
+      "citations": [
+        {
+          "document_id": "28",
+          "title": "AMFI Investor Guide: Direct Plans vs Regular Plans in Mutual Funds",
+          "source": "Association of Mutual Funds in India (AMFI) (India)",
+          "authority": "AMFI",
+          "effective_date": "2026-01-01",
+          "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/direct-plan.html"
+        },
+        {
+          "document_id": "21",
+          "title": "Understanding Mutual Funds",
+          "source": "DhanSarthi Financial Education Series (India)",
+          "authority": "APPROVED_EDUCATIONAL",
+          "effective_date": "2026-01-01",
+          "source_url": "https://dhansarthi.app/education/mutual-funds"
+        },
+        {
+          "document_id": "30",
+          "title": "AMFI Systematic Facilities: SIP, Systematic Transfer Plan (STP), and SWP",
+          "source": "Association of Mutual Funds in India (AMFI) (India)",
+          "authority": "AMFI",
+          "effective_date": "2026-01-01",
+          "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/systematic-investment-plan.html"
+        },
+        {
+          "document_id": "31",
+          "title": "AMFI & SEBI Regulatory Limits on Total Expense Ratio (TER)",
+          "source": "Association of Mutual Funds in India (AMFI) (India)",
+          "authority": "AMFI",
+          "effective_date": "2026-01-01",
+          "source_url": "https://www.amfiindia.com/investor-corner/knowledge-center/expense-ratio.html"
+        },
+        {
+          "document_id": "1",
+          "title": "Understanding Financial Assets",
+          "source": "DhanSarthi Financial Education Series (India)",
+          "authority": "APPROVED_EDUCATIONAL",
+          "effective_date": "2026-01-01",
+          "source_url": "https://dhansarthi.app/education/assets"
+        }
+      ]
+    },
+    "status": "PASS"
+  },
+  {
+    "label": "Test 3 \u2014 How much did I spend this month?",
+    "query": "How much did I spend this month?",
+    "response": "**Summary**\n\nYou've asked how much you spent this month. I'll provide you with a clear breakdown of your expenses.\n\n**Your Numbers**\n\nBased on the data I have, your total expenses for the month are \u20b940,000.\n\n**Considerations**\n\nIt's essential to keep track of your expenses to ensure you're staying within your budget. You can use this information to make informed decisions about your finances.\n\n**Next Steps**\n\nTo get a better understanding of your expenses, consider the following:\n\n1. **Review your budget**: Take a closer look at your expenses and see if there are any areas where you can cut back.\n2. **Create a budget plan**: Make a plan to allocate your funds effectively and stick to it.\n3. **Monitor your spending**: Regularly track your expenses to ensure you're staying within your budget.\n\n**Additional Information**\n\nFor more information on budgeting and expense tracking, you can refer to the knowledge sources provided:\n\n* Understanding Budgeting and Expense Tracking\n* AMFI Systematic Facilities: SIP, Systematic Transfer Plan (STP), and SWP\n* AMFI & SEBI Regulatory Limits on Total Expense Ratio (TER)\n\nPlease let me know if you have any further questions or if there's anything else I can help you with!",
+    "sources": [],
+    "metadata": {
+      "provider": "huggingface",
+      "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+      "response_time_ms": 15610,
+      "retrieval_count": 0,
+      "intent": "PERSONAL_FINANCE",
+      "source_ids": [],
+      "citations": []
+    },
+    "status": "PASS"
+  },
+  {
+    "label": "Test 4 \u2014 Is my savings rate healthy?",
+    "query": "Is my savings rate healthy?",
+    "response": "**Summary**\n\nBased on your current financial situation, I'll provide you with an assessment of your savings rate.\n\n**Your Numbers**\n\nAccording to the data I have, your total income is \u20b9100,000, and your total expenses are \u20b940,000. This means you have a surplus of \u20b960,000 per month, which is being saved. Your savings rate is 60.0% of your total income.\n\n**Considerations**\n\nA savings rate of 60.0% is considered healthy. It indicates that you're saving a significant portion of your income, which is a great habit to have. However, it's essential to consider other factors, such as your emergency fund, debt, and overall financial health.\n\n**Next Steps**\n\nTo further improve your financial health, consider the following:\n\n1. **Review your budget**: Ensure you're allocating your funds effectively and making the most of your savings.\n2. **Consider investing**: Think about investing your savings in a diversified portfolio to grow your wealth over time.\n3. **Monitor your progress**: Regularly track your savings rate and adjust your budget as needed to maintain a healthy savings rate.\n\n**Additional Information**\n\nFor more information on savings rates and investing, you can refer to the knowledge sources provided:\n\n* Understanding Savings Rates and Investing\n* AMFI Systematic Facilities: SIP, Systematic Transfer Plan (STP), and SWP\n* AMFI & SEBI Regulatory Limits on Total Expense Ratio (TER)\n\nPlease let me know if you have any further questions or if there's anything else I can help you with!",
+    "sources": [
+      {
+        "title": "Understanding Public Provident Fund (PPF)",
+        "source": "Government of India / Small Savings Schemes (India)",
+        "source_url": "https://dhansarthi.app/education/ppf",
+        "document_id": "24",
+        "relevance_score": 0.47
+      },
+      {
+        "title": "Income Tax Rules on Residential Status (Resident, RNOR, NRI)",
+        "source": "Income Tax Department, Government of India (India)",
+        "source_url": "https://incometaxindia.gov.in/Pages/international-taxation/residential-status.aspx",
+        "document_id": "40",
+        "relevance_score": 0.47
+      },
+      {
+        "title": "PFRDA Master Direction on Partial and Premature NPS Lump-Sum Withdrawals",
+        "source": "Pension Fund Regulatory and Development Authority (PFRDA) (India)",
+        "source_url": "https://www.pfrda.org.in/index1.cshtml?lsid=1682",
+        "document_id": "44",
+        "relevance_score": 0.47
+      },
+      {
+        "title": "RBI Charter of Customer Rights for Banking Consumers",
+        "source": "Reserve Bank of India (RBI) (India)",
+        "source_url": "https://www.rbi.org.in/scripts/BS_ViewMasCirculardetails.aspx?id=9872",
+        "document_id": "48",
+        "relevance_score": 0.47
+      },
+      {
+        "title": "SEBI Master Circular on Demat Accounts and Depository Participants",
+        "source": "Securities and Exchange Board of India (SEBI) (India)",
+        "source_url": "https://www.sebi.gov.in/legal/master-circulars/feb-2023/master-circular-for-depositories_68087.html",
+        "document_id": "56",
+        "relevance_score": 0.47
+      }
+    ],
+    "metadata": {
+      "provider": "huggingface",
+      "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+      "response_time_ms": 13922,
+      "retrieval_count": 5,
+      "intent": "MIXED",
+      "source_ids": [
+        "24",
+        "40",
+        "44",
+        "48",
+        "56"
+      ],
+      "citations": [
+        {
+          "document_id": "24",
+          "title": "Understanding Public Provident Fund (PPF)",
+          "source": "Government of India / Small Savings Schemes (India)",
+          "authority": "GOVERNMENT",
+          "effective_date": "2026-01-01",
+          "source_url": "https://dhansarthi.app/education/ppf"
+        },
+        {
+          "document_id": "40",
+          "title": "Income Tax Rules on Residential Status (Resident, RNOR, NRI)",
+          "source": "Income Tax Department, Government of India (India)",
+          "authority": "INCOME_TAX",
+          "effective_date": "2026-01-01",
+          "source_url": "https://incometaxindia.gov.in/Pages/international-taxation/residential-status.aspx"
+        },
+        {
+          "document_id": "44",
+          "title": "PFRDA Master Direction on Partial and Premature NPS Lump-Sum Withdrawals",
+          "source": "Pension Fund Regulatory and Development Authority (PFRDA) (India)",
+          "authority": "PFRDA",
+          "effective_date": "2026-01-01",
+          "source_url": "https://www.pfrda.org.in/index1.cshtml?lsid=1682"
+        },
+        {
+          "document_id": "48",
+          "title": "RBI Charter of Customer Rights for Banking Consumers",
+          "source": "Reserve Bank of India (RBI) (India)",
+          "authority": "RBI",
+          "effective_date": "2026-01-01",
+          "source_url": "https://www.rbi.org.in/scripts/BS_ViewMasCirculardetails.aspx?id=9872"
+        },
+        {
+          "document_id": "56",
+          "title": "SEBI Master Circular on Demat Accounts and Depository Participants",
+          "source": "Securities and Exchange Board of India (SEBI) (India)",
+          "authority": "SEBI",
+          "effective_date": "2026-01-01",
+          "source_url": "https://www.sebi.gov.in/legal/master-circulars/feb-2023/master-circular-for-depositories_68087.html"
+        }
+      ]
+    },
+    "status": "PASS"
+  }
+]

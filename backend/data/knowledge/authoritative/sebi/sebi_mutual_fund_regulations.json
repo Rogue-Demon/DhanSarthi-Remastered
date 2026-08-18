@@ -1,0 +1,17 @@
+{
+  "title": "SEBI Categorization and Rationalization of Mutual Fund Schemes",
+  "topic": "mutual_fund_regulations",
+  "category": "MUTUAL_FUNDS",
+  "authority": "SEBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Securities and Exchange Board of India (SEBI)",
+  "source_url": "https://www.sebi.gov.in/legal/circulars/oct-2017/categorization-and-rationalization-of-mutual-fund-schemes_36198.html",
+  "keywords": ["sebi", "mutual fund categorization", "large cap", "mid cap", "small cap", "equity funds", "debt funds"],
+  "content": "SEBI mandates strict categorization of mutual fund schemes into 5 broad groups: Equity, Debt, Hybrid, Solution-Oriented, and Other Schemes. Large Cap funds must invest at least 80% of total assets in top 100 companies by market capitalization. Mid Cap funds must invest at least 65% in 101st-250th companies, and Small Cap funds at least 65% in 251st company onwards. AMCs are permitted only one scheme per sub-category (except Index Funds and Sectoral/Thematic funds) to avoid investor confusion."
+}

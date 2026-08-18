@@ -1,0 +1,17 @@
+{
+  "title": "RBI Guidelines on Credit Information Companies and Free Credit Reports",
+  "topic": "credit_report_and_credit_score",
+  "category": "LOANS_AND_CREDIT",
+  "authority": "RBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Reserve Bank of India (RBI)",
+  "source_url": "https://www.rbi.org.in/scripts/NotificationUser.aspx?Id=10609",
+  "keywords": ["rbi", "credit score", "credit report", "cibil", "experian", "crif high mark", "free annual credit report"],
+  "content": "Reserve Bank of India (RBI) mandates that all Credit Information Companies (CICs) in India (such as CIBIL, Experian, Equifax, and CRIF High Mark) must provide one full credit report free of cost once every calendar year to individuals whose credit history they maintain. Credit scores range from 300 to 900, with scores above 750 considered favorable for loan approvals and preferential interest rates. Lenders must update credit records monthly and resolve credit report errors within 30 days of consumer dispute."
+}
