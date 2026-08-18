@@ -64,6 +64,7 @@ class KnowledgeIngestionService:
         review_date: Optional[date] = None,
         source_url: Optional[str] = None,
         description: Optional[str] = None,
+        extra_metadata: Optional[Dict[str, Any]] = None,
         dry_run: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -83,6 +84,7 @@ class KnowledgeIngestionService:
             review_date: Next review date.
             source_url: Verified URL citation.
             description: Summary description.
+            extra_metadata: Additional structured metadata (topic, keywords, document_type).
             dry_run: If True, executes extraction/chunking without database write.
 
         Returns:
@@ -97,7 +99,9 @@ class KnowledgeIngestionService:
             raise KnowledgeIngestionError("Document publishing source cannot be empty.")
 
         # 1. Extract raw text
-        if content_or_filepath.endswith((".txt", ".md", ".markdown", ".html", ".htm", ".json")):
+        if isinstance(content_or_filepath, list):
+            raw_text = "\n\n".join(str(x) for x in content_or_filepath)
+        elif isinstance(content_or_filepath, str) and content_or_filepath.endswith((".txt", ".md", ".markdown", ".html", ".htm", ".json")):
             raw_text = self._extractor.extract_from_file(content_or_filepath)
         else:
             raw_text = self._extractor.extract_from_text(content_or_filepath)
@@ -109,15 +113,28 @@ class KnowledgeIngestionService:
 
         # 3. Compute SHA-256 hash for duplicate detection
         doc_hash = hashlib.sha256(cleaned_text.encode("utf-8")).hexdigest()
-        existing = self._doc_repo.get_by_hash(doc_hash)
-        if existing:
+        existing_by_hash = self._doc_repo.get_by_hash(doc_hash)
+        if existing_by_hash:
             return {
                 "status": "duplicate_skipped",
-                "document_id": existing.id,
-                "title": existing.title,
+                "document_id": existing_by_hash.id,
+                "title": existing_by_hash.title,
                 "document_hash": doc_hash,
-                "chunk_count": len(existing.chunks),
+                "chunk_count": len(existing_by_hash.chunks),
             }
+
+        # Check for title + authority update (different version or content hash)
+        is_update = False
+        from sqlalchemy import select
+        stmt = (
+            select(KnowledgeDocument)
+            .where(KnowledgeDocument.title == title.strip())
+            .where(KnowledgeDocument.authority == authority)
+            .where(KnowledgeDocument.status == KnowledgeDocumentStatus.ACTIVE)
+        )
+        old_version_doc = self._db.execute(stmt).scalar_one_or_none()
+        if old_version_doc:
+            is_update = True
 
         # 4. Chunk document
         chunks = self._chunker.chunk_text(cleaned_text)
@@ -147,6 +164,9 @@ class KnowledgeIngestionService:
 
         # 6. Database transaction write
         try:
+            if is_update and old_version_doc:
+                old_version_doc.status = KnowledgeDocumentStatus.ARCHIVED
+
             doc = KnowledgeDocument(
                 title=title.strip(),
                 description=description,
@@ -167,13 +187,16 @@ class KnowledgeIngestionService:
             self._db.flush()
 
             for chunk_data, vector in zip(chunks, embeddings):
+                meta = dict(chunk_data.metadata or {})
+                if extra_metadata:
+                    meta.update(extra_metadata)
                 db_chunk = KnowledgeChunk(
                     document_id=doc.id,
                     chunk_index=chunk_data.chunk_index,
                     content=chunk_data.content,
                     token_count=chunk_data.token_count,
                     embedding=vector,
-                    chunk_metadata=chunk_data.metadata,
+                    chunk_metadata=meta,
                 )
                 self._db.add(db_chunk)
 
@@ -181,7 +204,7 @@ class KnowledgeIngestionService:
             self._db.refresh(doc)
 
             return {
-                "status": "success",
+                "status": "updated" if is_update else "success",
                 "document_id": doc.id,
                 "title": doc.title,
                 "document_hash": doc_hash,

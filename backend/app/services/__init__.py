@@ -38,6 +38,7 @@ from app.services.conversation_service import ConversationService
 from app.services.document_service import DocumentService
 from app.services.document_import_service import FinancialDocumentImportService
 from app.services.financial_intelligence_service import FinancialIntelligenceService
+from app.services.report_service import ReportService
 
 __all__ = [
     "AuthService",
@@ -58,5 +59,7 @@ __all__ = [
     "DocumentService",
     "FinancialDocumentImportService",
     "FinancialIntelligenceService",
+    "ReportService",
 ]
+
 

@@ -1,0 +1,6 @@
+loan account number: LA12345678
+lender: HDFC Bank
+principal amount: 1000000
+outstanding balance: 740000
+interest rate: 8.5%
+emi: 15500

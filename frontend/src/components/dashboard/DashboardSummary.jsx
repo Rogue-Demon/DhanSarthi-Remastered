@@ -1,8 +1,8 @@
-import React from 'react';
-import { useProfile } from '@/hooks';
-import { PROFILES } from '@/constants';
-import * as LucideIcons from 'lucide-react';
-import { cn } from '@/utils';
+import React from 'react'
+import { useProfile } from '@/hooks'
+import { PROFILES } from '@/constants'
+import * as LucideIcons from 'lucide-react'
+import { cn } from '@/utils'
 
 /**
  * DashboardSummary Component
@@ -10,52 +10,138 @@ import { cn } from '@/utils';
  * Renders a row of metric placeholder cards (summary strip) representing key
  * financial indicators customized for the active profile.
  */
-export function DashboardSummary({ className, ...props }) {
-  const { profile, profileConfig } = useProfile();
+export function DashboardSummary({ className, dashboardData, ...props }) {
+  const { profile, profileConfig } = useProfile()
 
-  if (!profileConfig) return null;
+  if (!profileConfig) return null
 
-  // Resolved mock data structures depending on profile context
+  // Resolved real data structures depending on profile context
   const getSummaryMetrics = () => {
+    const summary = dashboardData?.summary || {
+      total_income: 0,
+      total_expenses: 0,
+      savings: 0,
+      net_worth: 0,
+      total_assets: 0,
+      total_liabilities: 0,
+      total_invested: 0,
+      total_debt: 0,
+    }
+    const cashFlow = dashboardData?.cash_flow || { net_cash_flow: 0 }
+    const goals = dashboardData?.goals || { active_count: 0 }
+
+    const formatCurrency = (val) => {
+      return '₹' + parseFloat(val || 0).toLocaleString('en-IN')
+    }
+
     switch (profile) {
       case PROFILES.STUDENT:
         return [
-          { label: 'Monthly Allowance', value: '₹5,000', icon: 'Wallet', trend: '+10% stipend', color: '#8B5CF6' },
-          { label: 'Savings Balance', value: '₹12,450', icon: 'PiggyBank', trend: '82% of goal reached', color: '#EC4899' },
-          { label: 'Weekly Expenditures', value: '₹840', icon: 'TrendingDown', trend: '₹160 remaining', color: '#EF4444' },
-          { label: 'Active Goal Streaks', value: '14 Days', icon: 'Flame', trend: 'Top saver award', color: '#F59E0B' },
-        ];
+          {
+            label: 'Monthly Allowance',
+            value: formatCurrency(summary.total_income),
+            icon: 'Wallet',
+            trend: 'Active income inflow',
+            color: '#8B5CF6',
+          },
+          {
+            label: 'Savings Balance',
+            value: formatCurrency(summary.savings),
+            icon: 'PiggyBank',
+            trend: 'Accumulated savings',
+            color: '#EC4899',
+          },
+          {
+            label: 'Monthly Expenditures',
+            value: formatCurrency(summary.total_expenses),
+            icon: 'TrendingDown',
+            trend: 'Outflow spending',
+            color: '#EF4444',
+          },
+          {
+            label: 'Active Goals',
+            value: `${goals.active_count} Targets`,
+            icon: 'Target',
+            trend: 'Goals in progress',
+            color: '#F59E0B',
+          },
+        ]
       case PROFILES.PROFESSIONAL:
         return [
-          { label: 'Net Monthly Salary', value: '₹95,000', icon: 'Briefcase', trend: 'Credited 1st Aug', color: '#7C3AED' },
-          { label: 'Accumulated Assets', value: '₹8,45,000', icon: 'Gem', trend: 'Mutual funds & FD', color: '#10B981' },
-          { label: 'Active Liabilities', value: '₹1,20,000', icon: 'Handshake', trend: 'Car loan amortization', color: '#EF4444' },
-          { label: 'Current Net Worth', value: '₹7,25,000', icon: 'Coins', trend: '+4.2% this month', color: '#F59E0B' },
-        ];
+          {
+            label: 'Net Monthly Income',
+            value: formatCurrency(summary.total_income),
+            icon: 'Briefcase',
+            trend: 'Income inflow logs',
+            color: '#7C3AED',
+          },
+          {
+            label: 'Accumulated Assets',
+            value: formatCurrency(summary.total_assets),
+            icon: 'Gem',
+            trend: 'Total stored assets',
+            color: '#10B981',
+          },
+          {
+            label: 'Active Liabilities',
+            value: formatCurrency(summary.total_liabilities),
+            icon: 'Handshake',
+            trend: 'Total debt balance',
+            color: '#EF4444',
+          },
+          {
+            label: 'Current Net Worth',
+            value: formatCurrency(summary.net_worth),
+            icon: 'Coins',
+            trend: 'Assets minus liabilities',
+            color: '#F59E0B',
+          },
+        ]
       case PROFILES.BUSINESS:
         return [
-          { label: 'Gross Monthly Revenue', value: '₹4,85,000', icon: 'IndianRupee', trend: '+15.2% MoM profit', color: '#4F46E5' },
-          { label: 'Estimated Profit Margin', value: '₹1,45,000', icon: 'Sparkles', trend: '30% operating margin', color: '#10B981' },
-          { label: 'Operational Cost (OPEX)', value: '₹3,40,000', icon: 'TrendingDown', trend: 'Includes payroll & stock', color: '#EF4444' },
-          { label: 'Liquidity Cash Flow', value: '₹2,10,000', icon: 'RefreshCw', trend: 'Excellent cash ratio', color: '#0EA5E9' },
-        ];
+          {
+            label: 'Gross Monthly Revenue',
+            value: formatCurrency(summary.total_income),
+            icon: 'IndianRupee',
+            trend: 'Total invoice cash inflows',
+            color: '#4F46E5',
+          },
+          {
+            label: 'Estimated Profit Margin',
+            value: formatCurrency(summary.savings),
+            icon: 'Sparkles',
+            trend: 'Operating margin surplus',
+            color: '#10B981',
+          },
+          {
+            label: 'Operational Cost (OPEX)',
+            value: formatCurrency(summary.total_expenses),
+            icon: 'TrendingDown',
+            trend: 'Overheads & business payments',
+            color: '#EF4444',
+          },
+          {
+            label: 'Liquidity Cash Flow',
+            value: formatCurrency(cashFlow.net_cash_flow),
+            icon: 'RefreshCw',
+            trend: 'Net cash flow yield',
+            color: '#0EA5E9',
+          },
+        ]
       default:
-        return [];
+        return []
     }
-  };
+  }
 
-  const metrics = getSummaryMetrics();
+  const metrics = getSummaryMetrics()
 
   return (
     <div
-      className={cn(
-        'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full',
-        className
-      )}
+      className={cn('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full', className)}
       {...props}
     >
       {metrics.map((metric, idx) => {
-        const IconComponent = LucideIcons[metric.icon] || LucideIcons.Layers;
+        const IconComponent = LucideIcons[metric.icon] || LucideIcons.Layers
 
         return (
           <div
@@ -75,9 +161,7 @@ export function DashboardSummary({ className, ...props }) {
               <span className="text-2xl font-black text-text-primary tracking-tight leading-none">
                 {metric.value}
               </span>
-              <span className="text-[10px] font-bold text-text-secondary">
-                {metric.trend}
-              </span>
+              <span className="text-[10px] font-bold text-text-secondary">{metric.trend}</span>
             </div>
 
             {/* Icon Container with clay-like depth */}
@@ -91,10 +175,10 @@ export function DashboardSummary({ className, ...props }) {
               <IconComponent className="h-5 w-5 stroke-[2px]" />
             </div>
           </div>
-        );
+        )
       })}
     </div>
-  );
+  )
 }
 
-export default DashboardSummary;
+export default DashboardSummary

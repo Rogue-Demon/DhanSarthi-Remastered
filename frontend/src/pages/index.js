@@ -1,6 +1,7 @@
 export { default as Home } from './Home/Home'
 export { default as Dashboard } from './Dashboard/Dashboard'
 export { default as Profile } from './Profile/Profile'
+export { default as Documents } from './Documents/Documents'
 export { default as FinanceLayout } from './Finance/FinanceLayout'
 export { default as FinanceOverview } from './Finance/Overview'
 export { default as FinanceIncome } from './Finance/Income'

@@ -82,11 +82,20 @@ class SimpleSafetyValidator(AISafetyValidator):
                     "Response attempts to execute or claim autonomous financial transactions."
                 )
 
-        # Rule 4: No unsafe guarantees on returns or approvals
-        if "guarantee" in lower_resp and any(
-            word in lower_resp
-            for word in ["return", "growth", "interest", "profit", "approval", "approve"]
-        ):
+        # Rule 4: No unsafe guarantees on returns or approvals made by the advisor
+        guarantee_patterns = [
+            re.compile(r"\b(i|we)\s+(guarantee|promise|assure)\b.*\b(return|profit|growth|approval|interest)\b", re.IGNORECASE),
+            re.compile(r"\b(definitely|100%|guaranteed to)\s+(earn|get|make|gain|be approved)\b", re.IGNORECASE),
+            re.compile(r"\b100%\s+risk-free\s+(investment|stock|return|profit)\b", re.IGNORECASE),
+        ]
+        for pattern in guarantee_patterns:
+            if pattern.search(response):
+                raise AISafetyError(
+                    "Response makes unsafe guarantees about investment returns or loan approvals."
+                )
+
+        # Rule 5: No imperative command mandates for trading
+        if re.search(r"\b(sell your|buy the|sell all your|dump your)\s+(stock|shares|portfolio|equity)\b", lower_resp):
             raise AISafetyError(
-                "Response makes unsafe guarantees about investment returns or loan approvals."
+                "Response contains impermissible direct trading commands. Advisory options must be framed as suggestions."
             )

@@ -1,0 +1,6 @@
+employer: ABC Technologies Pvt. Ltd.
+gross salary: 50000
+total deductions: 5000
+net salary: 45000
+salary period: August 2026
+pay date: 31 August 2026

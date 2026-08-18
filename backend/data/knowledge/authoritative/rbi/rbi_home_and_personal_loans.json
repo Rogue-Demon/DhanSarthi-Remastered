@@ -1,0 +1,17 @@
+{
+  "title": "RBI Regulatory Master Direction on Retail Loans and EMIs",
+  "topic": "retail_loans_and_emi",
+  "category": "LOANS_AND_CREDIT",
+  "authority": "RBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Reserve Bank of India (RBI)",
+  "source_url": "https://www.rbi.org.in/scripts/NotificationUser.aspx?Id=12100",
+  "keywords": ["rbi", "home loan", "personal loan", "emi", "floating rate", "prepayment penalty", "key fact statement"],
+  "content": "Reserve Bank of India (RBI) regulations stipulate that regulated lenders must provide borrowers with a Key Fact Statement (KFS) containing the Annual Percentage Rate (APR), EMI breakdown, total cost of loan, and schedule of charges. RBI rules prohibit banks from levying prepayment penalties or foreclosure charges on floating-rate individual retail loans (such as home loans). Lenders must link floating rate personal and housing loans to an external benchmark, such as the RBI Repo Rate."
+}

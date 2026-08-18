@@ -68,7 +68,7 @@ def create_investment(
 
     purchase_date = data.purchase_date if data.purchase_date else date_cls.today()
 
-    meta = {}
+    meta = data.investment_metadata or {}
     if data.ticker_symbol:
         meta["ticker_symbol"] = data.ticker_symbol
     if data.institution:
@@ -114,8 +114,15 @@ def update_investment(
     if "units" in update_fields:
         update_fields["quantity"] = update_fields.pop("units")
 
-    # Map ticker_symbol, notes, and institution into investment_metadata
-    meta = {}
+    # Fetch existing metadata to merge and preserve custom keys!
+    existing_investment = service.get_investment(investment_id, user_id)
+    existing_meta = existing_investment.investment_metadata or {}
+
+    # Get updated metadata sent from frontend, if any
+    new_meta = update_fields.pop("investment_metadata", None) or {}
+
+    # Merge: existing_meta <- new_meta
+    meta = {**existing_meta, **new_meta}
     if "ticker_symbol" in update_fields:
         meta["ticker_symbol"] = update_fields.pop("ticker_symbol")
     if "institution" in update_fields:

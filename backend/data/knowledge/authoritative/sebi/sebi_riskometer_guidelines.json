@@ -1,0 +1,17 @@
+{
+  "title": "SEBI Riskometer Evaluation and Product Labeling Rules",
+  "topic": "riskometer_guidelines",
+  "category": "MUTUAL_FUNDS",
+  "authority": "SEBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Securities and Exchange Board of India (SEBI)",
+  "source_url": "https://www.sebi.gov.in/legal/circulars/oct-2020/product-labeling-in-mutual-fund-schemes-riskometer_47796.html",
+  "keywords": ["sebi", "riskometer", "risk levels", "very high risk", "moderate risk", "low risk", "product labeling"],
+  "content": "SEBI requires all mutual fund schemes to display a pictorial Riskometer depicting 6 risk levels: Low, Low to Moderate, Moderate, Moderately High, High, and Very High. The Riskometer level is evaluated monthly based on underlying portfolio holding risk parameters (liquidity risk, credit risk, volatility, interest rate sensitivity). AMCs must disclose monthly Riskometer evaluations on their website and send Riskometer change notifications to unit holders."
+}

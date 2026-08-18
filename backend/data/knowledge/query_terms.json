@@ -1,0 +1,198 @@
+{
+  "SIP": {
+    "canonical": "Systematic Investment Plan",
+    "synonyms": ["sip", "systematic investment plan", "sip kya hai", "sip plan", "monthly investment"],
+    "expanded_terms": ["SIP", "Systematic Investment Plan", "mutual fund", "periodic investment", "recurring investment", "rupee cost averaging", "compounding"],
+    "authority": "AMFI",
+    "category": "MUTUAL_FUNDS"
+  },
+  "MF": {
+    "canonical": "Mutual Funds",
+    "synonyms": ["mf", "mutual fund", "mutual funds", "mf kya hota hai", "mutual fund scheme"],
+    "expanded_terms": ["Mutual Funds", "MF", "NAV", "AMC", "equity fund", "debt fund", "hybrid fund", "Asset Management Company"],
+    "authority": "SEBI",
+    "category": "MUTUAL_FUNDS"
+  },
+  "NAV": {
+    "canonical": "Net Asset Value",
+    "synonyms": ["nav", "net asset value", "nav kya hota hai", "unit price"],
+    "expanded_terms": ["NAV", "Net Asset Value", "mutual fund valuation", "cut-off time", "portfolio valuation"],
+    "authority": "AMFI",
+    "category": "MUTUAL_FUNDS"
+  },
+  "TER": {
+    "canonical": "Total Expense Ratio",
+    "synonyms": ["ter", "expense ratio", "total expense ratio", "fund management fee"],
+    "expanded_terms": ["TER", "Total Expense Ratio", "expense cap", "direct plan", "regular plan", "AMC fee"],
+    "authority": "AMFI",
+    "category": "MUTUAL_FUNDS"
+  },
+  "PPF": {
+    "canonical": "Public Provident Fund",
+    "synonyms": ["ppf", "public provident fund", "ppf rules", "ppf rate", "ppf account"],
+    "expanded_terms": ["PPF", "Public Provident Fund", "small savings scheme", "15 year lock in", "tax free interest", "Section 80C"],
+    "authority": "GOVERNMENT_OF_INDIA",
+    "category": "RETIREMENT"
+  },
+  "NPS": {
+    "canonical": "National Pension System",
+    "synonyms": ["nps", "national pension system", "national pension scheme", "nps rules", "pension plan"],
+    "expanded_terms": ["NPS", "National Pension System", "PFRDA", "Tier I", "Tier II", "annuity", "Section 80CCD", "pension"],
+    "authority": "PFRDA",
+    "category": "RETIREMENT"
+  },
+  "FD": {
+    "canonical": "Fixed Deposit",
+    "synonyms": ["fd", "fixed deposit", "bank fd", "term deposit", "fd interest"],
+    "expanded_terms": ["FD", "Fixed Deposit", "term deposit", "interest rate", "DICGC insurance", "TDS on interest"],
+    "authority": "RBI",
+    "category": "FIXED_INCOME"
+  },
+  "RD": {
+    "canonical": "Recurring Deposit",
+    "synonyms": ["rd", "recurring deposit", "monthly deposit"],
+    "expanded_terms": ["RD", "Recurring Deposit", "monthly savings", "term deposit", "interest rate"],
+    "authority": "RBI",
+    "category": "FIXED_INCOME"
+  },
+  "SGB": {
+    "canonical": "Sovereign Gold Bond",
+    "synonyms": ["sgb", "sovereign gold bond", "gold bond", "sgb scheme", "sgb interest"],
+    "expanded_terms": ["SGB", "Sovereign Gold Bond", "RBI gold bond", "2.5 percent interest", "8 year tenor", "tax free capital gains"],
+    "authority": "RBI",
+    "category": "FIXED_INCOME"
+  },
+  "EMI": {
+    "canonical": "Equated Monthly Installment",
+    "synonyms": ["emi", "equated monthly installment", "loan emi", "installment"],
+    "expanded_terms": ["EMI", "Equated Monthly Installment", "loan repayment", "principal", "interest rate", "loan tenor"],
+    "authority": "RBI",
+    "category": "LOANS_AND_CREDIT"
+  },
+  "DTI": {
+    "canonical": "Debt-to-Income Ratio",
+    "synonyms": ["dti", "debt to income", "debt to income ratio", "dti ratio"],
+    "expanded_terms": ["DTI", "Debt to Income Ratio", "borrowing capacity", "loan eligibility", "fixed obligation to income ratio"],
+    "authority": "RBI",
+    "category": "LOANS_AND_CREDIT"
+  },
+  "TDS": {
+    "canonical": "Tax Deducted at Source",
+    "synonyms": ["tds", "tax deducted at source", "tds on salary", "tds rate", "form 16"],
+    "expanded_terms": ["TDS", "Tax Deducted at Source", "tax withholding", "Section 192", "Section 194A", "Form 26AS"],
+    "authority": "INCOME_TAX",
+    "category": "TAXATION"
+  },
+  "ITR": {
+    "canonical": "Income Tax Return",
+    "synonyms": ["itr", "income tax return", "itr filing", "itr 1", "itr 2", "itr form"],
+    "expanded_terms": ["ITR", "Income Tax Return", "tax assessment", "ITR-1 Sahaj", "ITR-2", "due date", "e-filing"],
+    "authority": "INCOME_TAX",
+    "category": "TAXATION"
+  },
+  "STCG": {
+    "canonical": "Short Term Capital Gains",
+    "synonyms": ["stcg", "short term capital gains", "stcg tax", "short term capital gain"],
+    "expanded_terms": ["STCG", "Short Term Capital Gains", "20 percent tax", "equity holding under 12 months", "capital gain"],
+    "authority": "INCOME_TAX",
+    "category": "TAXATION"
+  },
+  "LTCG": {
+    "canonical": "Long Term Capital Gains",
+    "synonyms": ["ltcg", "long term capital gains", "ltcg tax", "long term capital gain"],
+    "expanded_terms": ["LTCG", "Long Term Capital Gains", "12.5 percent tax", "exemption limit 1.25 lakh", "capital gain"],
+    "authority": "INCOME_TAX",
+    "category": "TAXATION"
+  },
+  "KYC": {
+    "canonical": "Know Your Customer",
+    "synonyms": ["kyc", "know your customer", "v-cip", "c-kyc", "video kyc", "kyc rules"],
+    "expanded_terms": ["KYC", "Know Your Customer", "RBI Master Direction", "identity verification", "address proof", "V-CIP"],
+    "authority": "RBI",
+    "category": "BANKING"
+  },
+  "PAN": {
+    "canonical": "Permanent Account Number",
+    "synonyms": ["pan", "pan card", "permanent account number"],
+    "expanded_terms": ["PAN", "Permanent Account Number", "Income Tax Department", "tax identifier", "financial transactions"],
+    "authority": "INCOME_TAX",
+    "category": "TAXATION"
+  },
+  "IPO": {
+    "canonical": "Initial Public Offering",
+    "synonyms": ["ipo", "initial public offering", "ipo application", "mainboard ipo"],
+    "expanded_terms": ["IPO", "Initial Public Offering", "SEBI ICDR", "red herring prospectus", "listing", "retail allotment"],
+    "authority": "SEBI",
+    "category": "STOCKS_AND_SECURITIES"
+  },
+  "IPO_ASBA": {
+    "canonical": "Application Supported by Blocked Amount",
+    "synonyms": ["asba", "ipo asba", "blocked amount", "upi ipo"],
+    "expanded_terms": ["ASBA", "Application Supported by Blocked Amount", "bank account lien", "UPI mandate", "SEBI IPO"],
+    "authority": "SEBI",
+    "category": "STOCKS_AND_SECURITIES"
+  },
+  "DEMAT": {
+    "canonical": "Dematerialized Account",
+    "synonyms": ["demat", "demat account", "depository participant", "nsdl", "cdsl"],
+    "expanded_terms": ["Demat", "Dematerialized Account", "NSDL", "CDSL", "Depository Participant", "BSDA"],
+    "authority": "SEBI",
+    "category": "STOCKS_AND_SECURITIES"
+  },
+  "BSDA": {
+    "canonical": "Basic Services Demat Account",
+    "synonyms": ["bsda", "basic services demat account", "no amc demat"],
+    "expanded_terms": ["BSDA", "Basic Services Demat Account", "SEBI Demat", "zero maintenance charge", "small investor"],
+    "authority": "SEBI",
+    "category": "STOCKS_AND_SECURITIES"
+  },
+  "SCORES": {
+    "canonical": "SEBI Complaints Redress System",
+    "synonyms": ["scores", "scores 2.0", "sebi complaint", "grievance portal"],
+    "expanded_terms": ["SCORES", "SEBI Complaints Redress System", "online grievance", "investor complaint", "SEBI portal"],
+    "authority": "SEBI",
+    "category": "INVESTOR_PROTECTION"
+  },
+  "RISKOMETER": {
+    "canonical": "SEBI Product Labeling Riskometer",
+    "synonyms": ["riskometer", "riskometer evaluation", "risk levels", "mutual fund riskometer"],
+    "expanded_terms": ["Riskometer", "SEBI Riskometer", "Low Risk", "Moderate Risk", "High Risk", "Very High Risk", "product labeling"],
+    "authority": "SEBI",
+    "category": "MUTUAL_FUNDS"
+  },
+  "NPS_TIER_I": {
+    "canonical": "NPS Tier I Account",
+    "synonyms": ["nps tier 1", "nps tier i", "tier 1 nps"],
+    "expanded_terms": ["NPS Tier I", "pension account", "60 year lock in", "tax exemption 80CCD", "PFRDA"],
+    "authority": "PFRDA",
+    "category": "RETIREMENT"
+  },
+  "NPS_TIER_II": {
+    "canonical": "NPS Tier II Account",
+    "synonyms": ["nps tier 2", "nps tier ii", "tier 2 nps"],
+    "expanded_terms": ["NPS Tier II", "voluntary investment account", "no lock in", "anytime withdrawal", "PFRDA"],
+    "authority": "PFRDA",
+    "category": "RETIREMENT"
+  },
+  "CREDIT_SCORE": {
+    "canonical": "Credit Score & Report",
+    "synonyms": ["credit score", "cibil score", "credit report", "free credit score"],
+    "expanded_terms": ["Credit Score", "CIBIL", "Experian", "Equifax", "RBI Credit Regulations", "free credit report"],
+    "authority": "RBI",
+    "category": "LOANS_AND_CREDIT"
+  },
+  "DICGC": {
+    "canonical": "Deposit Insurance and Credit Guarantee Corporation",
+    "synonyms": ["dicgc", "deposit insurance", "bank insurance", "5 lakh insurance"],
+    "expanded_terms": ["DICGC", "Deposit Insurance", "RBI DICGC", "5 Lakh cover", "bank failure protection", "savings deposit insurance"],
+    "authority": "RBI",
+    "category": "BANKING"
+  },
+  "REPO_RATE": {
+    "canonical": "RBI Repo Rate",
+    "synonyms": ["repo rate", "rbi rate", "policy rate", "monetary policy"],
+    "expanded_terms": ["Repo Rate", "Monetary Policy Committee", "RBI Policy Rate", "lending rate", "inflation control"],
+    "authority": "RBI",
+    "category": "BANKING"
+  }
+}

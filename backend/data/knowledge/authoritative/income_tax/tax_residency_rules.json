@@ -1,0 +1,17 @@
+{
+  "title": "Income Tax Rules on Residential Status (Resident, RNOR, NRI)",
+  "topic": "tax_residency_rules",
+  "category": "TAXATION",
+  "authority": "INCOME_TAX",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Income Tax Department, Government of India",
+  "source_url": "https://incometaxindia.gov.in/Pages/international-taxation/residential-status.aspx",
+  "keywords": ["income tax", "residential status", "resident", "nri", "rnor", "182 days rule", "global income"],
+  "content": "An individual is a Resident in India during a financial year if present in India for 182 days or more during that financial year, OR present for 60 days or more in that year AND 365 days or more in the preceding 4 financial years. Resident and Ordinarily Resident (ROR) individuals are taxed on worldwide global income. Non-Resident Indians (NRIs) and Resident but Not Ordinarily Resident (RNOR) individuals are taxed only on income accrued, received, or deemed to arise in India."
+}

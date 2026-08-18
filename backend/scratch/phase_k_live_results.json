@@ -1,0 +1,68 @@
+[
+  {
+    "label": "Query 1",
+    "query": "How am I doing financially?",
+    "intent": "PERSONAL_FINANCE",
+    "sub_intent": "PERSONAL_HEALTH",
+    "data_completeness": "PARTIAL",
+    "signals_count": 0,
+    "citations_count": 0,
+    "response_snippet": "## Summary / What I see (Facts from Financial Engine)\nBased on the provided financial data, here are the key facts:\n\n* You have a total income of \u20b9100,000.00.\n* Your total expenses are \u20b940,000.00.\n* You have a positive net cash flow of \u20b960,000.00.\n* Your savings rate is 60.0% of your income.\n* You h",
+    "status": "PASS"
+  },
+  {
+    "label": "Query 2",
+    "query": "Am I saving enough?",
+    "intent": "PERSONAL_FINANCE",
+    "sub_intent": "FINANCIAL_PLANNING",
+    "data_completeness": "PARTIAL",
+    "signals_count": 0,
+    "citations_count": 0,
+    "response_snippet": "## Summary / What I see (Facts from Financial Engine)\nBased on the provided financial data, here are the key facts:\n\n* You have a total income of \u20b9100,000.00.\n* Your total expenses are \u20b940,000.00.\n* You have a positive net cash flow of \u20b960,000.00.\n* Your savings rate is 60.0% of your income.\n* You h",
+    "status": "PASS"
+  },
+  {
+    "label": "Query 3",
+    "query": "Where am I overspending?",
+    "intent": "PERSONAL_FINANCE",
+    "sub_intent": "SPENDING_ANALYSIS",
+    "data_completeness": "PARTIAL",
+    "signals_count": 0,
+    "citations_count": 0,
+    "response_snippet": "## Summary / What I see (Facts from Financial Engine)\n\nBased on the provided financial data, here are the key facts:\n\n* You have a total income of \u20b9100,000.00.\n* Your total expenses are \u20b940,000.00.\n* You have a positive net cash flow of \u20b960,000.00.\n* Your savings rate is 60.0% of your income.\n* You ",
+    "status": "PASS"
+  },
+  {
+    "label": "Query 4",
+    "query": "Should I focus on debt or investing?",
+    "intent": "MIXED",
+    "sub_intent": "DEBT_ANALYSIS",
+    "data_completeness": "PARTIAL",
+    "signals_count": 0,
+    "citations_count": 5,
+    "response_snippet": "## Summary / What I see (Facts from Financial Engine)\n\nBased on the provided financial data, here are the key facts:\n\n* You have a total income of \u20b9100,000.00.\n* Your total expenses are \u20b940,000.00.\n* You have a positive net cash flow of \u20b960,000.00.\n* Your savings rate is 60.0% of your income.\n* You ",
+    "status": "PASS"
+  },
+  {
+    "label": "Query 5",
+    "query": "Can I afford my goal?",
+    "intent": "PERSONAL_FINANCE",
+    "sub_intent": "GOAL_ANALYSIS",
+    "data_completeness": "PARTIAL",
+    "signals_count": 0,
+    "citations_count": 0,
+    "response_snippet": "## Summary / What I see (Facts from Financial Engine)\n\nBased on the provided financial data, here are the key facts:\n\n* You have a total income of \u20b9100,000.00.\n* Your total expenses are \u20b940,000.00.\n* You have a positive net cash flow of \u20b960,000.00.\n* Your savings rate is 60.0% of your income.\n* You ",
+    "status": "PASS"
+  },
+  {
+    "label": "Query 6",
+    "query": "Is my savings rate healthy?",
+    "intent": "MIXED",
+    "sub_intent": "PERSONAL_HEALTH",
+    "data_completeness": "PARTIAL",
+    "signals_count": 0,
+    "citations_count": 5,
+    "response_snippet": "## Summary / What I see (Facts from Financial Engine)\n\nBased on the provided financial data, here are the key facts:\n\n* You have a total income of \u20b9100,000.00.\n* Your total expenses are \u20b940,000.00.\n* You have a positive net cash flow of \u20b960,000.00.\n* Your savings rate is 60.0% of your income.\n* You ",
+    "status": "PASS"
+  }
+]

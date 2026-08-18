@@ -1,0 +1,17 @@
+{
+  "title": "RBI Repo Rate and Monetary Policy Framework",
+  "topic": "repo_rate_and_monetary_policy",
+  "category": "FIXED_INCOME",
+  "authority": "RBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Reserve Bank of India (RBI)",
+  "source_url": "https://www.rbi.org.in/scripts/FS_Overview.aspx?fn=2752",
+  "keywords": ["rbi", "repo rate", "reverse repo", "monetary policy committee", "mpc", "interest rate Transmission"],
+  "content": "The Repo Rate is the key policy interest rate at which the Reserve Bank of India (RBI) lends money to commercial banks against government securities. Monetary Policy Committee (MPC) bi-monthly decisions adjust the repo rate to maintain price stability while sustaining economic growth. Changes in the repo rate influence retail deposit yields and borrowing costs across home loans, personal loans, and commercial lending."
+}

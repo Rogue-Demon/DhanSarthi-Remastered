@@ -148,6 +148,12 @@ class KnowledgeAuthority(str, enum.Enum):
     OFFICIAL_INSTITUTION = "OFFICIAL_INSTITUTION"
     APPROVED_EDUCATIONAL = "APPROVED_EDUCATIONAL"
     GENERAL = "GENERAL"
+    RBI = "RBI"
+    SEBI = "SEBI"
+    INCOME_TAX = "INCOME_TAX"
+    PFRDA = "PFRDA"
+    AMFI = "AMFI"
+    GOVERNMENT_OF_INDIA = "GOVERNMENT_OF_INDIA"
 
 
 class KnowledgeCategory(str, enum.Enum):
@@ -160,6 +166,19 @@ class KnowledgeCategory(str, enum.Enum):
     BUDGETING = "BUDGETING"
     FINANCIAL_PLANNING = "FINANCIAL_PLANNING"
     GENERAL_FINANCE = "GENERAL_FINANCE"
+    CONVERSATIONAL = "CONVERSATIONAL"
+    FINANCE_BASICS = "FINANCE_BASICS"
+    INVESTMENTS = "INVESTMENTS"
+    BANKING = "BANKING"
+    LOANS_AND_CREDIT = "LOANS_AND_CREDIT"
+    MUTUAL_FUNDS = "MUTUAL_FUNDS"
+    STOCKS_AND_SECURITIES = "STOCKS_AND_SECURITIES"
+    FIXED_INCOME = "FIXED_INCOME"
+    RETIREMENT = "RETIREMENT"
+    TAXATION = "TAXATION"
+    INVESTOR_PROTECTION = "INVESTOR_PROTECTION"
+
+
 
 
 class KnowledgeDocumentStatus(str, enum.Enum):
@@ -208,6 +227,18 @@ class DocumentType(str, enum.Enum):
     TAX_DOCUMENT = "TAX_DOCUMENT"
     BILL = "BILL"
     UNKNOWN = "UNKNOWN"
+
+
+class FinancialReportType(str, enum.Enum):
+    """Supported financial statement report types in DhanSarthi."""
+
+    MONTHLY_EXECUTIVE = "monthly_executive"
+    ANNUAL_TAX_SUMMARY = "annual_tax_summary"
+    EXPENSE_BREAKDOWN = "expense_breakdown"
+    NET_WORTH_STATEMENT = "net_worth_statement"
+    GOAL_FEASIBILITY = "goal_feasibility"
+    DEBT_SNOWBALL = "debt_snowball"
+
 
 
 

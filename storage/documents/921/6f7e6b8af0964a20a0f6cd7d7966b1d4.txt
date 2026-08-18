@@ -1,0 +1,4 @@
+utility bill
+biller name: Tata Power
+total amount: 2450.00
+bill date: 10-08-2026

@@ -1,0 +1,64 @@
+{
+  "sources": [
+    {
+      "id": "RBI",
+      "name": "Reserve Bank of India",
+      "official_domain": "rbi.org.in",
+      "authority": "REGULATOR",
+      "jurisdiction": "India",
+      "country": "IND",
+      "reliability_level": 1,
+      "description": "India's central banking institution and primary monetary regulator."
+    },
+    {
+      "id": "SEBI",
+      "name": "Securities and Exchange Board of India",
+      "official_domain": "sebi.gov.in",
+      "authority": "REGULATOR",
+      "jurisdiction": "India",
+      "country": "IND",
+      "reliability_level": 1,
+      "description": "India's principal regulator for capital markets and securities."
+    },
+    {
+      "id": "INCOME_TAX",
+      "name": "Income Tax Department, Ministry of Finance",
+      "official_domain": "incometaxindia.gov.in",
+      "authority": "GOVERNMENT",
+      "jurisdiction": "India",
+      "country": "IND",
+      "reliability_level": 1,
+      "description": "Government of India direct tax administration and enforcement."
+    },
+    {
+      "id": "PFRDA",
+      "name": "Pension Fund Regulatory and Development Authority",
+      "official_domain": "pfrda.org.in",
+      "authority": "REGULATOR",
+      "jurisdiction": "India",
+      "country": "IND",
+      "reliability_level": 1,
+      "description": "India's regulator for National Pension System (NPS) and retirement funds."
+    },
+    {
+      "id": "AMFI",
+      "name": "Association of Mutual Funds in India",
+      "official_domain": "amfiindia.com",
+      "authority": "OFFICIAL_INSTITUTION",
+      "jurisdiction": "India",
+      "country": "IND",
+      "reliability_level": 1,
+      "description": "Primary industry body and self-regulatory organization for Indian mutual funds."
+    },
+    {
+      "id": "GOVERNMENT_OF_INDIA",
+      "name": "Government of India / Ministry of Finance",
+      "official_domain": "finmin.nic.in",
+      "authority": "GOVERNMENT",
+      "jurisdiction": "India",
+      "country": "IND",
+      "reliability_level": 1,
+      "description": "Central ministry responsible for economic policy and public savings schemes."
+    }
+  ]
+}

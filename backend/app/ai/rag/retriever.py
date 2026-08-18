@@ -11,13 +11,15 @@ from sqlalchemy.orm import Session
 
 from app.ai.providers.base import EmbeddingProvider
 from app.ai.rag.base import RAGRetriever
+from app.ai.rag.query_processor import QueryProcessor
+from app.ai.rag.reranker import DeterministicReranker
 from app.ai.schemas.advisor import RetrievedDocument
 from app.core.config import settings
 from app.repositories.knowledge_repository import KnowledgeChunkRepository
 
 
 class PostgresRAGRetriever(RAGRetriever):
-    """Production vector-similarity RAG retriever powered by PostgreSQL/pgvector."""
+    """Production vector-similarity & metadata-aware RAG retriever powered by PostgreSQL/pgvector."""
 
     def __init__(
         self,
@@ -32,15 +34,31 @@ class PostgresRAGRetriever(RAGRetriever):
         self.top_k = top_k or settings.rag_top_k
         self.similarity_threshold = similarity_threshold or settings.rag_similarity_threshold
 
+        # Phase J Retrieval Intelligence components
+        self._query_processor = QueryProcessor()
+        self._reranker = DeterministicReranker()
+
     async def retrieve(
-        self, query: str, filters: Optional[Dict[str, Any]] = None
+        self,
+        query: str,
+        filters: Optional[Dict[str, Any]] = None,
+        legacy_mode: bool = False,
     ) -> List[RetrievedDocument]:
         """
-        Convert query to embedding vector and search pgvector for closest chunks.
+        Retrieve and rank KnowledgeChunks for user query.
+
+        Applies:
+          - Query normalization & synonym expansion
+          - Historical intent detection
+          - Extended candidate pool fetching
+          - Multi-factor deterministic reranking (Semantic + Keyword + Topic + Authority + Temporal + Quality)
+          - Deduplication & Context diversity filtering
+          - Abstention boundary check
 
         Args:
             query: Input question or search string.
             filters: Optional dictionary filters (country, category, authority).
+            legacy_mode: If True, executes legacy baseline retrieval for comparison evaluation.
 
         Returns:
             List[RetrievedDocument]: Ranked general financial knowledge documents.
@@ -48,21 +66,99 @@ class PostgresRAGRetriever(RAGRetriever):
         if not query or not query.strip():
             return []
 
-        # 1. Generate vector embedding for user query
-        query_vector = await self._embedding_provider.embed(query.strip())
+        query_text = query.strip()
 
-        # 2. Perform similarity search against active RAG chunks
+        # Legacy baseline retrieval for evaluation comparison
+        if legacy_mode:
+            return await self._retrieve_legacy(query_text, filters)
+
+        # 1. Query Normalization, Synonym Expansion & Historical Intent Detection
+        orig_query, norm_query, expanded_terms, is_historical, target_year = self._query_processor.process(query_text)
+
+        # Detect target authority hint from normalized query / expanded terms
+        q_lower = orig_query.lower()
+        target_authority = None
+        if "rbi" in q_lower or "reserve bank" in q_lower or "dicgc" in q_lower:
+            target_authority = "RBI"
+        elif "sebi" in q_lower or "riskometer" in q_lower or "scores" in q_lower or "demat" in q_lower:
+            target_authority = "SEBI"
+        elif "tax" in q_lower or "itr" in q_lower or "80c" in q_lower or "80d" in q_lower or "tds" in q_lower or "stcg" in q_lower or "ltcg" in q_lower:
+            target_authority = "INCOME_TAX"
+        elif "pfrda" in q_lower or "nps" in q_lower:
+            target_authority = "PFRDA"
+        elif "amfi" in q_lower or "nav" in q_lower or "ter" in q_lower or "sip" in q_lower:
+            target_authority = "AMFI"
+        elif "ppf" in q_lower or "ssy" in q_lower or "scss" in q_lower:
+            target_authority = "GOVERNMENT_OF_INDIA"
+
+        # 2. Generate vector embedding for user query
+        query_vector = await self._embedding_provider.embed(norm_query or query_text)
+
+        # 3. Perform candidate pool retrieval (fetch candidate limit = top_k * 5)
+        candidate_limit = max(self.top_k * 5, 20)
         matches = self._chunk_repo.search_similarity(
             query_embedding=query_vector,
-            limit=self.top_k,
+            limit=candidate_limit,
+            filters=filters,
+            threshold=0.15,  # Fetch wider candidate pool before reranking
+        )
+
+        # 4. Deterministic Reranking, Deduplication, Context Diversity, and Abstention Guard
+        retrieved = self._reranker.rerank_and_filter(
+            matches=matches,
+            query_terms=expanded_terms,
+            target_authority=target_authority,
+            is_historical=is_historical,
+            target_year=target_year,
+            threshold=self.similarity_threshold,
+            top_k=self.top_k,
+        )
+
+        # Add query processor metadata for observability
+        for doc in retrieved:
+            doc.metadata["query_normalized"] = norm_query
+            doc.metadata["query_expanded_terms"] = expanded_terms
+            doc.metadata["is_historical_intent"] = is_historical
+
+        return retrieved
+
+    async def _retrieve_legacy(
+        self, query: str, filters: Optional[Dict[str, Any]] = None
+    ) -> List[RetrievedDocument]:
+        """Legacy baseline retrieval implementation."""
+        query_vector = await self._embedding_provider.embed(query)
+
+        q_lower = query.lower()
+        target_authority = None
+        if "rbi" in q_lower or "reserve bank" in q_lower:
+            target_authority = "RBI"
+        elif "sebi" in q_lower or "riskometer" in q_lower:
+            target_authority = "SEBI"
+        elif "tax" in q_lower or "itr" in q_lower or "80c" in q_lower or "80d" in q_lower or "tds" in q_lower:
+            target_authority = "INCOME_TAX"
+        elif "pfrda" in q_lower or "nps" in q_lower:
+            target_authority = "PFRDA"
+        elif "amfi" in q_lower or "nav" in q_lower:
+            target_authority = "AMFI"
+
+        matches = self._chunk_repo.search_similarity(
+            query_embedding=query_vector,
+            limit=max(self.top_k * 3, 15),
             filters=filters,
             threshold=self.similarity_threshold,
         )
 
-        # 3. Map KnowledgeChunk matches to RetrievedDocument schema
         retrieved: List[RetrievedDocument] = []
-        for chunk, score in matches:
+        for chunk, raw_score in matches:
             doc = chunk.document
+            boosted_score = raw_score
+            doc_auth_str = str(doc.authority).upper() if doc.authority else ""
+
+            if target_authority and target_authority in doc_auth_str:
+                boosted_score = min(1.0, round(raw_score + 0.20, 4))
+            elif doc_auth_str in ("RBI", "SEBI", "INCOME_TAX", "PFRDA", "AMFI", "GOVERNMENT_OF_INDIA", "GOVERNMENT", "REGULATOR"):
+                boosted_score = min(1.0, round(raw_score + 0.05, 4))
+
             meta = {
                 "chunk_id": chunk.id,
                 "chunk_index": chunk.chunk_index,
@@ -74,8 +170,6 @@ class PostgresRAGRetriever(RAGRetriever):
                 "effective_date": doc.effective_date.isoformat() if doc.effective_date else None,
                 "source_url": doc.source_url,
             }
-            if chunk.chunk_metadata:
-                meta.update(chunk.chunk_metadata)
 
             retrieved.append(
                 RetrievedDocument(
@@ -83,9 +177,10 @@ class PostgresRAGRetriever(RAGRetriever):
                     title=doc.title,
                     content=chunk.content,
                     source=f"{doc.source} ({doc.jurisdiction})",
-                    relevance_score=score,
+                    relevance_score=boosted_score,
                     metadata=meta,
                 )
             )
 
-        return retrieved
+        retrieved.sort(key=lambda x: x.relevance_score, reverse=True)
+        return retrieved[: self.top_k]

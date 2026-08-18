@@ -100,8 +100,8 @@ class TestAICrossUserIsolation:
     @pytest.mark.anyio
     async def test_user_a_facts_do_not_leak_to_user_b(self, db_session: Session):
         """User A's large salary must not be visible when User B asks the AI."""
-        _seed_user(db_session, 402, "usera@example.com")
-        _seed_user(db_session, 403, "userb@example.com")
+        _seed_user(db_session, 402, "usera_advisor@example.com")
+        _seed_user(db_session, 403, "userb_advisor@example.com")
 
         # User A (402) has big salary
         db_session.add(Income(

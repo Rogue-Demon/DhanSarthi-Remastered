@@ -1,0 +1,4 @@
+basic salary: 80000
+net pay: 75000
+total deductions: 5000
+salary period: August 2026

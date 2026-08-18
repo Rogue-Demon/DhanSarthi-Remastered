@@ -82,6 +82,8 @@ class FinancialDocumentExtractor:
             self._extract_loan_statement(extraction, result)
         elif doc_type == DocumentType.INVESTMENT_STATEMENT:
             self._extract_investment_statement(extraction, result)
+        elif doc_type == DocumentType.BILL:
+            self._extract_bill_invoice(extraction, result)
         else:
             self._extract_generic(extraction, result)
 
@@ -290,6 +292,19 @@ class FinancialDocumentExtractor:
                 )
             )
 
+        # Employer / Company Name
+        emp_match = re.search(r"(?:employer|company|organization|company\s*name)\s*[:\-]?\s*([a-zA-Z0-9\s,\-\.]+)", text, re.IGNORECASE)
+        if emp_match:
+            res.fields.append(
+                ExtractedField(
+                    name="employer",
+                    value=emp_match.group(1).strip(),
+                    confidence=0.85,
+                    source_page=1,
+                    source_text_ref=emp_match.group(0)
+                )
+            )
+
     def _extract_loan_statement(self, ext: ExtractionOutput, res: FinancialExtractionResult):
         text = ext.raw_text
         
@@ -342,6 +357,26 @@ class FinancialDocumentExtractor:
         scheme_match = re.search(r"(?:scheme\s*name|fund\s*name)\s*[:\-]?\s*([a-zA-Z0-9\s,\-\(\)]+)", text, re.IGNORECASE)
         if scheme_match:
             res.fields.append(ExtractedField(name="scheme_name", value=scheme_match.group(1).strip(), confidence=0.85, source_page=1, source_text_ref=scheme_match.group(0)))
+
+    def _extract_bill_invoice(self, ext: ExtractionOutput, res: FinancialExtractionResult):
+        text = ext.raw_text
+
+        # Total amount / Amount due
+        tot_match = re.search(r"(?:total\s*amount|amount\s*due|total\s*payable|invoice\s*total|bill\s*amount)\s*[:\-]?\s*(?:rs\.?|inr|[\$₹])?\s*([\d,]+(?:\.\d{2})?)", text, re.IGNORECASE)
+        if tot_match:
+            res.fields.append(ExtractedField(name="total_amount", value=self._parse_decimal_stub(tot_match.group(1)), confidence=0.95, source_page=1, source_text_ref=tot_match.group(0)))
+
+        # Vendor / Biller name
+        vendor_match = re.search(r"(?:vendor|biller|biller\s*name|merchant|provider|company)\s*[:\-]?\s*([a-zA-Z0-9\s,\-\.]+)", text, re.IGNORECASE)
+        if vendor_match:
+            res.fields.append(ExtractedField(name="vendor", value=vendor_match.group(1).strip(), confidence=0.85, source_page=1, source_text_ref=vendor_match.group(0)))
+
+        # Bill date
+        bill_date_match = re.search(r"(?:bill\s*date|invoice\s*date|date)\s*[:\-]?\s*(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})", text, re.IGNORECASE)
+        if bill_date_match:
+            parsed_d = self._parse_date_stub(bill_date_match.group(1))
+            if parsed_d:
+                res.fields.append(ExtractedField(name="bill_date", value=parsed_d, confidence=0.9, source_page=1, source_text_ref=bill_date_match.group(0)))
 
     def _extract_generic(self, ext: ExtractionOutput, res: FinancialExtractionResult):
         # Look for general dates and amounts

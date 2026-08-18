@@ -46,6 +46,7 @@ from app.core.config import settings
 from app.services.conversation_service import ConversationService
 from app.services.dashboard_service import DashboardService
 from app.services.financial_intelligence_service import FinancialIntelligenceService
+from app.ai.router import IntentRouter, QueryIntent
 from app.market_data.service import MarketDataService
 
 
@@ -73,6 +74,7 @@ class AIAdvisorService:
         self._conv = conversation_service
         self._intel = financial_intelligence_service
         self._market = market_data_service
+        self._router = IntentRouter()
 
     # ------------------------------------------------------------------
     # Legacy single-endpoint advisor (Phase 9 compatibility)
@@ -89,11 +91,19 @@ class AIAdvisorService:
         """
         conv_id = request.conversation_id or str(uuid.uuid4())
 
+        # Classify query intent
+        intent = self._router.classify(request.message)
+
         # Financial context
         full_facts = self._dash.build_dashboard(user_id=user_id)
 
-        # RAG retrieval
-        retrieved_docs = await self._rag.retrieve(query=request.message)
+        # RAG retrieval (executed ONLY for GENERAL_FINANCE and MIXED intents)
+        retrieved_docs = []
+        if intent in (QueryIntent.GENERAL_FINANCE, QueryIntent.MIXED):
+            try:
+                retrieved_docs = await self._rag.retrieve(query=request.message)
+            except Exception:
+                retrieved_docs = []
 
         # Financial intelligence
         financial_intelligence = None
@@ -116,13 +126,26 @@ class AIAdvisorService:
         )
         prompt = self._builder.build_prompt(context=ai_context)
 
-        # LLM call with timeout
-        raw_response = await self._call_llm_with_timeout(ai_context, prompt)
+        # LLM call / Casual response
+        msg_clean = request.message.strip().lower()
+        if intent == QueryIntent.CASUAL:
+            if msg_clean in {"hi", "hello", "hey", "good morning", "good afternoon", "good evening", "greetings"}:
+                raw_response = "Hey! 👋 I'm DhanSarthi. How can I help you with your finances today?"
+            elif "how are you" in msg_clean:
+                raw_response = "I'm doing great, thank you! Ready to help you with your financial questions and planning. How can I assist you today?"
+            elif msg_clean in {"thanks", "thank you", "thanks a lot", "thx"}:
+                raw_response = "You're very welcome! Let me know whenever you have more questions about your money or investments."
+            elif any(phrase in msg_clean for phrase in ["what can you do", "what are your capabilities", "who are you", "how can you help"]):
+                raw_response = "I am DhanSarthi, your AI Financial Advisor. I can help you with:\n1. Tracking your expenses, net worth, and cash flow.\n2. Explaining financial concepts like SIP, PPF, mutual funds, and inflation.\n3. Analyzing your savings rate and debt priorities.\n4. Planning your financial goals. How would you like to start?"
+            else:
+                raw_response = await self._call_llm_with_timeout(ai_context, prompt)
+        else:
+            raw_response = await self._call_llm_with_timeout(ai_context, prompt)
 
         # Safety validation
         self._safety.validate_response(response=raw_response, context=ai_context)
 
-        sources = [f"{doc.title} ({doc.source})" for doc in retrieved_docs]
+        sources = [f"{doc.title} ({doc.source})" for doc in retrieved_docs] if intent in (QueryIntent.GENERAL_FINANCE, QueryIntent.MIXED) else []
 
         return AIAdvisorResponse(
             response=raw_response,
@@ -194,11 +217,16 @@ class AIAdvisorService:
         # Exclude the just-stored user message (last one)
         history = [m for m in recent_messages if m.id != user_msg.id]
 
-        # 5. RAG retrieval
-        try:
-            retrieved_docs = await self._rag.retrieve(query=request.message)
-        except Exception:
-            retrieved_docs = []  # RAG failure is non-fatal; proceed without knowledge
+        # Classify query intent
+        intent = self._router.classify(request.message)
+
+        # 5. RAG retrieval (executed ONLY for GENERAL_FINANCE and MIXED intents)
+        retrieved_docs = []
+        if intent in (QueryIntent.GENERAL_FINANCE, QueryIntent.MIXED):
+            try:
+                retrieved_docs = await self._rag.retrieve(query=request.message)
+            except Exception:
+                retrieved_docs = []  # RAG failure is non-fatal; proceed without knowledge
 
         # Financial intelligence
         financial_intelligence = None
@@ -222,9 +250,24 @@ class AIAdvisorService:
         )
         prompt = self._builder.build_prompt(context=ai_context)
 
-        # 7. LLM call with timeout
+        # 7. LLM call / Casual turn processing
         start_ms = time.monotonic()
-        raw_response = await self._call_llm_with_timeout(ai_context, prompt)
+        msg_clean = request.message.strip().lower()
+
+        if intent == QueryIntent.CASUAL:
+            if msg_clean in {"hi", "hello", "hey", "good morning", "good afternoon", "good evening", "greetings"}:
+                raw_response = "Hey! 👋 I'm DhanSarthi. How can I help you with your finances today?"
+            elif "how are you" in msg_clean:
+                raw_response = "I'm doing great, thank you! Ready to help you with your financial questions and planning. How can I assist you today?"
+            elif msg_clean in {"thanks", "thank you", "thanks a lot", "thx"}:
+                raw_response = "You're very welcome! Let me know whenever you have more questions about your money or investments."
+            elif any(phrase in msg_clean for phrase in ["what can you do", "what are your capabilities", "who are you", "how can you help"]):
+                raw_response = "I am DhanSarthi, your AI Financial Advisor. I can help you with:\n1. Tracking your expenses, net worth, and cash flow.\n2. Explaining financial concepts like SIP, PPF, mutual funds, and inflation.\n3. Analyzing your savings rate and debt priorities.\n4. Planning your financial goals. How would you like to start?"
+            else:
+                raw_response = await self._call_llm_with_timeout(ai_context, prompt)
+        else:
+            raw_response = await self._call_llm_with_timeout(ai_context, prompt)
+
         response_time_ms = int((time.monotonic() - start_ms) * 1000)
 
         # 8. Safety validation
@@ -239,25 +282,61 @@ class AIAdvisorService:
         # 9. Build citation sources from RAG documents
         citation_sources: List[CitationSource] = []
         source_ids: List[str] = []
-        for doc in retrieved_docs:
-            citation_sources.append(
-                CitationSource(
-                    title=doc.title,
-                    source=doc.source,
-                    source_url=doc.metadata.get("source_url"),
-                    document_id=doc.document_id,
-                    relevance_score=doc.relevance_score,
+        if intent in (QueryIntent.GENERAL_FINANCE, QueryIntent.MIXED):
+            for doc in retrieved_docs:
+                citation_sources.append(
+                    CitationSource(
+                        title=doc.title,
+                        source=doc.source,
+                        source_url=doc.metadata.get("source_url"),
+                        document_id=doc.document_id,
+                        relevance_score=doc.relevance_score,
+                    )
                 )
-            )
-            source_ids.append(doc.document_id)
+                source_ids.append(doc.document_id)
 
         # 10. Store assistant message with safe operational metadata
+        citations_meta = [
+            {
+                "document_id": doc.document_id,
+                "title": doc.title,
+                "source": doc.source,
+                "authority": doc.metadata.get("authority"),
+                "effective_date": doc.metadata.get("effective_date"),
+                "source_url": doc.metadata.get("source_url"),
+            }
+            for doc in retrieved_docs[:10]
+        ]
+        sub_intent = self._router.classify_sub_intent(request.message)
+
+        # Extract signals, health score, and formulas from financial_intelligence
+        signals_meta = []
+        health_score_meta = None
+        data_quality_meta = "LIMITED"
+        if financial_intelligence:
+            data_quality_meta = getattr(financial_intelligence, "data_quality", "LIMITED")
+            if getattr(financial_intelligence, "signals", None):
+                signals_meta = [
+                    s.model_dump() if hasattr(s, "model_dump") else s
+                    for s in financial_intelligence.signals
+                ]
+            if getattr(financial_intelligence, "health_snapshot", None):
+                hs = financial_intelligence.health_snapshot
+                if hasattr(hs, "health_score") and hs.health_score:
+                    health_score_meta = hs.health_score.model_dump() if hasattr(hs.health_score, "model_dump") else hs.health_score
+
         assistant_metadata = {
             "provider": settings.ai_provider,
             "model": settings.ai_model,
             "response_time_ms": response_time_ms,
             "retrieval_count": len(retrieved_docs),
+            "intent": intent.value,
+            "sub_intent": sub_intent.value,
+            "data_completeness": data_quality_meta,
+            "signals": signals_meta,
+            "health_score": health_score_meta,
             "source_ids": source_ids[:10],  # store at most 10
+            "citations": citations_meta,
         }
         assistant_msg = self._conv.store_assistant_message(
             conversation_id=conversation_id,

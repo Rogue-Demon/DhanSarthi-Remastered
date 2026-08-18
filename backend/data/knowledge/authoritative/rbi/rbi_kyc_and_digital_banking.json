@@ -1,0 +1,17 @@
+{
+  "title": "RBI Master Direction on Know Your Customer (KYC) and Digital Banking",
+  "topic": "kyc_and_digital_banking",
+  "category": "BANKING",
+  "authority": "RBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Reserve Bank of India (RBI)",
+  "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=11566",
+  "keywords": ["rbi", "kyc", "c-kyc", "video-kyc", "v-cip", "digital banking", "officially valid documents", "aadhaar", "pan"],
+  "content": "The RBI Master Direction on KYC requires regulated entities to perform customer due diligence prior to opening accounts or originating financial products. Officially Valid Documents (OVDs) include Passport, Driving Licence, Voter ID, NREGA Job Card, and Aadhaar card. RBI permits Video-based Customer Identification Process (V-CIP) for seamless digital onboarding. Periodic re-KYC is mandated every 2 years for high-risk customers, 8 years for medium-risk, and 10 years for low-risk customers."
+}

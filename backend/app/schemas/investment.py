@@ -63,6 +63,7 @@ class InvestmentResponse(BaseModel):
     ticker_symbol: Optional[str] = None
     institution: Optional[str] = None
     notes: Optional[str] = None
+    investment_metadata: Optional[dict] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -73,6 +74,7 @@ class InvestmentResponse(BaseModel):
                 data.setdefault("ticker_symbol", meta.get("ticker_symbol"))
                 data.setdefault("institution", meta.get("institution"))
                 data.setdefault("notes", meta.get("notes"))
+                data.setdefault("investment_metadata", meta)
         elif hasattr(data, "investment_metadata"):
             meta = data.investment_metadata or {}
             if isinstance(meta, dict):
@@ -90,6 +92,7 @@ class InvestmentResponse(BaseModel):
                     "ticker_symbol": meta.get("ticker_symbol"),
                     "institution": meta.get("institution"),
                     "notes": meta.get("notes"),
+                    "investment_metadata": meta,
                 }
                 return d
         return data
@@ -107,6 +110,7 @@ class InvestmentCreate(BaseModel):
     ticker_symbol: Optional[str] = Field(default=None, max_length=20)
     institution: Optional[str] = Field(default=None, max_length=100)
     notes: Optional[str] = Field(default=None, max_length=255)
+    investment_metadata: Optional[dict] = None
 
     @field_validator("invested_amount", "current_value")
     @classmethod
@@ -128,6 +132,7 @@ class InvestmentUpdate(BaseModel):
     ticker_symbol: Optional[str] = Field(default=None, max_length=20)
     institution: Optional[str] = Field(default=None, max_length=100)
     notes: Optional[str] = Field(default=None, max_length=255)
+    investment_metadata: Optional[dict] = None
 
     @field_validator("invested_amount", "current_value")
     @classmethod

@@ -1,0 +1,5 @@
+mutual fund statement
+folio number: 91028374/12
+scheme name: Axis Bluechip Fund
+invested amount: 100000
+current value: 145000

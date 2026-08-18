@@ -1,11 +1,11 @@
-import React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
-import { useProfile } from '@/hooks';
-import { dashboardConfig } from '@/config';
-import { PROFILES } from '@/constants';
-import { Button } from '@/components/ui';
-import * as LucideIcons from 'lucide-react';
-import { cn } from '@/utils';
+import React from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { useProfile, useAuth } from '@/hooks'
+import { dashboardConfig } from '@/config'
+import { PROFILES } from '@/constants'
+import { Button } from '@/components/ui'
+import * as LucideIcons from 'lucide-react'
+import { cn } from '@/utils'
 
 /**
  * BusinessWelcomeHero Component
@@ -13,8 +13,11 @@ import { cn } from '@/utils';
  * A premium corporate hero banner designed specifically for the Business profile.
  * Highlights metrics (gross revenue, profit, opex), collection stats, and invoice actions.
  */
-function BusinessWelcomeHero({ profileConfig }) {
-  const shouldReduceMotion = useReducedMotion();
+function BusinessWelcomeHero({ profileConfig, dashboardData, user }) {
+  const shouldReduceMotion = useReducedMotion()
+
+  const revenue = parseFloat(dashboardData?.summary?.total_income || 0)
+  const opex = parseFloat(dashboardData?.summary?.total_expenses || 0)
 
   return (
     <div className="clay-surface bg-card border-2 border-white/60 dark:border-white/5 rounded-3xl p-6 md:p-8 shadow-floating text-left flex flex-col lg:flex-row items-center justify-between gap-8 overflow-hidden relative font-sans">
@@ -38,13 +41,20 @@ function BusinessWelcomeHero({ profileConfig }) {
         <h2 className="text-2xl md:text-3xl font-extrabold text-text-primary tracking-tight leading-tight">
           Manage liquid cash flows and payrolls,{' '}
           <span className="bg-gradient-primary bg-clip-text text-transparent font-black">
-            Shreyanshu
+            {user?.profile?.display_name ||
+              user?.display_name ||
+              user?.email?.split('@')[0] ||
+              'Valued Member'}
           </span>
         </h2>
 
         {/* Description / Business message */}
         <p className="text-xs md:text-sm text-text-secondary leading-relaxed font-semibold">
-          Your gross revenue is <span className="text-text-primary font-bold">₹4,85,000</span> this month with an operating opex margin of <span className="text-text-primary font-bold">₹2,75,000</span>. Ensure pending collections are resolved.
+          Your gross revenue is{' '}
+          <span className="text-text-primary font-bold">₹{revenue.toLocaleString('en-IN')}</span>{' '}
+          this month with an operating opex margin of{' '}
+          <span className="text-text-primary font-bold">₹{opex.toLocaleString('en-IN')}</span>.
+          Ensure pending collections are resolved.
         </p>
 
         {/* Primary/Secondary CTAs */}
@@ -82,26 +92,30 @@ function BusinessWelcomeHero({ profileConfig }) {
           <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center text-xs font-semibold">
               <span className="text-text-secondary">Payroll (salaries)</span>
-              <span className="font-extrabold text-text-primary">₹95,000</span>
+              <span className="font-extrabold text-text-primary">
+                ₹{Math.round(opex * 0.4).toLocaleString('en-IN')}
+              </span>
             </div>
             <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden border border-white/60 shadow-inner">
-              <div className="bg-primary h-full rounded-full" style={{ width: '35%' }} />
+              <div className="bg-primary h-full rounded-full" style={{ width: '40%' }} />
             </div>
           </div>
 
           <div className="flex flex-col gap-2 border-t border-border/40 pt-2.5">
             <div className="flex justify-between items-center text-xs font-semibold">
               <span className="text-text-secondary">Office rent & utilities</span>
-              <span className="font-extrabold text-text-primary">₹49,500</span>
+              <span className="font-extrabold text-text-primary">
+                ₹{Math.round(opex * 0.2).toLocaleString('en-IN')}
+              </span>
             </div>
             <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden border border-white/60 shadow-inner">
-              <div className="bg-primary h-full rounded-full" style={{ width: '18%' }} />
+              <div className="bg-primary h-full rounded-full" style={{ width: '20%' }} />
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 /**
@@ -111,8 +125,10 @@ function BusinessWelcomeHero({ profileConfig }) {
  * Working Professional profile. Emphasizes productivity, wealth accumulation,
  * opex ratios, and tax planning.
  */
-function ExecutiveWelcomeHero({ profileConfig }) {
-  const shouldReduceMotion = useReducedMotion();
+function ExecutiveWelcomeHero({ profileConfig, dashboardData, user }) {
+  const shouldReduceMotion = useReducedMotion()
+  const liquidCash = parseFloat(dashboardData?.net_worth?.liquid_assets || 0)
+  const returnPct = parseFloat(dashboardData?.investments?.total_return_percentage || 0)
 
   return (
     <div className="clay-surface bg-card border-2 border-white/60 dark:border-white/5 rounded-3xl p-6 md:p-8 shadow-floating text-left flex flex-col lg:flex-row items-center justify-between gap-8 overflow-hidden relative font-sans">
@@ -136,13 +152,18 @@ function ExecutiveWelcomeHero({ profileConfig }) {
         <h2 className="text-2xl md:text-3xl font-extrabold text-text-primary tracking-tight leading-tight">
           Track wealth accumulation and optimize taxation,{' '}
           <span className="bg-gradient-primary bg-clip-text text-transparent font-black">
-            Shreyanshu
+            {user?.profile?.display_name ||
+              user?.display_name ||
+              user?.email?.split('@')[0] ||
+              'Valued Member'}
           </span>
         </h2>
 
         {/* Description / Financial overview message */}
         <p className="text-xs md:text-sm text-text-secondary leading-relaxed font-semibold">
-          Your portfolio grew by <span className="text-success font-bold">+1.3%</span> this month. Increase your Section 80C contributions to optimize your tax liabilities further.
+          Your portfolio grew by{' '}
+          <span className="text-success font-bold">+{returnPct.toFixed(1)}%</span> this month.
+          Increase your Section 80C contributions to optimize your tax liabilities further.
         </p>
 
         {/* Primary/Secondary CTAs */}
@@ -190,7 +211,9 @@ function ExecutiveWelcomeHero({ profileConfig }) {
           <div className="flex flex-col gap-2.5 border-t border-border/40 pt-2.5 mt-1">
             <div className="flex justify-between items-center text-xs font-semibold">
               <span className="text-text-secondary">Liquid Cash</span>
-              <span className="font-extrabold text-text-primary">₹54,600</span>
+              <span className="font-extrabold text-text-primary">
+                ₹{liquidCash.toLocaleString('en-IN')}
+              </span>
             </div>
             <div className="w-full bg-muted h-2 rounded-full overflow-hidden border border-white/60 shadow-inner">
               <div className="bg-primary h-full rounded-full" style={{ width: '35%' }} />
@@ -199,7 +222,7 @@ function ExecutiveWelcomeHero({ profileConfig }) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 /**
@@ -208,8 +231,8 @@ function ExecutiveWelcomeHero({ profileConfig }) {
  * A premium, interactive hero banner specifically designed for the Student profile.
  * Emphasizes motivational learning, savings quotes, quick actions, and playful clay visuals.
  */
-function StudentWelcomeHero({ profileConfig }) {
-  const shouldReduceMotion = useReducedMotion();
+function StudentWelcomeHero({ profileConfig, dashboardData, user }) {
+  const shouldReduceMotion = useReducedMotion()
 
   // Floating bubble animation variants for premium claymorphic background depth
   const bubbleVariants = (delay) => ({
@@ -223,7 +246,7 @@ function StudentWelcomeHero({ profileConfig }) {
         ease: 'easeInOut',
       },
     },
-  });
+  })
 
   return (
     <div className="clay-surface bg-card border-2 border-white/60 dark:border-white/5 rounded-3xl p-6 md:p-10 shadow-floating text-left flex flex-col lg:flex-row items-center justify-between gap-10 overflow-hidden relative">
@@ -243,9 +266,7 @@ function StudentWelcomeHero({ profileConfig }) {
       {/* Left side: Heading copy, quote, and buttons */}
       <div className="flex-1 flex flex-col items-start gap-5 md:gap-6 z-10 max-w-xl">
         <div className="flex items-center gap-2">
-          <Badge
-            className="text-[10px] font-black uppercase tracking-widest bg-primary/10 border-primary/20 text-primary py-0.5 px-2.5 rounded-full"
-          >
+          <Badge className="text-[10px] font-black uppercase tracking-widest bg-primary/10 border-primary/20 text-primary py-0.5 px-2.5 rounded-full">
             Student Hub
           </Badge>
           <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
@@ -258,7 +279,11 @@ function StudentWelcomeHero({ profileConfig }) {
         <h2 className="text-3xl md:text-4xl font-black text-text-primary tracking-tight leading-[1.15]">
           Make every rupee count,{' '}
           <span className="bg-gradient-primary bg-clip-text text-transparent font-black">
-            Shreyanshu!
+            {user?.profile?.display_name ||
+              user?.display_name ||
+              user?.email?.split('@')[0] ||
+              'Valued Member'}
+            !
           </span>
         </h2>
 
@@ -280,7 +305,7 @@ function StudentWelcomeHero({ profileConfig }) {
           <Button
             variant="gradient"
             size="md"
-            onClick={() => alert("Log Expense form placeholder")}
+            onClick={() => alert('Log Expense form placeholder')}
             className="rounded-2xl font-black shadow-button gap-2 group shrink-0"
             iconLeft={<LucideIcons.PlusCircle className="h-4 w-4" />}
           >
@@ -289,12 +314,10 @@ function StudentWelcomeHero({ profileConfig }) {
           <Button
             variant="secondary"
             size="md"
-            onClick={() => alert("AI Advisor chat page redirect")}
+            onClick={() => alert('AI Advisor chat page redirect')}
             className="rounded-2xl font-black border-border shadow-xs gap-2 group hover:border-primary/20 text-text-secondary bg-card shrink-0"
             iconLeft={<LucideIcons.Bot className="h-4 w-4 text-primary" />}
-            iconRight={
-              <LucideIcons.Sparkles className="h-3.5 w-3.5 text-accent animate-pulse" />
-            }
+            iconRight={<LucideIcons.Sparkles className="h-3.5 w-3.5 text-accent animate-pulse" />}
           >
             Consult AI Advisor
           </Button>
@@ -305,7 +328,7 @@ function StudentWelcomeHero({ profileConfig }) {
       <div className="flex-1 w-full max-w-[340px] flex items-center justify-center relative min-h-[180px] z-10">
         <div className="clay-surface bg-card p-4.5 border border-white/60 shadow-md w-full relative flex items-center justify-between gap-4 overflow-hidden group hover:shadow-lg transition-shadow duration-300">
           <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#7C3AED_1px,transparent_1px)] [background-size:10px_10px]" />
-          
+
           <div className="flex flex-col text-left gap-1">
             <span className="text-[9px] font-black text-text-muted uppercase tracking-wider leading-none">
               Daily Challenge
@@ -325,20 +348,28 @@ function StudentWelcomeHero({ profileConfig }) {
             </div>
             {/* Animated coins floating down */}
             <motion.div
-              animate={shouldReduceMotion ? {} : {
-                y: [0, 8, 0],
-                opacity: [0, 1, 0]
-              }}
+              animate={
+                shouldReduceMotion
+                  ? {}
+                  : {
+                      y: [0, 8, 0],
+                      opacity: [0, 1, 0],
+                    }
+              }
               transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
               className="absolute top-1 left-7 text-xs"
             >
               🪙
             </motion.div>
             <motion.div
-              animate={shouldReduceMotion ? {} : {
-                y: [0, 12, 0],
-                opacity: [0, 1, 0]
-              }}
+              animate={
+                shouldReduceMotion
+                  ? {}
+                  : {
+                      y: [0, 12, 0],
+                      opacity: [0, 1, 0],
+                    }
+              }
               transition={{ repeat: Infinity, duration: 3, delay: 1, ease: 'easeInOut' }}
               className="absolute top-3 right-6 text-[10px]"
             >
@@ -348,7 +379,7 @@ function StudentWelcomeHero({ profileConfig }) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 // Inline badge helper for simple layouts
@@ -363,7 +394,7 @@ function Badge({ children, className, style }) {
     >
       {children}
     </span>
-  );
+  )
 }
 
 /**
@@ -375,30 +406,44 @@ function Badge({ children, className, style }) {
  * the BusinessWelcomeHero component; otherwise, it defaults to the
  * standard profile welcome banner.
  */
-export function DashboardBanner({ className, ...props }) {
-  const { profile, profileConfig } = useProfile();
-  const shouldReduceMotion = useReducedMotion();
+export function DashboardBanner({ className, dashboardData, ...props }) {
+  const { profile, profileConfig } = useProfile()
+  const { user } = useAuth()
+  const shouldReduceMotion = useReducedMotion()
 
-  if (!profileConfig) return null;
+  if (!profileConfig) return null
 
   // Render Student Specific Hero
   if (profile === PROFILES.STUDENT) {
-    return <StudentWelcomeHero profileConfig={profileConfig} />;
+    return (
+      <StudentWelcomeHero profileConfig={profileConfig} dashboardData={dashboardData} user={user} />
+    )
   }
 
   // Render Working Professional Specific Hero
   if (profile === PROFILES.PROFESSIONAL) {
-    return <ExecutiveWelcomeHero profileConfig={profileConfig} />;
+    return (
+      <ExecutiveWelcomeHero
+        profileConfig={profileConfig}
+        dashboardData={dashboardData}
+        user={user}
+      />
+    )
   }
 
   // Render Business Specific Hero
   if (profile === PROFILES.BUSINESS) {
-    return <BusinessWelcomeHero profileConfig={profileConfig} />;
+    return (
+      <BusinessWelcomeHero
+        profileConfig={profileConfig}
+        dashboardData={dashboardData}
+        user={user}
+      />
+    )
   }
 
   // Fallback Standard banner
-  const bannerMessage =
-    dashboardConfig[profile]?.bannerMessage || profileConfig.welcomeMessage;
+  const bannerMessage = dashboardConfig[profile]?.bannerMessage || profileConfig.welcomeMessage
 
   return (
     <motion.div
@@ -430,7 +475,8 @@ export function DashboardBanner({ className, ...props }) {
             {bannerMessage}
           </h2>
           <p className="text-xs md:text-sm font-medium text-white/80 leading-relaxed">
-            {profileConfig.description} Manage analytics, tracks, and configure advisor bots instantly.
+            {profileConfig.description} Manage analytics, tracks, and configure advisor bots
+            instantly.
           </p>
         </div>
       </div>
@@ -445,7 +491,7 @@ export function DashboardBanner({ className, ...props }) {
         </div>
       </div>
     </motion.div>
-  );
+  )
 }
 
-export default DashboardBanner;
+export default DashboardBanner

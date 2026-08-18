@@ -1,0 +1,17 @@
+{
+  "title": "RBI DICGC Bank Deposit Insurance Protection Scheme",
+  "topic": "dicgc_deposit_insurance",
+  "category": "BANKING",
+  "authority": "RBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Deposit Insurance and Credit Guarantee Corporation (DICGC) / RBI",
+  "source_url": "https://www.dicgc.org.in/FD_AONotice.html",
+  "keywords": ["dicgc", "deposit insurance", "rbi", "5 lakh insurance", "bank failure", "insured deposits"],
+  "content": "Bank deposits in India are insured by the Deposit Insurance and Credit Guarantee Corporation (DICGC), a wholly-owned subsidiary of the Reserve Bank of India (RBI). Each depositor in an insured bank is covered up to a maximum limit of ₹5,00,000 (Rupees Five Lakhs) for both principal and interest amount across all deposit accounts (savings, current, fixed, recurring) held in the same bank and same capacity."
+}

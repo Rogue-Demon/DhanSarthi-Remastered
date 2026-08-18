@@ -51,6 +51,8 @@ class FinancialIntelligenceSummary(BaseModel):
     goals: List[FinancialInsight] = Field(default_factory=list, description="Structured per-goal analyses")
     warnings: List[str] = Field(default_factory=list, description="Active warning alerts triggered by rules")
     opportunities: List[str] = Field(default_factory=list, description="Active opportunity recommendations triggered by rules")
+    health_snapshot: Optional[Any] = Field(default=None, description="Presentation-independent FinancialHealthSnapshot")
+    signals: List[Any] = Field(default_factory=list, description="Deterministic financial rule signals")
     data_quality: str = Field(..., description="Consolidated data quality status ('COMPLETE', 'GOOD', 'PARTIAL', 'LIMITED')")
     data_as_of: str = Field(..., description="Valuation timestamp or data freshness date (ISO-8601)")
 

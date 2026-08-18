@@ -1,0 +1,17 @@
+{
+  "title": "Income Tax Rules on Salary Income, Allowances, and Perquisites",
+  "topic": "tax_salary_income_and_perquisites",
+  "category": "TAXATION",
+  "authority": "INCOME_TAX",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Income Tax Department, Government of India",
+  "source_url": "https://incometaxindia.gov.in/Pages/i-am/salaried-employee.aspx",
+  "keywords": ["income tax", "salary income", "form 16", "hra exemption", "lta", "standard deduction", "perquisites"],
+  "content": "Salaried income includes basic salary, dearness allowance (DA), bonuses, commissions, and perquisites. Under the Old Tax Regime, House Rent Allowance (HRA) is partially or fully exempt under Section 10(13A) calculated as the minimum of: 1. Actual HRA received. 2. 50% of salary for metro cities (40% non-metro). 3. Rent paid minus 10% of salary. Form 16 issued by employers serves as the authoritative tax deduction certificate for salary income."
+}

@@ -1,17 +1,29 @@
-import React from 'react';
-import { useProfile } from '@/hooks';
-import { getFinanceConfig } from '@/config';
-import { motion, useReducedMotion } from 'framer-motion';
-import { DashboardGrid, WidgetContainer } from '@/components/dashboard';
-import * as LucideIcons from 'lucide-react';
-import { Badge } from '@/components/ui';
+import React from 'react'
+import { useProfile, useCashFlow } from '@/hooks'
+import { motion, useReducedMotion } from 'framer-motion'
+import { DashboardGrid, WidgetContainer } from '@/components/dashboard'
+import * as LucideIcons from 'lucide-react'
+import { Badge } from '@/components/ui'
 
 export function CashFlow() {
-  const { profile } = useProfile();
-  const shouldReduceMotion = useReducedMotion();
-  const financeData = getFinanceConfig(profile);
+  const { profile } = useProfile()
+  const shouldReduceMotion = useReducedMotion()
+  const { data: cashFlowData, isLoading } = useCashFlow()
 
-  if (!financeData) return null;
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full animate-pulse">
+        <div className="h-28 bg-muted/20 rounded-2xl border" />
+        <div className="h-28 bg-muted/20 rounded-2xl border" />
+        <div className="h-28 bg-muted/20 rounded-2xl border" />
+      </div>
+    )
+  }
+
+  const cashFlow = cashFlowData || {}
+  const totalIncome = parseFloat(cashFlow.total_income || 0)
+  const totalExpenses = parseFloat(cashFlow.total_expenses || 0)
+  const netFlow = parseFloat(cashFlow.net_cash_flow || 0)
 
   return (
     <motion.div
@@ -30,7 +42,6 @@ export function CashFlow() {
       </div>
 
       <DashboardGrid>
-        
         {/* Money In */}
         <div className="lg:col-span-4 md:col-span-1">
           <div className="clay-surface bg-card p-5 border border-white/60 dark:border-white/5 shadow-card flex items-center justify-between gap-4 select-none relative group h-full">
@@ -40,10 +51,10 @@ export function CashFlow() {
                 Total Inbound (In)
               </span>
               <span className="text-2xl font-black text-text-primary tracking-tight leading-none">
-                {financeData.cashFlow.income}
+                ₹{totalIncome.toLocaleString('en-IN')}
               </span>
               <span className="text-[10px] font-bold text-success mt-0.5">
-                Invoices collected
+                Active credits logged
               </span>
             </div>
             <div className="p-3.5 rounded-2xl flex items-center justify-center border bg-success/10 text-success shadow-xs shrink-0">
@@ -61,10 +72,10 @@ export function CashFlow() {
                 Total Outbound (Out)
               </span>
               <span className="text-2xl font-black text-text-primary tracking-tight leading-none">
-                {financeData.cashFlow.expense}
+                ₹{totalExpenses.toLocaleString('en-IN')}
               </span>
               <span className="text-[10px] font-bold text-danger mt-0.5">
-                Bill payments debited
+                Active opex debits logged
               </span>
             </div>
             <div className="p-3.5 rounded-2xl flex items-center justify-center border bg-danger/10 text-danger shadow-xs shrink-0">
@@ -82,10 +93,10 @@ export function CashFlow() {
                 Net cash flow yield
               </span>
               <span className="text-2xl font-black text-text-primary tracking-tight leading-none">
-                {financeData.cashFlow.netFlow}
+                ₹{netFlow.toLocaleString('en-IN')}
               </span>
               <span className="text-[10px] font-bold text-primary mt-0.5">
-                Liquid cushion added
+                Liquid surplus cushion
               </span>
             </div>
             <div className="p-3.5 rounded-2xl flex items-center justify-center border bg-primary/10 text-primary shadow-xs shrink-0">
@@ -102,21 +113,31 @@ export function CashFlow() {
         >
           <div className="h-32 w-full rounded-2xl bg-card border border-border/80 relative flex items-end justify-between px-8 pb-3 overflow-hidden mt-2">
             <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(#7C3AED_1px,transparent_1px)] [background-size:12px_12px]" />
-            
-            {/* Visual graph line paths */}
-            <svg className="absolute inset-0 w-full h-full text-success/10" preserveAspectRatio="none" viewBox="0 0 100 100">
+
+            <svg
+              className="absolute inset-0 w-full h-full text-success/10"
+              preserveAspectRatio="none"
+              viewBox="0 0 100 100"
+            >
               <path d="M0,90 Q20,80 40,85 T80,50 T100,30 L100,100 Z" fill="currentColor" />
-              <path d="M0,90 Q20,80 40,85 T80,50 T100,30" fill="none" stroke="#10B981" strokeWidth="2.5" />
+              <path
+                d="M0,90 Q20,80 40,85 T80,50 T100,30"
+                fill="none"
+                stroke="#10B981"
+                strokeWidth="2.5"
+              />
             </svg>
 
             {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map((w) => (
-              <span key={w} className="text-[9px] font-black text-text-muted z-10">{w}</span>
+              <span key={w} className="text-[9px] font-black text-text-muted z-10">
+                {w}
+              </span>
             ))}
           </div>
         </WidgetContainer>
       </DashboardGrid>
     </motion.div>
-  );
+  )
 }
 
-export default CashFlow;
+export default CashFlow

@@ -1,0 +1,17 @@
+{
+  "title": "SEBI Issue of Capital and Disclosure Requirements (ICDR) for IPOs",
+  "topic": "primary_market_ipo",
+  "category": "STOCKS_AND_SECURITIES",
+  "authority": "SEBI",
+  "country": "IND",
+  "jurisdiction": "India",
+  "language": "en",
+  "version": "1.0",
+  "published_date": "2026-01-01",
+  "effective_date": "2026-01-01",
+  "document_type": "official_guidance",
+  "source": "Securities and Exchange Board of India (SEBI)",
+  "source_url": "https://www.sebi.gov.in/legal/regulations/sep-2018/sebi-issue-of-capital-and-disclosure-requirements-regulations-2018_40366.html",
+  "keywords": ["sebi", "ipo", "asba", "upi ipo", "red herring prospectus", "rhp", "retail investor category", "lot size"],
+  "content": "Initial Public Offerings (IPOs) in India are regulated under SEBI (ICDR) Regulations. Retail Individual Investors (RIIs) can apply for IPO shares up to ₹2,00,000 using Applications Supported by Blocked Amount (ASBA) through bank accounts or UPI payment handles. Money remains blocked in the investor's bank account until allotment and is debited only upon successful share allotment, ensuring safety of funds."
+}

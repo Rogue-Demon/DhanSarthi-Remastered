@@ -406,3 +406,69 @@ def test_financial_analytics_endpoints_use_token_user_id(client: TestClient, aut
     # Verify User B's summary shows the new income
     resp_b = client.get("/api/v1/financial/summary", headers=auth_headers["user_b"])
     assert float(resp_b.json()["total_income"]) >= 5000.0
+
+
+def test_investment_metadata_crud_and_merge(client: TestClient, auth_headers: dict):
+    # User A creates an investment of type OTHER with metadata subtype 'PPF'
+    payload = {
+        "name": "My PPF Account",
+        "investment_type": "OTHER",
+        "invested_amount": 150000.0,
+        "current_value": 150000.0,
+        "ticker_symbol": "PPF-01",
+        "institution": "SBI",
+        "notes": "SBI Provident Fund",
+        "investment_metadata": {
+            "subtype": "PPF",
+            "annual_contribution": 50000.0
+        }
+    }
+    create_resp = client.post("/api/v1/investments", headers=auth_headers["user_a"], json=payload)
+    assert create_resp.status_code == 201
+    created_data = create_resp.json()
+    assert created_data["investment_metadata"]["subtype"] == "PPF"
+    assert created_data["investment_metadata"]["annual_contribution"] == 50000.0
+    assert created_data["ticker_symbol"] == "PPF-01"
+    
+    inv_id = created_data["id"]
+
+    # Retrieve and verify list filters
+    list_resp = client.get("/api/v1/investments?investment_type=OTHER", headers=auth_headers["user_a"])
+    assert list_resp.status_code == 200
+    items = list_resp.json()["items"]
+    assert len(items) >= 1
+    ppf_item = next(item for item in items if item["id"] == inv_id)
+    assert ppf_item["investment_metadata"]["subtype"] == "PPF"
+
+    # Update only the name and verify metadata remains completely intact
+    patch_resp = client.patch(
+        f"/api/v1/investments/{inv_id}",
+        headers=auth_headers["user_a"],
+        json={"name": "My Updated PPF Account"}
+    )
+    assert patch_resp.status_code == 200
+    patched_data = patch_resp.json()
+    assert patched_data["name"] == "My Updated PPF Account"
+    assert patched_data["investment_metadata"]["subtype"] == "PPF"
+    assert patched_data["investment_metadata"]["annual_contribution"] == 50000.0
+
+    # Update metadata and verify custom keys are merged/preserved
+    update_meta_resp = client.patch(
+        f"/api/v1/investments/{inv_id}",
+        headers=auth_headers["user_a"],
+        json={
+            "investment_metadata": {
+                "subtype": "PPF",
+                "annual_contribution": 75000.0,
+                "extra_key": "custom_val"
+            }
+        }
+    )
+    assert update_meta_resp.status_code == 200
+    updated_data = update_meta_resp.json()
+    assert updated_data["investment_metadata"]["subtype"] == "PPF"
+    assert updated_data["investment_metadata"]["annual_contribution"] == 75000.0
+    assert updated_data["investment_metadata"]["extra_key"] == "custom_val"
+    # Root level fields are still mapped from previous states
+    assert updated_data["ticker_symbol"] == "PPF-01"
+    assert updated_data["institution"] == "SBI"

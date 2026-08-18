@@ -97,9 +97,25 @@ class FinancialIntelligenceService:
             if emergency_fund_insight.status != "INSUFFICIENT_DATA":
                 dash.financial_health.emergency_fund_months = emergency_fund_insight.value
 
-        # 3. Rules Engine
+        # 3. Rules Engine & Financial Health Model
         warnings = evaluate_warnings(dash)
         opportunities = evaluate_opportunities(dash)
+
+        health_snapshot = None
+        signals = []
+        if context.metrics:
+            try:
+                from app.financial.health_snapshot import build_financial_health_snapshot
+                from app.financial.signals import evaluate_financial_signals
+
+                health_snapshot = build_financial_health_snapshot(
+                    user_id=user_id,
+                    metrics=context.metrics,
+                    reference_date=dash.period.end_date,
+                )
+                signals = evaluate_financial_signals(snapshot=health_snapshot)
+            except Exception:
+                pass
 
         # 4. Resolve Data Quality
         has_income = dash.cash_flow.has_data and dash.cash_flow.total_income > 0
@@ -128,6 +144,8 @@ class FinancialIntelligenceService:
             goals=goals_insights,
             warnings=warnings,
             opportunities=opportunities,
+            health_snapshot=health_snapshot,
+            signals=signals,
             data_quality=data_quality,
             data_as_of=datetime.now().isoformat(),
         )

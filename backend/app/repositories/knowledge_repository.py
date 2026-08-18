@@ -71,68 +71,71 @@ class KnowledgeChunkRepository(BaseRepository[KnowledgeChunk]):
         dialect_name = self._db.bind.dialect.name if self._db.bind else "sqlite"
 
         if dialect_name == "postgresql":
-            # Native pgvector L2 distance calculation on PostgreSQL
-            distance_expr = self.model.embedding.l2_distance(query_embedding)
-            stmt = (
-                select(self.model, distance_expr.label("distance"))
-                .join(self.model.document)
-                .options(joinedload(self.model.document))
-                .where(KnowledgeDocument.status == KnowledgeDocumentStatus.ACTIVE)
-            )
+            try:
+                # Native pgvector L2 distance calculation on PostgreSQL
+                distance_expr = self.model.embedding.l2_distance(query_embedding)
+                stmt = (
+                    select(self.model, distance_expr.label("distance"))
+                    .join(self.model.document)
+                    .options(joinedload(self.model.document))
+                    .where(KnowledgeDocument.status == KnowledgeDocumentStatus.ACTIVE)
+                )
 
-            if filters:
-                if "category" in filters and filters["category"]:
-                    stmt = stmt.where(KnowledgeDocument.category == filters["category"])
-                if "country" in filters and filters["country"]:
-                    stmt = stmt.where(KnowledgeDocument.country == filters["country"])
-                if "jurisdiction" in filters and filters["jurisdiction"]:
-                    stmt = stmt.where(KnowledgeDocument.jurisdiction == filters["jurisdiction"])
-                if "authority" in filters and filters["authority"]:
-                    stmt = stmt.where(KnowledgeDocument.authority == filters["authority"])
+                if filters:
+                    if "category" in filters and filters["category"]:
+                        stmt = stmt.where(KnowledgeDocument.category == filters["category"])
+                    if "country" in filters and filters["country"]:
+                        stmt = stmt.where(KnowledgeDocument.country == filters["country"])
+                    if "jurisdiction" in filters and filters["jurisdiction"]:
+                        stmt = stmt.where(KnowledgeDocument.jurisdiction == filters["jurisdiction"])
+                    if "authority" in filters and filters["authority"]:
+                        stmt = stmt.where(KnowledgeDocument.authority == filters["authority"])
 
-            stmt = stmt.order_by(distance_expr.asc()).limit(limit)
-            rows = self._db.execute(stmt).all()
+                stmt = stmt.order_by(distance_expr.asc()).limit(limit)
+                rows = self._db.execute(stmt).all()
 
-            results: List[Tuple[KnowledgeChunk, float]] = []
-            for chunk, dist in rows:
-                # Convert L2 distance to an approximate 0..1 relevance score
-                score = max(0.0, 1.0 - (float(dist) / 2.0))
-                if score >= threshold:
-                    results.append((chunk, round(score, 4)))
-            return results
+                results: List[Tuple[KnowledgeChunk, float]] = []
+                for chunk, dist in rows:
+                    # Convert L2 distance to an approximate 0..1 relevance score
+                    score = max(0.0, 1.0 - (float(dist) / 2.0))
+                    if score >= threshold:
+                        results.append((chunk, round(score, 4)))
+                return results
+            except Exception:
+                # Fallback to in-memory cosine similarity if pgvector extension is not enabled in DB instance
+                pass
 
-        else:
-            # Fallback in-memory vector similarity for SQLite test environments
-            stmt = (
-                select(self.model)
-                .join(self.model.document)
-                .options(joinedload(self.model.document))
-                .where(KnowledgeDocument.status == KnowledgeDocumentStatus.ACTIVE)
-            )
+        # Fallback in-memory vector similarity for SQLite test environments or DBs without pgvector extension
+        stmt = (
+            select(self.model)
+            .join(self.model.document)
+            .options(joinedload(self.model.document))
+            .where(KnowledgeDocument.status == KnowledgeDocumentStatus.ACTIVE)
+        )
 
-            if filters:
-                if "category" in filters and filters["category"]:
-                    stmt = stmt.where(KnowledgeDocument.category == filters["category"])
-                if "country" in filters and filters["country"]:
-                    stmt = stmt.where(KnowledgeDocument.country == filters["country"])
-                if "jurisdiction" in filters and filters["jurisdiction"]:
-                    stmt = stmt.where(KnowledgeDocument.jurisdiction == filters["jurisdiction"])
-                if "authority" in filters and filters["authority"]:
-                    stmt = stmt.where(KnowledgeDocument.authority == filters["authority"])
+        if filters:
+            if "category" in filters and filters["category"]:
+                stmt = stmt.where(KnowledgeDocument.category == filters["category"])
+            if "country" in filters and filters["country"]:
+                stmt = stmt.where(KnowledgeDocument.country == filters["country"])
+            if "jurisdiction" in filters and filters["jurisdiction"]:
+                stmt = stmt.where(KnowledgeDocument.jurisdiction == filters["jurisdiction"])
+            if "authority" in filters and filters["authority"]:
+                stmt = stmt.where(KnowledgeDocument.authority == filters["authority"])
 
-            chunks = list(self._db.execute(stmt).scalars().all())
-            scored: List[Tuple[KnowledgeChunk, float]] = []
+        chunks = list(self._db.execute(stmt).scalars().all())
+        scored: List[Tuple[KnowledgeChunk, float]] = []
 
-            for chunk in chunks:
-                if not chunk.embedding:
-                    continue
-                # Compute cosine similarity
-                score = self._cosine_similarity(query_embedding, chunk.embedding)
-                if score >= threshold:
-                    scored.append((chunk, round(score, 4)))
+        for chunk in chunks:
+            if not chunk.embedding:
+                continue
+            # Compute cosine similarity
+            score = self._cosine_similarity(query_embedding, chunk.embedding)
+            if score >= threshold:
+                scored.append((chunk, round(score, 4)))
 
-            scored.sort(key=lambda x: x[1], reverse=True)
-            return scored[:limit]
+        scored.sort(key=lambda x: x[1], reverse=True)
+        return scored[:limit]
 
     @staticmethod
     def _cosine_similarity(vec1: List[float], vec2: List[float]) -> float:

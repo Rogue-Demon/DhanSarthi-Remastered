@@ -1,10 +1,10 @@
-import React from 'react';
-import { useProfile } from '@/hooks';
-import { getActiveWidgets } from '@/config';
-import { StaggerContainer } from '@/components/motion';
-import DashboardGrid from './DashboardGrid';
-import WidgetRenderer from './WidgetRenderer';
-import EmptyDashboard from './EmptyDashboard';
+import React from 'react'
+import { useProfile } from '@/hooks'
+import { getActiveWidgets } from '@/config'
+import { StaggerContainer } from '@/components/motion'
+import DashboardGrid from './DashboardGrid'
+import WidgetRenderer from './WidgetRenderer'
+import EmptyDashboard from './EmptyDashboard'
 
 /**
  * DashboardWidgets Component
@@ -12,18 +12,18 @@ import EmptyDashboard from './EmptyDashboard';
  * Dynamically resolves, loads, and structures active widgets for the selected
  * user profile within a staggered entrance grid layout.
  */
-export function DashboardWidgets() {
-  const { profile } = useProfile();
+export function DashboardWidgets({ dashboardData }) {
+  const { profile } = useProfile()
 
   if (!profile) {
-    return <EmptyDashboard />;
+    return <EmptyDashboard />
   }
 
   // Retrieve active widget configurations
-  const activeWidgets = getActiveWidgets(profile);
+  const activeWidgets = getActiveWidgets(profile)
 
   if (activeWidgets.length === 0) {
-    return <EmptyDashboard />;
+    return <EmptyDashboard />
   }
 
   return (
@@ -34,11 +34,12 @@ export function DashboardWidgets() {
             key={widgetConfig.id}
             widgetId={widgetConfig.id}
             size={widgetConfig.size}
+            dashboardData={dashboardData}
           />
         ))}
       </DashboardGrid>
     </StaggerContainer>
-  );
+  )
 }
 
-export default DashboardWidgets;
+export default DashboardWidgets

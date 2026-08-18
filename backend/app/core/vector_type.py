@@ -12,6 +12,15 @@ from sqlalchemy.types import JSON, TypeDecorator
 from pgvector.sqlalchemy import Vector
 
 
+_PGVECTOR_ENABLED: bool = False
+
+
+def enable_pgvector() -> None:
+    """Flag that pgvector extension is verified enabled in database."""
+    global _PGVECTOR_ENABLED
+    _PGVECTOR_ENABLED = True
+
+
 class VectorType(TypeDecorator):
     """SQLAlchemy TypeDecorator for vector embeddings."""
 
@@ -23,7 +32,7 @@ class VectorType(TypeDecorator):
         self.dim = dim
 
     def load_dialect_impl(self, dialect: Any) -> Any:
-        if dialect.name == "postgresql":
+        if dialect.name == "postgresql" and _PGVECTOR_ENABLED:
             return dialect.type_descriptor(Vector(self.dim))
         return dialect.type_descriptor(JSON())
 

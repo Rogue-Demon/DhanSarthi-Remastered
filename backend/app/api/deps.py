@@ -185,21 +185,35 @@ def get_conversation_service(db: Session = Depends(get_db)) -> ConversationServi
     return ConversationService(db)
 
 
-from app.ai.providers.mock import MockEmbeddingProvider
+from app.ai.exceptions import AIConfigurationError
+from app.ai.providers.huggingface import HuggingFaceProvider
+from app.ai.providers.mock import MockEmbeddingProvider, MockLLMProvider
 from app.ai.rag.retriever import PostgresRAGRetriever
 from app.ai.rag.base import RAGRetriever
 
 
 def get_llm_provider():
-    if settings.ai_provider == "huggingface":
+    provider = settings.ai_provider.lower() if settings.ai_provider else "mock"
+    if provider == "huggingface":
         return HuggingFaceProvider()
-    return MockLLMProvider()
+    elif provider == "mock":
+        return MockLLMProvider()
+    else:
+        raise AIConfigurationError(
+            f"Unsupported AI_PROVIDER '{settings.ai_provider}'. Expected 'mock' or 'huggingface'."
+        )
 
 
 def get_embedding_provider():
-    if settings.embedding_provider == "huggingface":
+    provider = settings.embedding_provider.lower() if settings.embedding_provider else "mock"
+    if provider == "huggingface":
         return HuggingFaceProvider()
-    return MockEmbeddingProvider()
+    elif provider == "mock":
+        return MockEmbeddingProvider()
+    else:
+        raise AIConfigurationError(
+            f"Unsupported EMBEDDING_PROVIDER '{settings.embedding_provider}'. Expected 'mock' or 'huggingface'."
+        )
 
 
 def get_rag_retriever(
@@ -262,4 +276,12 @@ def get_document_service(db: Session = Depends(get_db)) -> DocumentService:
 
 def get_document_import_service(db: Session = Depends(get_db)) -> FinancialDocumentImportService:
     return FinancialDocumentImportService(db)
+
+
+from app.services.report_service import ReportService
+
+
+def get_report_service(db: Session = Depends(get_db)) -> ReportService:
+    return ReportService(db)
+
 
