@@ -13,7 +13,11 @@ class RAGRetriever(ABC):
 
     @abstractmethod
     async def retrieve(
-        self, query: str, filters: dict | None = None
+        self,
+        query: str,
+        filters: dict | None = None,
+        retrieval_plan: Any = None,
+        **kwargs: Any,
     ) -> list[RetrievedDocument]:
         """
         Query general financial knowledge base for relevant chunks.

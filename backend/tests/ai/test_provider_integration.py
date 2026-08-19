@@ -4,7 +4,7 @@ Unit and integration tests for AI Provider Selection, HuggingFace Integration, P
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
@@ -31,11 +31,13 @@ class TestProviderSelection:
                 assert isinstance(provider, HuggingFaceProvider)
 
     def test_huggingface_provider_missing_key_raises_config_error(self):
-        with patch.object(settings, "ai_provider", "huggingface"):
-            with patch.object(settings, "ai_provider_api_key", ""):
-                with pytest.raises(AIConfigurationError) as exc_info:
-                    get_llm_provider()
-                assert "API Key is not configured" in str(exc_info.value)
+        # Test the provider class directly (not the singleton factory in deps)
+        # because get_llm_provider() now returns a cached singleton that was
+        # already constructed with a valid key in a previous test.
+        with patch.object(settings, "ai_provider_api_key", ""):
+            with pytest.raises(AIConfigurationError) as exc_info:
+                HuggingFaceProvider()
+            assert "API Key is not configured" in str(exc_info.value)
 
     def test_invalid_provider_raises_config_error(self):
         with patch.object(settings, "ai_provider", "unknown_provider"):
@@ -59,10 +61,13 @@ class TestHuggingFaceProvider:
             json_data=[{"generated_text": "Systematic Investment Plan (SIP) is an investment vehicle."}],
         )
 
-        with patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response):
-            context = AIContext(question="What is SIP?")
-            res = await provider.generate(context=context, prompt="Tell me about SIP")
-            assert res == "Systematic Investment Plan (SIP) is an investment vehicle."
+        # Phase L.7.2: provider uses persistent _client instance, not httpx.AsyncClient class.
+        provider._client = MagicMock()
+        provider._client.post = AsyncMock(return_value=mock_response)
+
+        context = AIContext(question="What is SIP?")
+        res = await provider.generate(context=context, prompt="Tell me about SIP")
+        assert res == "Systematic Investment Plan (SIP) is an investment vehicle."
 
     @pytest.mark.anyio
     async def test_generate_choices_response(self):
@@ -78,10 +83,13 @@ class TestHuggingFaceProvider:
             json_data={"choices": [{"message": {"content": "SIP stands for Systematic Investment Plan."}}]},
         )
 
-        with patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response):
-            context = AIContext(question="What is SIP?")
-            res = await provider.generate(context=context, prompt="Tell me about SIP")
-            assert res == "SIP stands for Systematic Investment Plan."
+        # Phase L.7.2: provider uses persistent _client instance.
+        provider._client = MagicMock()
+        provider._client.post = AsyncMock(return_value=mock_response)
+
+        context = AIContext(question="What is SIP?")
+        res = await provider.generate(context=context, prompt="Tell me about SIP")
+        assert res == "SIP stands for Systematic Investment Plan."
 
     @pytest.mark.anyio
     async def test_generate_model_loading_503(self):
@@ -98,11 +106,14 @@ class TestHuggingFaceProvider:
             content_type="application/json",
         )
 
-        with patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response):
-            context = AIContext(question="What is SIP?")
-            with pytest.raises(AIProviderError) as exc_info:
-                await provider.generate(context=context, prompt="Tell me about SIP")
-            assert "loading" in str(exc_info.value).lower()
+        # Phase L.7.2: provider uses persistent _client instance.
+        provider._client = MagicMock()
+        provider._client.post = AsyncMock(return_value=mock_response)
+
+        context = AIContext(question="What is SIP?")
+        with pytest.raises(AIProviderError) as exc_info:
+            await provider.generate(context=context, prompt="Tell me about SIP")
+        assert "loading" in str(exc_info.value).lower()
 
     @pytest.mark.anyio
     async def test_generate_rate_limit_429(self):
@@ -119,11 +130,14 @@ class TestHuggingFaceProvider:
             content_type="application/json",
         )
 
-        with patch("httpx.AsyncClient.post", new_callable=AsyncMock, return_value=mock_response):
-            context = AIContext(question="What is SIP?")
-            with pytest.raises(AIProviderError) as exc_info:
-                await provider.generate(context=context, prompt="Tell me about SIP")
-            assert "rate limit" in str(exc_info.value).lower()
+        # Phase L.7.2: provider uses persistent _client instance.
+        provider._client = MagicMock()
+        provider._client.post = AsyncMock(return_value=mock_response)
+
+        context = AIContext(question="What is SIP?")
+        with pytest.raises(AIProviderError) as exc_info:
+            await provider.generate(context=context, prompt="Tell me about SIP")
+        assert "rate limit" in str(exc_info.value).lower()
 
 
 class TestPromptAssemblyAndRAGWrapping:

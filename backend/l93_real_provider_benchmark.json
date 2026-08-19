@@ -1,0 +1,41 @@
+{
+  "status": "REAL_PROVIDER_BENCHMARK_BLOCKED",
+  "reason": "REAL_PROVIDER_NOT_CONFIGURED: Live Hugging Face API connection failed ()",
+  "provider": "huggingface",
+  "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+  "query_count": 42,
+  "streaming_supported": true,
+  "failures_benchmark": {
+    "HTTP_401": {
+      "handled_correctly": true,
+      "error_type": "HTTPException",
+      "no_api_key_leakage": true
+    },
+    "HTTP_429": {
+      "handled_correctly": true,
+      "error_type": "HTTPException",
+      "no_api_key_leakage": true
+    },
+    "HTTP_502": {
+      "handled_correctly": true,
+      "error_type": "HTTPException",
+      "no_api_key_leakage": true
+    },
+    "HTTP_503": {
+      "handled_correctly": true,
+      "error_type": "HTTPException",
+      "no_api_key_leakage": true
+    },
+    "HTTP_504": {
+      "handled_correctly": true,
+      "error_type": "HTTPException",
+      "no_api_key_leakage": true
+    },
+    "TIMEOUT": {
+      "handled_correctly": true,
+      "error_type": "HTTPException",
+      "no_api_key_leakage": true
+    }
+  },
+  "timestamp": "2026-08-19T12:03:32.851229"
+}

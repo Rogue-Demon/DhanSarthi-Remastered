@@ -191,11 +191,41 @@ from app.ai.providers.mock import MockEmbeddingProvider, MockLLMProvider
 from app.ai.rag.retriever import PostgresRAGRetriever
 from app.ai.rag.base import RAGRetriever
 
+# ---------------------------------------------------------------------------
+# Phase L.7.3 — Provider Singletons
+#
+# HuggingFaceProvider holds a persistent httpx.AsyncClient for connection reuse.
+# A per-request instantiation (old behaviour) would create a new TCP connection
+# per request, completely negating the connection pool benefit from L.7.2.
+#
+# FastAPI runs in a single async process: the module-level singleton is safe.
+# aclose() is called by the FastAPI lifespan shutdown hook (see main.py).
+# ---------------------------------------------------------------------------
+
+_hf_llm_singleton: HuggingFaceProvider | None = None
+_hf_embed_singleton: HuggingFaceProvider | None = None
+
+
+def get_hf_llm_singleton() -> HuggingFaceProvider:
+    """Return (or lazily create) the shared HuggingFaceProvider LLM singleton."""
+    global _hf_llm_singleton
+    if _hf_llm_singleton is None:
+        _hf_llm_singleton = HuggingFaceProvider()
+    return _hf_llm_singleton
+
+
+def get_hf_embed_singleton() -> HuggingFaceProvider:
+    """Return (or lazily create) the shared HuggingFaceProvider embedding singleton."""
+    global _hf_embed_singleton
+    if _hf_embed_singleton is None:
+        _hf_embed_singleton = HuggingFaceProvider()
+    return _hf_embed_singleton
+
 
 def get_llm_provider():
     provider = settings.ai_provider.lower() if settings.ai_provider else "mock"
     if provider == "huggingface":
-        return HuggingFaceProvider()
+        return get_hf_llm_singleton()
     elif provider == "mock":
         return MockLLMProvider()
     else:
@@ -207,7 +237,7 @@ def get_llm_provider():
 def get_embedding_provider():
     provider = settings.embedding_provider.lower() if settings.embedding_provider else "mock"
     if provider == "huggingface":
-        return HuggingFaceProvider()
+        return get_hf_embed_singleton()
     elif provider == "mock":
         return MockEmbeddingProvider()
     else:
@@ -246,6 +276,13 @@ def get_market_data_service() -> MarketDataService:
     return MarketDataService(cache=market_data_cache)
 
 
+from app.ai.query_understanding.service import QueryUnderstandingService
+
+
+def get_query_understanding_service() -> QueryUnderstandingService:
+    return QueryUnderstandingService()
+
+
 def get_ai_advisor_service(
     db: Session = Depends(get_db),
     llm_provider=Depends(get_llm_provider),
@@ -256,6 +293,7 @@ def get_ai_advisor_service(
     conversation_service=Depends(get_conversation_service),
     financial_intelligence_service=Depends(get_financial_intelligence_service),
     market_data_service=Depends(get_market_data_service),
+    query_understanding_service=Depends(get_query_understanding_service),
 ) -> AIAdvisorService:
     return AIAdvisorService(
         db=db,
@@ -267,6 +305,7 @@ def get_ai_advisor_service(
         conversation_service=conversation_service,
         financial_intelligence_service=financial_intelligence_service,
         market_data_service=market_data_service,
+        query_understanding_service=query_understanding_service,
     )
 
 

@@ -116,7 +116,8 @@ async def test_rag_vs_live_data_precedence():
 
     # Verify live data and RAG are formatted, and instructions ask LLM to use Live Market Data as ground truth
     assert "Live Market Data (Authoritative Current Values):" in prompt
-    assert '"price": "150.00"' in prompt
+    # Phase L.7.2: compact JSON serialization uses separators=(",", ":") — no spaces around colon
+    assert '"price":"150.00"' in prompt
     assert "Retrieved General Knowledge:" in prompt
     assert "Stock price is 100" in prompt
 

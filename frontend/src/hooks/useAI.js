@@ -94,3 +94,114 @@ export const useSendMessage = (conversationId) => {
     },
   })
 }
+
+/**
+ * Stream a chat message via SSE endpoint with callbacks for real-time progressive rendering.
+ *
+ * @param {Object} params
+ * @param {string|number} params.conversationId
+ * @param {string} params.message
+ * @param {Function} [params.onStart] - Callback when stream starts
+ * @param {Function} [params.onToken] - Callback for each text token chunk
+ * @param {Function} [params.onMetadata] - Callback with citations, latency, quality
+ * @param {Function} [params.onComplete] - Callback when message generation completes
+ * @param {Function} [params.onError] - Callback on error
+ * @param {AbortSignal} [params.signal] - AbortSignal for user cancellation
+ */
+export const streamChatMessage = async ({
+  conversationId,
+  message,
+  onStart,
+  onToken,
+  onMetadata,
+  onComplete,
+  onError,
+  signal,
+}) => {
+  const { envConfig } = await import('@/config')
+  const { requestInterceptor } = await import('@/services/api/interceptors')
+  const url = `${envConfig.apiBaseUrl}${ENDPOINTS.ai.conversations.stream(conversationId)}`
+  const options = requestInterceptor({
+    method: 'POST',
+    body: JSON.stringify({ message }),
+    signal,
+  })
+
+  try {
+    const response = await fetch(url, options)
+    if (!response.ok) {
+      let errorMsg = `Server error ${response.status}`
+      try {
+        const errJson = await response.json()
+        errorMsg = errJson.detail || errJson.message || errorMsg
+      } catch {
+        // Response is not JSON
+      }
+      const err = new Error(errorMsg)
+      err.status = response.status
+      throw err
+    }
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || ''
+
+      let currentEvent = null
+      for (const line of lines) {
+        const trimmed = line.trim()
+        if (!trimmed) {
+          currentEvent = null
+          continue
+        }
+        if (trimmed.startsWith('event:')) {
+          currentEvent = trimmed.slice(6).trim()
+        } else if (trimmed.startsWith('data:')) {
+          const dataStr = trimmed.slice(5).trim()
+          if (dataStr === '[DONE]') {
+            continue
+          }
+          try {
+            const data = JSON.parse(dataStr)
+            if (currentEvent === 'start') {
+              onStart?.(data)
+            } else if (currentEvent === 'token') {
+              onToken?.(data.text ?? '')
+            } else if (currentEvent === 'metadata') {
+              onMetadata?.(data)
+            } else if (currentEvent === 'complete') {
+              onComplete?.(data)
+            } else if (currentEvent === 'error') {
+              onError?.(new Error(data.message || 'Stream error'))
+            } else if (!currentEvent) {
+              if (data.text !== undefined) {
+                onToken?.(data.text)
+              } else if (data.citations || data.quality) {
+                onMetadata?.(data)
+              }
+            }
+          } catch {
+            // Raw text chunk fallback
+            if (currentEvent === 'token' || !currentEvent) {
+              onToken?.(dataStr)
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log('Chat stream cancelled by user.')
+      return
+    }
+    onError?.(error)
+    throw error
+  }
+}

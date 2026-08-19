@@ -42,7 +42,11 @@ class MockRAGRetriever(RAGRetriever):
         ]
 
     async def retrieve(
-        self, query: str, filters: dict | None = None
+        self,
+        query: str,
+        filters: dict | None = None,
+        retrieval_plan: Any = None,
+        **kwargs: Any,
     ) -> list[RetrievedDocument]:
         self.last_query = query
         self.last_filters = filters
