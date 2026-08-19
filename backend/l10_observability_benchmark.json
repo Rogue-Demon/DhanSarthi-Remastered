@@ -1,0 +1,59 @@
+{
+  "benchmark_timestamp": "2026-08-19T10:45:00.553123+00:00",
+  "phase": "L.10",
+  "iterations": 1000,
+  "scenarios": {
+    "telemetry_construction": {
+      "iterations": 1000,
+      "avg_latency_us": 21.007,
+      "avg_latency_ms": 0.02101,
+      "target_ms": 0.1,
+      "pass": true
+    },
+    "sanitization_and_privacy": {
+      "iterations": 1000,
+      "avg_latency_us": 23.318,
+      "avg_latency_ms": 0.02332,
+      "target_ms": 0.2,
+      "scrub_fidelity_verified": true,
+      "pass": true
+    },
+    "aggregation_latency": {
+      "dataset_size": 1000,
+      "total_aggregation_ms": 6.253,
+      "status": "HEALTHY",
+      "p50_total_ms": 450.2,
+      "p95_total_ms": 450.2,
+      "p99_total_ms": 450.2,
+      "pass": true
+    },
+    "percentile_correctness": {
+      "sample_size": 100,
+      "min": 1.0,
+      "p50": 50.5,
+      "p90": 90.1,
+      "p95": 95.05,
+      "p99": 99.01,
+      "max": 100.0,
+      "pass": true
+    },
+    "storage_capacity": {
+      "inserted": 500,
+      "max_capacity": 200,
+      "actual_stored": 200,
+      "pass": true
+    },
+    "failure_isolation": {
+      "handled_malformed_record": true,
+      "pass": true
+    }
+  },
+  "summary": {
+    "total_scenarios": 6,
+    "passed_scenarios": 6,
+    "all_scenarios_passed": true,
+    "telemetry_construction_us": 21.01,
+    "sanitizer_us": 23.32,
+    "aggregation_1000_ms": 6.25
+  }
+}

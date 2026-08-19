@@ -160,6 +160,19 @@ class Settings(BaseSettings):
     ai_rag_degradation_enabled: bool = Field(default=True, validation_alias="AI_RAG_DEGRADATION_ENABLED")
     ai_stream_recovery_enabled: bool = Field(default=True, validation_alias="AI_STREAM_RECOVERY_ENABLED")
 
+    # Phase L.10 — Production AI Observability, Evaluation & Performance Monitoring
+    ai_observability_enabled: bool = Field(default=True, validation_alias="AI_OBSERVABILITY_ENABLED")
+    ai_observability_retention_hours: int = Field(default=24, validation_alias="AI_OBSERVABILITY_RETENTION_HOURS")
+    ai_observability_max_events: int = Field(default=10000, validation_alias="AI_OBSERVABILITY_MAX_EVENTS")
+    ai_health_p95_latency_ms: float = Field(default=20000.0, validation_alias="AI_HEALTH_P95_LATENCY_MS")
+    ai_health_min_quality_score: float = Field(default=0.90, validation_alias="AI_HEALTH_MIN_QUALITY_SCORE")
+    ai_health_min_citation_accuracy: float = Field(default=0.95, validation_alias="AI_HEALTH_MIN_CITATION_ACCURACY")
+    ai_health_min_grounding_score: float = Field(default=0.95, validation_alias="AI_HEALTH_MIN_GROUNDING_SCORE")
+    ai_health_max_fallback_rate: float = Field(default=0.10, validation_alias="AI_HEALTH_MAX_FALLBACK_RATE")
+    ai_health_max_retry_rate: float = Field(default=0.20, validation_alias="AI_HEALTH_MAX_RETRY_RATE")
+    ai_health_max_stream_interruption_rate: float = Field(default=0.05, validation_alias="AI_HEALTH_MAX_STREAM_INTERRUPTION_RATE")
+    ai_observability_api_enabled: bool = Field(default=True, validation_alias="AI_OBSERVABILITY_API_ENABLED")
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

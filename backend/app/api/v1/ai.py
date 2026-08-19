@@ -276,3 +276,77 @@ async def stream_message(
             "Connection": "keep-alive",
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase L.10 — Production AI Observability & Health Scorecard Endpoints
+# ---------------------------------------------------------------------------
+
+from app.ai.observability.service import get_observability_service
+from app.ai.schemas.observability import SystemHealthScorecard, TimeWindow
+
+
+@router.get(
+    "/observability/health",
+    response_model=SystemHealthScorecard,
+    summary="Get Production AI Health Scorecard",
+    description="Returns aggregated SLA health, latency distributions, RAG evaluation, resilience rates, and SLA compliance status.",
+)
+async def get_ai_health(
+    window: TimeWindow = TimeWindow.RECENT,
+    user_id: int = Depends(get_current_user_id),
+):
+    """Return production AI health scorecard across requested time window."""
+    from app.core.config import settings as _settings
+    if not _settings.ai_observability_api_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="AI observability API is disabled on this server.",
+        )
+    obs_service = get_observability_service()
+    return obs_service.get_health_scorecard(time_window=window)
+
+
+@router.get(
+    "/observability/summary",
+    summary="Get Production AI Summary Metrics",
+    description="Returns summary scorecard data dictionary for dashboards and health monitors.",
+)
+async def get_ai_summary(
+    window: TimeWindow = TimeWindow.RECENT,
+    user_id: int = Depends(get_current_user_id),
+):
+    """Return summary dictionary representation of production AI metrics."""
+    from app.core.config import settings as _settings
+    if not _settings.ai_observability_api_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="AI observability API is disabled on this server.",
+        )
+    obs_service = get_observability_service()
+    if window == TimeWindow.HOURLY:
+        return obs_service.get_hourly_summary()
+    elif window == TimeWindow.DAILY:
+        return obs_service.get_daily_summary()
+    return obs_service.get_recent_summary()
+
+
+@router.get(
+    "/observability/metrics",
+    summary="Get Raw Sanitized Telemetry Records",
+    description="Returns list of recent privacy-safe AI request telemetries.",
+)
+async def get_ai_metrics(
+    limit: int = 50,
+    user_id: int = Depends(get_current_user_id),
+):
+    """Return recent sanitized AI request telemetry records."""
+    from app.core.config import settings as _settings
+    if not _settings.ai_observability_api_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="AI observability API is disabled on this server.",
+        )
+    obs_service = get_observability_service()
+    records = obs_service.store.get_telemetries(limit=min(limit, 200))
+    return [r.model_dump() for r in records]

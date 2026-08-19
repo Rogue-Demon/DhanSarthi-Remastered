@@ -81,6 +81,8 @@ from app.ai.resilience import (
     ResilienceService,
     get_resilience_service,
 )
+from app.ai.observability.service import ObservabilityService, get_observability_service
+from app.ai.schemas.observability import PipelineEventType
 
 
 class AIAdvisorService:
@@ -103,6 +105,7 @@ class AIAdvisorService:
         inflight: Optional[InFlightDeduplicator] = None,
         compressor: Optional[PromptCompressor] = None,
         resilience_service: Optional[ResilienceService] = None,
+        observability_service: Optional[ObservabilityService] = None,
     ) -> None:
         self._db = db
         self._llm = llm_provider
@@ -126,6 +129,7 @@ class AIAdvisorService:
         self._compressor = compressor if compressor is not None else get_prompt_compressor()
         self._quality_evaluator = ResponseQualityEvaluator(safety_validator=self._safety)
         self._resilience = resilience_service if resilience_service is not None else get_resilience_service()
+        self._observability = observability_service if observability_service is not None else get_observability_service()
 
 
     # ------------------------------------------------------------------
@@ -423,6 +427,7 @@ class AIAdvisorService:
                 detail="Conversation service is not configured.",
             )
 
+        req_id, event_tracker = self._observability.create_request_tracker()
         tracker = LatencyTracker()
         resilience_metrics = ResilienceMetrics()
         resilience_metrics.circuit_state = self._resilience.get_circuit_state()
@@ -469,8 +474,11 @@ class AIAdvisorService:
             resilience_metrics.fallback_used = True
             resilience_metrics.fallback_type = FallbackType.SAFE_FALLBACK
             resilience_metrics.safe_fallback_used = True
+            event_tracker.record_event(PipelineEventType.FALLBACK_USED, {"fallback_type": "SAFE_FALLBACK"})
+            event_tracker.record_event(PipelineEventType.REQUEST_COMPLETED)
             response_time_ms = int(tracker.finish())
             assistant_metadata = {
+                "request_id": req_id,
                 "provider": settings.ai_provider,
                 "model": settings.ai_model,
                 "response_time_ms": response_time_ms,
@@ -488,6 +496,19 @@ class AIAdvisorService:
                     content=safe_text,
                     metadata=assistant_metadata,
                 )
+            self._observability.record_request_telemetry(
+                request_id=req_id,
+                conversation_id=conversation_id,
+                latency_breakdown=tracker.breakdown,
+                understanding=understanding,
+                quality_metadata={"overall_score": 1.0, "passed": True, "dimensions": {}},
+                resilience_metadata=assistant_metadata.get("resilience"),
+                routing_decision=None,
+                streaming_enabled=False,
+                personal_boundary_checked=True,
+                personal_boundary_passed=True,
+                pipeline_events=event_tracker.get_events(),
+            )
             return SendMessageResponse(
                 conversation_id=conversation_id,
                 user_message=MessageResponse.model_validate(user_msg),
@@ -499,8 +520,10 @@ class AIAdvisorService:
         # Fast short-circuit if query is too ambiguous and requires clarification
         if understanding.execution_plan and understanding.execution_plan.clarification_required:
             clarification_text = understanding.execution_plan.clarification_prompt or "Could you please clarify your question?"
+            event_tracker.record_event(PipelineEventType.REQUEST_COMPLETED)
             response_time_ms = tracker.finish()
             assistant_metadata = {
+                "request_id": req_id,
                 "provider": settings.ai_provider,
                 "model": settings.ai_model,
                 "response_time_ms": response_time_ms,
@@ -523,6 +546,19 @@ class AIAdvisorService:
                     content=clarification_text,
                     metadata=assistant_metadata,
                 )
+            self._observability.record_request_telemetry(
+                request_id=req_id,
+                conversation_id=conversation_id,
+                latency_breakdown=tracker.breakdown,
+                understanding=understanding,
+                quality_metadata={"overall_score": 1.0, "passed": True, "dimensions": {}},
+                resilience_metadata=assistant_metadata.get("resilience"),
+                routing_decision=None,
+                streaming_enabled=False,
+                personal_boundary_checked=False,
+                personal_boundary_passed=True,
+                pipeline_events=event_tracker.get_events(),
+            )
             return SendMessageResponse(
                 conversation_id=conversation_id,
                 user_message=MessageResponse.model_validate(user_msg),
@@ -887,7 +923,10 @@ class AIAdvisorService:
 
         response_time_ms = int(tracker.finish())
 
+        event_tracker.record_event(PipelineEventType.REQUEST_COMPLETED)
+
         assistant_metadata = {
+            "request_id": req_id,
             "provider": settings.ai_provider,
             "model": settings.ai_model,
             "response_time_ms": response_time_ms,
@@ -922,6 +961,20 @@ class AIAdvisorService:
                 content=raw_response,
                 metadata=assistant_metadata,
             )
+
+        self._observability.record_request_telemetry(
+            request_id=req_id,
+            conversation_id=conversation_id,
+            latency_breakdown=tracker.breakdown,
+            understanding=understanding,
+            quality_metadata=assistant_metadata.get("quality"),
+            resilience_metadata=assistant_metadata.get("resilience"),
+            routing_decision=routing_decision,
+            streaming_enabled=False,
+            personal_boundary_checked=bool(understanding.requires_personal_data if understanding else False),
+            personal_boundary_passed=True,
+            pipeline_events=event_tracker.get_events(),
+        )
 
         return SendMessageResponse(
             conversation_id=conversation_id,
@@ -966,6 +1019,7 @@ class AIAdvisorService:
                 detail="Conversation service is not configured.",
             )
 
+        req_id, event_tracker = self._observability.create_request_tracker()
         tracker = LatencyTracker()
         tracker.record_flag("streaming_used", True)
         resilience_metrics = ResilienceMetrics()
@@ -1006,8 +1060,10 @@ class AIAdvisorService:
             resilience_metrics.fallback_used = True
             resilience_metrics.fallback_type = FallbackType.SAFE_FALLBACK
             resilience_metrics.safe_fallback_used = True
+            event_tracker.record_event(PipelineEventType.FALLBACK_USED, {"fallback_type": "SAFE_FALLBACK"})
+            event_tracker.record_event(PipelineEventType.REQUEST_COMPLETED)
             if emit_sse:
-                yield f"event: start\ndata: {json.dumps({'message_id': user_msg.id, 'conversation_id': conversation_id})}\n\n"
+                yield f"event: start\ndata: {json.dumps({'message_id': user_msg.id, 'conversation_id': conversation_id, 'request_id': req_id})}\n\n"
             words = safe_text.split(" ")
             for i, word in enumerate(words):
                 chunk = word + (" " if i < len(words) - 1 else "")
@@ -1018,6 +1074,7 @@ class AIAdvisorService:
                 await asyncio.sleep(0.01)
             response_time_ms = int(tracker.finish())
             assistant_metadata = {
+                "request_id": req_id,
                 "provider": settings.ai_provider,
                 "model": settings.ai_model,
                 "response_time_ms": response_time_ms,
@@ -1036,6 +1093,19 @@ class AIAdvisorService:
                     content=safe_text,
                     metadata=assistant_metadata,
                 )
+            self._observability.record_request_telemetry(
+                request_id=req_id,
+                conversation_id=conversation_id,
+                latency_breakdown=tracker.breakdown,
+                understanding=understanding,
+                quality_metadata={"overall_score": 1.0, "passed": True, "dimensions": {}},
+                resilience_metadata=assistant_metadata.get("resilience"),
+                routing_decision=None,
+                streaming_enabled=True,
+                personal_boundary_checked=True,
+                personal_boundary_passed=True,
+                pipeline_events=event_tracker.get_events(),
+            )
             if emit_sse:
                 yield f"event: metadata\ndata: {json.dumps({'citations': [], 'quality': {'overall_score': 1.0, 'passed': True, 'dimensions': {}}, 'latency': tracker.to_dict(), 'selected_model': settings.ai_model, 'resilience': resilience_metrics.to_metadata_dict()})}\n\n"
                 yield f"event: complete\ndata: {json.dumps({'message_id': asst_msg.id, 'status': 'completed'})}\n\n"
@@ -1047,9 +1117,11 @@ class AIAdvisorService:
             resilience_metrics.fallback_used = True
             resilience_metrics.fallback_type = FallbackType.SAFE_FALLBACK
             resilience_metrics.safe_fallback_used = True
+            event_tracker.record_event(PipelineEventType.FALLBACK_USED, {"fallback_type": "SAFE_FALLBACK"})
+            event_tracker.record_event(PipelineEventType.REQUEST_COMPLETED)
             safe_text = self._resilience.get_safe_fallback_message(ResilienceFailureType.PROVIDER_UNAVAILABLE)
             if emit_sse:
-                yield f"event: start\ndata: {json.dumps({'message_id': user_msg.id, 'conversation_id': conversation_id})}\n\n"
+                yield f"event: start\ndata: {json.dumps({'message_id': user_msg.id, 'conversation_id': conversation_id, 'request_id': req_id})}\n\n"
             words = safe_text.split(" ")
             for i, word in enumerate(words):
                 chunk = word + (" " if i < len(words) - 1 else "")
@@ -1060,6 +1132,7 @@ class AIAdvisorService:
                 await asyncio.sleep(0.01)
             response_time_ms = int(tracker.finish())
             assistant_metadata = {
+                "request_id": req_id,
                 "provider": settings.ai_provider,
                 "model": settings.ai_model,
                 "response_time_ms": response_time_ms,
@@ -1078,6 +1151,19 @@ class AIAdvisorService:
                     content=safe_text,
                     metadata=assistant_metadata,
                 )
+            self._observability.record_request_telemetry(
+                request_id=req_id,
+                conversation_id=conversation_id,
+                latency_breakdown=tracker.breakdown,
+                understanding=understanding,
+                quality_metadata={"overall_score": 1.0, "passed": True, "dimensions": {}},
+                resilience_metadata=assistant_metadata.get("resilience"),
+                routing_decision=None,
+                streaming_enabled=True,
+                personal_boundary_checked=False,
+                personal_boundary_passed=True,
+                pipeline_events=event_tracker.get_events(),
+            )
             if emit_sse:
                 yield f"event: metadata\ndata: {json.dumps({'citations': [], 'quality': {'overall_score': 1.0, 'passed': True, 'dimensions': {}}, 'latency': tracker.to_dict(), 'selected_model': settings.ai_model, 'resilience': resilience_metrics.to_metadata_dict()})}\n\n"
                 yield f"event: complete\ndata: {json.dumps({'message_id': asst_msg.id, 'status': 'completed'})}\n\n"
@@ -1234,13 +1320,14 @@ class AIAdvisorService:
 
         if cached_entry is not None:
             # CACHE HIT: stream cached content cleanly
+            event_tracker.record_event(PipelineEventType.REQUEST_COMPLETED)
             tracker.record_flag("cache_hit", True)
             tracker.record_flag("llm_skipped_due_to_cache", True)
             tracker.record("cache_entry_age_ms", cached_entry.age_ms)
             raw_response = cached_entry.response_text
 
             if emit_sse:
-                yield f"event: start\ndata: {json.dumps({'message_id': user_msg.id, 'conversation_id': conversation_id})}\n\n"
+                yield f"event: start\ndata: {json.dumps({'message_id': user_msg.id, 'conversation_id': conversation_id, 'request_id': req_id})}\n\n"
             
             for chunk in raw_response.split(" "):
                 token_chunk = chunk + " "
@@ -1253,6 +1340,7 @@ class AIAdvisorService:
             sub_intent = self._router.classify_sub_intent(request.message)
             response_time_ms = int(tracker.finish())
             assistant_metadata = {
+                "request_id": req_id,
                 "provider": settings.ai_provider,
                 "model": settings.ai_model,
                 "response_time_ms": response_time_ms,
@@ -1271,6 +1359,20 @@ class AIAdvisorService:
                     content=raw_response,
                     metadata=assistant_metadata,
                 )
+
+            self._observability.record_request_telemetry(
+                request_id=req_id,
+                conversation_id=conversation_id,
+                latency_breakdown=tracker.breakdown,
+                understanding=understanding,
+                quality_metadata=assistant_metadata.get("quality"),
+                resilience_metadata=assistant_metadata.get("resilience"),
+                routing_decision=routing_decision,
+                streaming_enabled=True,
+                personal_boundary_checked=bool(understanding.requires_personal_data if understanding else False),
+                personal_boundary_passed=True,
+                pipeline_events=event_tracker.get_events(),
+            )
 
             if emit_sse:
                 meta_payload = {
@@ -1413,9 +1515,11 @@ class AIAdvisorService:
                 )
 
         # --- Persist final accepted assistant message ---
+        event_tracker.record_event(PipelineEventType.REQUEST_COMPLETED)
         sub_intent = self._router.classify_sub_intent(request.message)
         response_time_ms = int(tracker.finish())
         assistant_metadata = {
+            "request_id": req_id,
             "provider": settings.ai_provider,
             "model": settings.ai_model,
             "response_time_ms": response_time_ms,
@@ -1441,8 +1545,22 @@ class AIAdvisorService:
                 metadata=assistant_metadata,
             )
 
+        self._observability.record_request_telemetry(
+            request_id=req_id,
+            conversation_id=conversation_id,
+            latency_breakdown=tracker.breakdown,
+            understanding=understanding,
+            quality_metadata=assistant_metadata.get("quality"),
+            resilience_metadata=assistant_metadata.get("resilience"),
+            routing_decision=routing_decision,
+            streaming_enabled=True,
+            personal_boundary_checked=bool(understanding.requires_personal_data if understanding else False),
+            personal_boundary_passed=True,
+            pipeline_events=event_tracker.get_events(),
+        )
+
         if emit_sse:
-            yield f"event: metadata\ndata: {json.dumps({'citations': citations_meta, 'quality': {'overall_score': round(quality_result.overall_score, 2), 'passed': quality_result.overall_pass, 'retry_used': retry_used, 'dimensions': quality_result.dimensions}, 'latency': tracker.to_dict(), 'selected_model': routing_decision.model, 'tokens_per_second': tracker.breakdown.tokens_per_second or 0.0})}\n\n"
+            yield f"event: metadata\ndata: {json.dumps({'request_id': req_id, 'citations': citations_meta, 'quality': {'overall_score': round(quality_result.overall_score, 2), 'passed': quality_result.overall_pass, 'retry_used': retry_used, 'dimensions': quality_result.dimensions}, 'latency': tracker.to_dict(), 'selected_model': routing_decision.model, 'tokens_per_second': tracker.breakdown.tokens_per_second or 0.0})}\n\n"
             yield f"event: complete\ndata: {json.dumps({'message_id': asst_msg.id, 'status': 'completed'})}\n\n"
 
     # ------------------------------------------------------------------
