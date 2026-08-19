@@ -130,6 +130,18 @@ class LatencyBreakdown(BaseModel):
     history_messages_after_compression: int = Field(default=0)
     prompt_compression_mode: str = Field(default="")
 
+    # Phase L.9.9 — AI Production Resilience, Failure Recovery & Graceful Degradation
+    resilience_ms: float = Field(default=0.0)
+    retry_count: int = Field(default=0)
+    fallback_used: bool = Field(default=False)
+    fallback_type: Optional[str] = Field(default=None)
+    circuit_state: str = Field(default="CLOSED")
+    failure_type: str = Field(default="NONE")
+    recovery_time_ms: Optional[float] = Field(default=None)
+    stream_interrupted: bool = Field(default=False)
+    client_cancelled: bool = Field(default=False)
+    safe_fallback_used: bool = Field(default=False)
+
     def to_dict(self) -> Dict[str, Any]:
         """Return numeric dictionary representation rounded to 2 decimal places."""
         data = self.model_dump()

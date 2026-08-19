@@ -147,6 +147,19 @@ class Settings(BaseSettings):
     ai_max_history_messages_after_compression: int = Field(default=4, validation_alias="AI_MAX_HISTORY_MESSAGES_AFTER_COMPRESSION")
     ai_prompt_compression_version: str = Field(default="v1", validation_alias="AI_PROMPT_COMPRESSION_VERSION")
 
+    # Phase L.9.9 — AI Production Resilience, Failure Recovery & Graceful Degradation
+    ai_resilience_enabled: bool = Field(default=True, validation_alias="AI_RESILIENCE_ENABLED")
+    ai_max_total_attempts: int = Field(default=3, validation_alias="AI_MAX_TOTAL_ATTEMPTS")
+    ai_circuit_breaker_enabled: bool = Field(default=True, validation_alias="AI_CIRCUIT_BREAKER_ENABLED")
+    ai_circuit_failure_threshold: int = Field(default=5, validation_alias="AI_CIRCUIT_FAILURE_THRESHOLD")
+    ai_circuit_recovery_seconds: float = Field(default=30.0, validation_alias="AI_CIRCUIT_RECOVERY_SECONDS")
+    ai_circuit_half_open_requests: int = Field(default=1, validation_alias="AI_CIRCUIT_HALF_OPEN_REQUESTS")
+    ai_resilience_max_backoff_seconds: float = Field(default=4.0, validation_alias="AI_RESILIENCE_MAX_BACKOFF_SECONDS")
+    ai_resilience_jitter_seconds: float = Field(default=0.25, validation_alias="AI_RESILIENCE_JITTER_SECONDS")
+    ai_provider_fallback_enabled: bool = Field(default=True, validation_alias="AI_PROVIDER_FALLBACK_ENABLED")
+    ai_rag_degradation_enabled: bool = Field(default=True, validation_alias="AI_RAG_DEGRADATION_ENABLED")
+    ai_stream_recovery_enabled: bool = Field(default=True, validation_alias="AI_STREAM_RECOVERY_ENABLED")
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

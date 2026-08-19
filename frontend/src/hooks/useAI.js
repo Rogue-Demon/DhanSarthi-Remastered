@@ -41,7 +41,8 @@ export const useCreateConversation = () => {
 export const useDeleteConversation = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (conversationId) => apiClient.delete(ENDPOINTS.ai.conversations.delete(conversationId)),
+    mutationFn: (conversationId) =>
+      apiClient.delete(ENDPOINTS.ai.conversations.delete(conversationId)),
     onSuccess: (_data, conversationId) => {
       queryClient.invalidateQueries({ queryKey: ['ai-conversations'] })
       queryClient.removeQueries({ queryKey: AI_KEYS.conversation(conversationId) })
@@ -52,7 +53,8 @@ export const useDeleteConversation = () => {
 export const useSendMessage = (conversationId) => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ message }) => apiClient.post(ENDPOINTS.ai.conversations.sendMessage(conversationId), { message }),
+    mutationFn: ({ message }) =>
+      apiClient.post(ENDPOINTS.ai.conversations.sendMessage(conversationId), { message }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: AI_KEYS.conversation(conversationId) })
       queryClient.invalidateQueries({ queryKey: ['ai-conversations'] })
@@ -205,14 +207,16 @@ export const streamChatMessage = async ({
     if (error?.name === 'AbortError') {
       // Cancellation is intentionally not reported as a provider failure.
       if (reader) {
-        try { await reader.cancel() } catch { /* already closed */ }
+        try {
+          await reader.cancel()
+        } catch {
+          /* already closed */
+        }
       }
       return
     }
 
     deliverError(error)
     throw error
-  } finally {
-    reader = null
   }
 }
