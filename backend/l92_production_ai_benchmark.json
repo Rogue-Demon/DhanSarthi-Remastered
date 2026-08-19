@@ -1,0 +1,188 @@
+{
+  "total_queries": 32,
+  "latency": {
+    "total_ms": {
+      "min": 1.76,
+      "mean": 2.78,
+      "median": 2.44,
+      "p50": 2.44,
+      "p90": 3.11,
+      "p95": 3.72,
+      "p99": 10.69,
+      "max": 13.56
+    },
+    "provider_network_ms": {
+      "min": 0.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "p50": 0.0,
+      "p90": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    },
+    "ttft_ms": {
+      "min": 0.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "p50": 0.0,
+      "p90": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    },
+    "generation_ms": {
+      "min": 0.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "p50": 0.0,
+      "p90": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    },
+    "retrieval_ms": {
+      "min": 0.42,
+      "mean": 0.71,
+      "median": 0.58,
+      "p50": 0.58,
+      "p90": 0.84,
+      "p95": 0.86,
+      "p99": 2.84,
+      "max": 3.73
+    },
+    "query_understanding_ms": {
+      "min": 0.69,
+      "mean": 1.26,
+      "median": 1.02,
+      "p50": 1.02,
+      "p90": 1.39,
+      "p95": 1.83,
+      "p99": 6.16,
+      "max": 7.88
+    }
+  },
+  "inference": {
+    "mean_tokens_per_second": 150.0,
+    "median_tokens_per_second": 150.0,
+    "mean_prompt_tokens": 797.47,
+    "mean_generated_tokens": 8.0
+  },
+  "quality": {
+    "quality_pass_rate_percent": 100.0,
+    "average_quality_score": 0.99,
+    "median_quality_score": 1.0,
+    "retry_rate_percent": 6.25,
+    "retry_success_rate_percent": 0.0,
+    "fallback_rate_percent": 6.25,
+    "average_quality_improvement_on_retry": 0.1
+  },
+  "category_breakdown": {
+    "CASUAL": {
+      "query_count": 2,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    },
+    "FINANCE_BASICS": {
+      "query_count": 2,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    },
+    "INVESTMENTS": {
+      "query_count": 2,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    },
+    "BANKING": {
+      "query_count": 2,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    },
+    "TAX": {
+      "query_count": 2,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    },
+    "PERSONAL_LOOKUP": {
+      "query_count": 3,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    },
+    "PERSONAL_ANALYSIS": {
+      "query_count": 2,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    },
+    "MIXED": {
+      "query_count": 2,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    },
+    "COMPARISON": {
+      "query_count": 3,
+      "pass_rate_percent": 100.0,
+      "average_score": 0.93
+    },
+    "HISTORICAL": {
+      "query_count": 2,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    },
+    "HINGLISH": {
+      "query_count": 2,
+      "pass_rate_percent": 100.0,
+      "average_score": 0.9
+    },
+    "TYPO": {
+      "query_count": 2,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    },
+    "ADVERSARIAL": {
+      "query_count": 3,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    },
+    "COMPLEX_PLANNING": {
+      "query_count": 3,
+      "pass_rate_percent": 100.0,
+      "average_score": 1.0
+    }
+  },
+  "rag": {
+    "rag_eligible_queries": 11,
+    "hit_at_1": 1.0,
+    "hit_at_3": 0.82,
+    "hit_at_5": 0.82,
+    "mrr": 1.0,
+    "authority_accuracy": 1.0,
+    "citation_accuracy": 1.0,
+    "grounding_score": 1.0,
+    "abstention_accuracy": 1.0
+  },
+  "personal_finance_boundary": {
+    "personal_queries_evaluated": 7,
+    "personal_boundary_compliance_percent": 100.0,
+    "factual_integrity_verified": true
+  },
+  "bottleneck": {
+    "dominant_bottleneck": "QUERY_UNDERSTANDING",
+    "dominant_latency_ms": 40.21,
+    "dominant_percentage": 61.29,
+    "breakdown_ms": {
+      "LLM_GENERATION": 0.0,
+      "PROVIDER_NETWORK": 0.0,
+      "MINILM": 0.0,
+      "RETRIEVAL": 22.81,
+      "QUERY_UNDERSTANDING": 40.21,
+      "QUALITY_RETRY": 0.04,
+      "CONTEXT_BUILD": 0.86,
+      "RERANKER": 0.0,
+      "SAFETY": 1.14,
+      "PERSISTENCE": 0.55
+    }
+  },
+  "benchmark_date": "2026-08-19T09:12:04.117515",
+  "configured_provider": "huggingface",
+  "configured_model": "meta-llama/Meta-Llama-3-8B-Instruct"
+}

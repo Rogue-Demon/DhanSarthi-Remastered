@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useProfile } from '@/hooks'
-import { useConversationDetail, useSendMessage } from '@/hooks/useAI'
+import { useConversationDetail, useSendMessage, streamChatMessage, AI_KEYS } from '@/hooks/useAI'
+import { useQueryClient } from '@tanstack/react-query'
 import { getAIAdvisorConfig } from '@/config'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Badge, Button } from '@/components/ui'
@@ -12,32 +13,31 @@ import { cn } from '@/utils'
  *
  * Full-featured interactive chat interface connected to the real AI Advisor backend.
  *
- * Props:
- *   conversationId (number|null) — if provided, loads and continues an existing conversation.
- *                                   if null/undefined, shows the welcome screen (no conversation yet).
- *   initialPrompt (string)       — pre-fill the input text field.
- *
- * State model:
- *   - Conversation messages come from `useConversationDetail` (real backend data).
- *   - Sending uses `useSendMessage` mutation — backend returns both user + assistant messages.
- *   - Optimistic user message is appended immediately so the UI feels instant.
- *   - On mutation success the query is invalidated and real data re-fetches.
+ * Phase L.9.8 Streaming UX:
+ *   - Streaming-First execution via SSE (`streamChatMessage`).
+ *   - Instant Time-To-First-Token progressive token rendering.
+ *   - Automatic seamless fallback to non-streaming mutation if streaming is disabled or unsupported.
+ *   - Cancellation support via AbortController with clean connection teardown.
  */
 export function ChatWorkspace({ conversationId = null, initialPrompt = '' }) {
   const { profile } = useProfile()
+  const queryClient = useQueryClient()
   const shouldReduceMotion = useReducedMotion()
   const advisorConfig = getAIAdvisorConfig(profile)
 
   const [inputText, setInputText] = useState(initialPrompt || '')
   // Optimistic messages shown while the real response is loading
   const [optimisticMessages, setOptimisticMessages] = useState([])
+  const [streamingMsg, setStreamingMsg] = useState(null)
+  const [isStreaming, setIsStreaming] = useState(false)
   const [expandedCalcMsgId, setExpandedCalcMsgId] = useState(null)
   const messagesEndRef = useRef(null)
+  const abortControllerRef = useRef(null)
 
   // ── Real data: load conversation messages when conversationId is set ──────
   const { data: convDetail, isLoading: isLoadingHistory } = useConversationDetail(conversationId)
 
-  // ── Send message mutation ─────────────────────────────────────────────────
+  // ── Send message mutation fallback ────────────────────────────────────────
   const sendMutation = useSendMessage(conversationId)
 
   // Auto-scroll to bottom when messages change
@@ -47,34 +47,154 @@ export function ChatWorkspace({ conversationId = null, initialPrompt = '' }) {
 
   useEffect(() => {
     scrollToBottom()
-  }, [convDetail, optimisticMessages, sendMutation.isPending, scrollToBottom])
+  }, [
+    convDetail,
+    optimisticMessages,
+    streamingMsg,
+    isStreaming,
+    sendMutation.isPending,
+    scrollToBottom,
+  ])
+
+  // Cleanup stream abort controller on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [])
 
   // ── Build the displayed message list ─────────────────────────────────────
-  // Real messages from backend (chronological); append optimistic messages while pending
   const realMessages = convDetail?.messages ?? []
-  const displayMessages = sendMutation.isPending
-    ? [...realMessages, ...optimisticMessages]
-    : realMessages
+  const displayMessages = [...realMessages]
+  if (optimisticMessages.length > 0) {
+    displayMessages.push(...optimisticMessages)
+  }
+  if (streamingMsg) {
+    displayMessages.push(streamingMsg)
+  }
+
+  const isBusy = isStreaming || sendMutation.isPending
 
   // ── Handlers ─────────────────────────────────────────────────────────────
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = inputText.trim()
-    if (!text || !conversationId || sendMutation.isPending) return
+    if (!text || !conversationId || isBusy) return
 
-    // Optimistic user message (will be replaced by real data after mutation)
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    setOptimisticMessages([
-      {
-        id: `opt-u-${Date.now()}`,
-        role: 'USER',
-        content: text,
-        created_at: now,
-        _optimistic: true,
-      },
-    ])
+    const optUserMsg = {
+      id: `opt-u-${Date.now()}`,
+      role: 'USER',
+      content: text,
+      created_at: now,
+      _optimistic: true,
+    }
+    setOptimisticMessages([optUserMsg])
     setInputText('')
 
-    sendMutation.mutate({ message: text })
+    // Set up AbortController for stream cancellation
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+    setIsStreaming(true)
+
+    // Initial temporary streaming message
+    const tempStreamingMsg = {
+      id: `streaming-asst-${Date.now()}`,
+      role: 'ASSISTANT',
+      content: '',
+      created_at: now,
+      _isStreaming: true,
+      metadata: {},
+    }
+    setStreamingMsg(tempStreamingMsg)
+
+    let streamSucceeded = false
+    let currentContent = ''
+
+    try {
+      await streamChatMessage({
+        conversationId,
+        message: text,
+        signal: controller.signal,
+        onStart: () => {
+          streamSucceeded = true
+        },
+        onToken: (token) => {
+          streamSucceeded = true
+          currentContent += token
+          setStreamingMsg((prev) => (prev ? { ...prev, content: currentContent } : prev))
+        },
+        onMetadata: (meta) => {
+          setStreamingMsg((prev) => (prev ? { ...prev, metadata: meta } : prev))
+        },
+        onComplete: () => {
+          // Re-fetch real messages from database and clear temporary optimistic/streaming state
+          queryClient.invalidateQueries({ queryKey: AI_KEYS.conversation(conversationId) })
+          queryClient.invalidateQueries({ queryKey: ['ai-conversations'] })
+          setStreamingMsg(null)
+          setOptimisticMessages([])
+          setIsStreaming(false)
+          abortControllerRef.current = null
+        },
+        onError: (err) => {
+          console.warn('Stream failed or interrupted, falling back:', err)
+          if (!streamSucceeded) {
+            // Fallback to standard non-streaming mutation if stream hasn't produced output
+            setStreamingMsg(null)
+            setIsStreaming(false)
+            sendMutation.mutate(
+              { message: text },
+              {
+                onSettled: () => {
+                  setOptimisticMessages([])
+                },
+              }
+            )
+          } else {
+            // Partial stream interrupted: finish and refresh
+            queryClient.invalidateQueries({ queryKey: AI_KEYS.conversation(conversationId) })
+            setStreamingMsg(null)
+            setOptimisticMessages([])
+            setIsStreaming(false)
+          }
+        },
+      })
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        setStreamingMsg(null)
+        setOptimisticMessages([])
+        setIsStreaming(false)
+        return
+      }
+      if (!streamSucceeded) {
+        setStreamingMsg(null)
+        setIsStreaming(false)
+        sendMutation.mutate(
+          { message: text },
+          {
+            onSettled: () => {
+              setOptimisticMessages([])
+            },
+          }
+        )
+      } else {
+        setStreamingMsg(null)
+        setOptimisticMessages([])
+        setIsStreaming(false)
+      }
+    }
+  }
+
+  const handleStopStream = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
+    setIsStreaming(false)
+    setStreamingMsg(null)
+    setOptimisticMessages([])
+    queryClient.invalidateQueries({ queryKey: AI_KEYS.conversation(conversationId) })
   }
 
   const handleKeyDown = (e) => {
@@ -277,7 +397,16 @@ export function ChatWorkspace({ conversationId = null, initialPrompt = '' }) {
                           : 'clay-surface bg-card border border-white/60 dark:border-white/5 text-text-primary rounded-tl-none'
                       )}
                     >
-                      {msg.content}
+                      {msg.content ||
+                        (msg._isStreaming ? (
+                          <span className="inline-flex items-center gap-1.5 text-text-muted italic font-semibold">
+                            <LucideIcons.Sparkles className="h-3.5 w-3.5 animate-spin text-primary" />
+                            Thinking…
+                          </span>
+                        ) : null)}
+                      {msg._isStreaming && msg.content ? (
+                        <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-primary animate-pulse align-middle" />
+                      ) : null}
                     </div>
 
                     {/* Assistant Action Toolbar */}
@@ -504,16 +633,28 @@ export function ChatWorkspace({ conversationId = null, initialPrompt = '' }) {
                 <LucideIcons.Mic className="h-4 w-4" />
               </button>
 
-              <Button
-                variant="gradient"
-                size="sm"
-                onClick={handleSend}
-                disabled={!inputText.trim() || !conversationId || sendMutation.isPending}
-                className="rounded-xl px-3 py-2 font-black text-xs shadow-button"
-                iconLeft={<LucideIcons.Send className="h-3.5 w-3.5" />}
-              >
-                Send
-              </Button>
+              {isStreaming ? (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={handleStopStream}
+                  className="rounded-xl px-3 py-2 font-black text-xs shadow-button"
+                  iconLeft={<LucideIcons.Square className="h-3.5 w-3.5 fill-current" />}
+                >
+                  Stop
+                </Button>
+              ) : (
+                <Button
+                  variant="gradient"
+                  size="sm"
+                  onClick={handleSend}
+                  disabled={!inputText.trim() || !conversationId || isBusy}
+                  className="rounded-xl px-3 py-2 font-black text-xs shadow-button"
+                  iconLeft={<LucideIcons.Send className="h-3.5 w-3.5" />}
+                >
+                  Send
+                </Button>
+              )}
             </div>
           </div>
 

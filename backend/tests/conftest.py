@@ -31,3 +31,15 @@ def db_session() -> Session:
     
     session.rollback()
     session.close()
+
+
+@pytest.fixture(autouse=True)
+def reset_ai_caches():
+    """Ensure AI response cache and in-flight deduplicator are reset between tests."""
+    from app.ai.cache.response_cache import get_response_cache
+    from app.ai.cache.inflight import get_inflight_deduplicator
+    get_response_cache().clear()
+    get_inflight_deduplicator().clear()
+    yield
+    get_response_cache().clear()
+    get_inflight_deduplicator().clear()

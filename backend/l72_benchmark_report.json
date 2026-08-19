@@ -1,0 +1,160 @@
+{
+  "phase": "L.7.2",
+  "timestamp": "2026-08-18T19:10:40Z",
+  "repetitions_per_query": 3,
+  "note": "Pipeline-only benchmark (MockLLM). Real HF latency excluded.",
+  "queries": [
+    {
+      "label": "CASUAL",
+      "query_preview": "Hi",
+      "intent": "CASUAL",
+      "scope": "CASUAL",
+      "token_budget": 128,
+      "prompt_chars": {
+        "min": 1470,
+        "median": 1470,
+        "p95": 1470,
+        "max": 1470
+      },
+      "total_ms": {
+        "min": 0.1,
+        "median": 0.12,
+        "p95": 3.2,
+        "max": 3.54
+      }
+    },
+    {
+      "label": "SIMPLE_GENERAL",
+      "query_preview": "What is SIP?",
+      "intent": "GENERAL_FINANCE",
+      "scope": "EDUCATIONAL",
+      "token_budget": 256,
+      "prompt_chars": {
+        "min": 1872,
+        "median": 1872,
+        "p95": 1872,
+        "max": 1872
+      },
+      "total_ms": {
+        "min": 0.31,
+        "median": 0.32,
+        "p95": 2.63,
+        "max": 2.89
+      }
+    },
+    {
+      "label": "GENERAL_FUND",
+      "query_preview": "What is a mutual fund?",
+      "intent": "GENERAL_FINANCE",
+      "scope": "EDUCATIONAL",
+      "token_budget": 256,
+      "prompt_chars": {
+        "min": 1882,
+        "median": 1882,
+        "p95": 1882,
+        "max": 1882
+      },
+      "total_ms": {
+        "min": 0.33,
+        "median": 0.34,
+        "p95": 0.45,
+        "max": 0.46
+      }
+    },
+    {
+      "label": "PERSONAL",
+      "query_preview": "How much did I spend this month?",
+      "intent": "PERSONAL_FINANCE",
+      "scope": "PERSONAL_LOOKUP",
+      "token_budget": 300,
+      "prompt_chars": {
+        "min": 1500,
+        "median": 1500,
+        "p95": 1500,
+        "max": 1500
+      },
+      "total_ms": {
+        "min": 0.37,
+        "median": 0.39,
+        "p95": 0.54,
+        "max": 0.56
+      }
+    },
+    {
+      "label": "MIXED_HEALTH",
+      "query_preview": "Is my savings rate healthy?",
+      "intent": "MIXED",
+      "scope": "MIXED",
+      "token_budget": 450,
+      "prompt_chars": {
+        "min": 1887,
+        "median": 1887,
+        "p95": 1887,
+        "max": 1887
+      },
+      "total_ms": {
+        "min": 0.35,
+        "median": 0.35,
+        "p95": 0.36,
+        "max": 0.36
+      }
+    },
+    {
+      "label": "COMPARISON",
+      "query_preview": "SIP vs FD, which is better?",
+      "intent": "GENERAL_FINANCE",
+      "scope": "COMPARISON",
+      "token_budget": 600,
+      "prompt_chars": {
+        "min": 1887,
+        "median": 1887,
+        "p95": 1887,
+        "max": 1887
+      },
+      "total_ms": {
+        "min": 0.4,
+        "median": 0.5,
+        "p95": 0.55,
+        "max": 0.56
+      }
+    },
+    {
+      "label": "HISTORICAL",
+      "query_preview": "What was the RBI repo rate in FY 2024-25?",
+      "intent": "GENERAL_FINANCE",
+      "scope": "MARKET_INFORMATION",
+      "token_budget": 600,
+      "prompt_chars": {
+        "min": 1901,
+        "median": 1901,
+        "p95": 1901,
+        "max": 1901
+      },
+      "total_ms": {
+        "min": 0.46,
+        "median": 0.46,
+        "p95": 0.49,
+        "max": 0.49
+      }
+    },
+    {
+      "label": "MIXED_ADVICE",
+      "query_preview": "What should I do with it?",
+      "intent": "MIXED",
+      "scope": "MIXED",
+      "token_budget": 450,
+      "prompt_chars": {
+        "min": 1885,
+        "median": 1885,
+        "p95": 1885,
+        "max": 1885
+      },
+      "total_ms": {
+        "min": 0.35,
+        "median": 0.35,
+        "p95": 0.5,
+        "max": 0.52
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "provider": "huggingface",
+  "primary_model": "meta-llama/Meta-Llama-3-8B-Instruct",
+  "primary_status": "READY",
+  "primary_result": {
+    "provider": "huggingface",
+    "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+    "status": "READY",
+    "authenticated": true,
+    "model_accessible": true,
+    "test_generation": true,
+    "latency_ms": 5624.01,
+    "error_code": null,
+    "safe_error_message": null
+  },
+  "fallback_model": null,
+  "fallback_result": null,
+  "overall_status": "READY",
+  "checked_at": "2026-08-19T06:32:41Z"
+}

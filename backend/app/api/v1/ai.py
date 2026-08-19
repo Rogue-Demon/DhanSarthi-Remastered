@@ -192,3 +192,79 @@ async def send_message(
         conversation_id=conversation_id,
         request=body,
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase L.7.3 — SSE streaming endpoint (AI_STREAMING_ENABLED=true path)
+# ---------------------------------------------------------------------------
+
+
+from fastapi.responses import StreamingResponse as _StreamingResponse
+
+
+@router.post(
+    "/conversations/{conversation_id}/stream",
+    status_code=200,
+    response_class=_StreamingResponse,
+    summary="Stream AI response via Server-Sent Events",
+    description=(
+        "SSE streaming endpoint. Enabled only when AI_STREAMING_ENABLED=true. "
+        "Yields incremental text chunks as `data: <chunk>\\n\\n` events. "
+        "Ends with `data: [DONE]\\n\\n`. "
+        "The full assembled response is validated by SafetyValidator before persistence."
+    ),
+)
+async def stream_message(
+    conversation_id: int,
+    body: "SendMessageRequest",
+    user_id: int = Depends(get_current_user_id),
+    ai_service=Depends(get_ai_advisor_service),
+):
+    """
+    Send a message and receive an AI Advisor response as an SSE stream.
+
+    When AI_STREAMING_ENABLED=false (the production default), returns HTTP 501.
+    When enabled, yields text delta chunks; the last event is always ``[DONE]``.
+
+    The complete response is safety-validated and persisted identically to
+    the non-streaming endpoint — streaming is purely a frontend UX improvement.
+    """
+    from app.core.config import settings as _settings
+
+    if not _settings.ai_streaming_enabled:
+        from fastapi import HTTPException as _HTTPException
+        raise _HTTPException(
+            status_code=501,
+            detail=(
+                "Streaming is not enabled on this server. "
+                "Set AI_STREAMING_ENABLED=true to activate."
+            ),
+        )
+
+    enforce_ai_rate_limit(user_id)
+
+    async def _event_generator():
+        import json
+        try:
+            async for sse_chunk in ai_service.stream_chat_message(
+                user_id=user_id,
+                conversation_id=conversation_id,
+                request=body,
+                emit_sse=True,
+            ):
+                yield sse_chunk
+        except asyncio.CancelledError:
+            # Client disconnected cleanly
+            return
+        except Exception as exc:
+            yield f"event: error\ndata: {json.dumps({'code': 'STREAM_ERROR', 'message': str(exc)})}\n\n"
+
+    return _StreamingResponse(
+        _event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
+

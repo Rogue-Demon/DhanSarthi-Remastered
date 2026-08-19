@@ -6,6 +6,8 @@ responses.  No internal database details, SQL text, or credentials are
 ever returned to the client.
 """
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -187,12 +189,37 @@ def _register_exception_handlers(application: FastAPI) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Application lifespan (startup + shutdown hooks)
+# ---------------------------------------------------------------------------
+
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    """
+    FastAPI lifespan context manager.
+
+    Startup: nothing yet (DB connections are managed by SQLAlchemy pool).
+    Shutdown: close the persistent HuggingFaceProvider HTTP client to avoid
+              socket leak warnings in uvicorn (Phase L.7.3).
+    """
+    yield
+    # --- Shutdown ---
+    from app.api.deps import _hf_llm_singleton, _hf_embed_singleton
+    for _provider in (_hf_llm_singleton, _hf_embed_singleton):
+        if _provider is not None:
+            try:
+                await _provider.aclose()
+            except Exception:
+                pass
+
+
+# ---------------------------------------------------------------------------
 # Application factory
 # ---------------------------------------------------------------------------
 
 
 def create_application() -> FastAPI:
-    application = FastAPI(title=settings.app_name, version="0.1.0")
+    application = FastAPI(title=settings.app_name, version="0.1.0", lifespan=_lifespan)
 
     origins = list(settings.cors_origins_list)
     for port in range(5173, 5185):

@@ -1,0 +1,35 @@
+{
+  "timestamp": "2026-08-19T12:45:06.595586",
+  "phase": "L.9.6",
+  "cold_latency_ms": 5195.96,
+  "warm_latency_avg_ms": 1.19,
+  "speedup_factor": 4361.15,
+  "concurrent_duplicates": {
+    "total_requests": 10,
+    "actual_llm_executions": 1,
+    "coalesced_requests": 9,
+    "total_time_ms": 96.27
+  },
+  "concurrent_distinct": {
+    "total_requests": 10,
+    "actual_llm_executions": 10,
+    "total_time_ms": 116.17
+  },
+  "personal_query_isolation": {
+    "queries_tested": 3,
+    "cache_hit_rate": 0.0,
+    "status": "PASS"
+  },
+  "cache_stats": {
+    "hits": 5,
+    "misses": 20,
+    "writes": 20,
+    "evictions": 0,
+    "expirations": 0,
+    "size": 9,
+    "max_entries": 500,
+    "ttl_seconds": 3600,
+    "hit_rate_pct": 20.0,
+    "version": "v1"
+  }
+}

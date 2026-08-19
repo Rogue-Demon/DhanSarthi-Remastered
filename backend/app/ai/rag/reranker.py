@@ -43,6 +43,7 @@ class DeterministicReranker:
         target_authority: Optional[str] = None,
         is_historical: bool = False,
         target_year: Optional[str] = None,
+        minilm_score: Optional[float] = None,
     ) -> Tuple[float, Dict[str, float]]:
         """
         Calculate deterministic score breakdown for a candidate chunk.
@@ -52,7 +53,16 @@ class DeterministicReranker:
         title_lower = doc.title.lower()
 
         # 1. Semantic score component (0.30 weight)
-        sem_score = max(0.0, min(1.0, raw_semantic_score)) * 0.30
+        pg_sem = max(0.0, min(1.0, raw_semantic_score))
+        if minilm_score is not None:
+            from app.core.config import settings
+
+            w = settings.minilm_similarity_weight
+            combined_sem = (1.0 - w) * pg_sem + w * max(0.0, min(1.0, minilm_score))
+        else:
+            combined_sem = pg_sem
+
+        sem_score = combined_sem * 0.30
 
         # 2. Title & Exact Keyword Match component (0.30 weight)
         title_score = 0.0
@@ -130,6 +140,8 @@ class DeterministicReranker:
             "temporal_score": round(temp_score, 4),
             "quality_score": round(qual_score, 4),
         }
+        if minilm_score is not None:
+            breakdown["minilm_score"] = round(minilm_score, 4)
 
         return final_score, breakdown
 
@@ -142,15 +154,27 @@ class DeterministicReranker:
         target_year: Optional[str] = None,
         threshold: float = 0.30,
         top_k: int = 4,
+        minilm_scores: Optional[List[float]] = None,
+        tracker: Optional[Any] = None,
     ) -> List[RetrievedDocument]:
         """
         Rerank candidates, deduplicate, enforce diversity, and apply RAG abstention threshold.
         """
+        if tracker:
+            tracker.record_count("candidate_count_before_rerank", len(matches))
+
         if not matches:
+            if tracker:
+                tracker.record("reranker_ms", 0.0)
+                tracker.record_count("candidate_count_after_rerank", 0)
             return []
 
+        import time
+        start_r = time.perf_counter() if tracker else 0.0
+
         scored_list: List[Tuple[KnowledgeChunk, float, Dict[str, float]]] = []
-        for chunk, raw_score in matches:
+        for idx, (chunk, raw_score) in enumerate(matches):
+            m_score = minilm_scores[idx] if minilm_scores and idx < len(minilm_scores) else None
             score, breakdown = self.score_candidate(
                 chunk=chunk,
                 raw_semantic_score=raw_score,
@@ -158,6 +182,7 @@ class DeterministicReranker:
                 target_authority=target_authority,
                 is_historical=is_historical,
                 target_year=target_year,
+                minilm_score=m_score,
             )
             scored_list.append((chunk, score, breakdown))
 
@@ -220,5 +245,9 @@ class DeterministicReranker:
 
             if len(retrieved) >= top_k:
                 break
+
+        if tracker and start_r > 0.0:
+            tracker.record("reranker_ms", (time.perf_counter() - start_r) * 1000.0)
+            tracker.record_count("candidate_count_after_rerank", len(retrieved))
 
         return retrieved

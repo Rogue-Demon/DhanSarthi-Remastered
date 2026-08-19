@@ -46,7 +46,7 @@ class SimpleSafetyValidator(AISafetyValidator):
             ),
         ]
 
-    def validate_response(self, response: str, context: AIContext) -> None:
+    def validate_response(self, response: str, context: AIContext, tracker: Optional[Any] = None) -> None:
         """
         Scan response text and raise AISafetyError if any rules are violated.
 
@@ -57,6 +57,16 @@ class SimpleSafetyValidator(AISafetyValidator):
           4. No unsafe guarantees about returns or approvals.
           5. Response must not be empty.
         """
+        import time
+        start_v = time.perf_counter() if tracker else 0.0
+
+        try:
+            self._do_validate(response, context)
+        finally:
+            if tracker and start_v > 0.0:
+                tracker.record("safety_validation_ms", (time.perf_counter() - start_v) * 1000.0)
+
+    def _do_validate(self, response: str, context: AIContext) -> None:
         # Rule 0: Non-empty
         if not response or not response.strip():
             raise AISafetyError("LLM returned an empty response.")

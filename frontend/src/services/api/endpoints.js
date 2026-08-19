@@ -113,6 +113,7 @@ export const ENDPOINTS = {
       get: (id) => `/ai/conversations/${id}`,
       delete: (id) => `/ai/conversations/${id}`,
       sendMessage: (id) => `/ai/conversations/${id}/messages`,
+      stream: (id) => `/ai/conversations/${id}/stream`,
     },
   },
   documents: {

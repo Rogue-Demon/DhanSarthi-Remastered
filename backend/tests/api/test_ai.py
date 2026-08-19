@@ -107,17 +107,28 @@ class TestAIAdvisorAPI:
         """Valid query returns a successful 200 payload with disclaimer and sources."""
         _seed_user(db, 501)
 
-        payload = {"message": "How can I set up a monthly budget?"}
-        r = client.post("/api/v1/ai/advisor", json=payload, headers=HEADERS_USER)
+        # Override LLM provider with mock to avoid network dependency on HuggingFace.
+        # The singleton introduced in L.7.3 means get_llm_provider() may return a
+        # real HuggingFaceProvider cached from a previous test, which fails without network.
+        def _get_mock_llm():
+            return MockLLMProvider()
 
-        assert r.status_code == 200
-        body = r.json()
+        app.dependency_overrides[get_llm_provider] = _get_mock_llm
 
-        assert "response" in body
-        assert "conversation_id" in body
-        assert "sources" in body
-        assert "disclaimer" in body
-        assert "DhanSarthi" in body["disclaimer"]
+        try:
+            payload = {"message": "How can I set up a monthly budget?"}
+            r = client.post("/api/v1/ai/advisor", json=payload, headers=HEADERS_USER)
+
+            assert r.status_code == 200
+            body = r.json()
+
+            assert "response" in body
+            assert "conversation_id" in body
+            assert "sources" in body
+            assert "disclaimer" in body
+            assert "DhanSarthi" in body["disclaimer"]
+        finally:
+            app.dependency_overrides.pop(get_llm_provider, None)
 
     def test_safety_check_failure_returns_400(self, client: TestClient, db: Session):
         """A response triggering safety violations returns a clean 400 Bad Request."""
