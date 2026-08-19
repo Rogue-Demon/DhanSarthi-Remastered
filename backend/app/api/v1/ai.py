@@ -15,6 +15,8 @@ Conversation ownership is verified before every operation.
 
 from __future__ import annotations
 
+import asyncio
+
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import (
@@ -195,7 +197,7 @@ async def send_message(
 
 
 # ---------------------------------------------------------------------------
-# Phase L.7.3 — SSE streaming endpoint (AI_STREAMING_ENABLED=true path)
+# Phase L.7.3 / L.9.8 — SSE streaming endpoint
 # ---------------------------------------------------------------------------
 
 
@@ -210,7 +212,7 @@ from fastapi.responses import StreamingResponse as _StreamingResponse
     description=(
         "SSE streaming endpoint. Enabled only when AI_STREAMING_ENABLED=true. "
         "Yields incremental text chunks as `data: <chunk>\\n\\n` events. "
-        "Ends with `data: [DONE]\\n\\n`. "
+        "Ends with a completion event. "
         "The full assembled response is validated by SafetyValidator before persistence."
     ),
 )
@@ -223,11 +225,12 @@ async def stream_message(
     """
     Send a message and receive an AI Advisor response as an SSE stream.
 
-    When AI_STREAMING_ENABLED=false (the production default), returns HTTP 501.
-    When enabled, yields text delta chunks; the last event is always ``[DONE]``.
+    When AI_STREAMING_ENABLED=false, returns HTTP 501 so the frontend can
+    transparently fall back to the normal request path. When enabled, chunks
+    are forwarded immediately and cancellation is propagated to the provider.
 
-    The complete response is safety-validated and persisted identically to
-    the non-streaming endpoint — streaming is purely a frontend UX improvement.
+    The complete response is safety-validated and quality-evaluated before
+    persistence. Partial or cancelled responses are never persisted.
     """
     from app.core.config import settings as _settings
 
@@ -254,17 +257,22 @@ async def stream_message(
             ):
                 yield sse_chunk
         except asyncio.CancelledError:
-            # Client disconnected cleanly
+            # Client disconnected: cancellation must propagate to the provider
+            # so the HTTP connection is released and no partial response is saved.
             return
         except Exception as exc:
-            yield f"event: error\ndata: {json.dumps({'code': 'STREAM_ERROR', 'message': str(exc)})}\n\n"
+            # Do not expose exception internals or credentials to the client.
+            yield (
+                "event: error\n"
+                f"data: {json.dumps({'code': 'STREAM_ERROR', 'message': 'AI streaming failed. Please retry.'})}\n\n"
+            )
 
     return _StreamingResponse(
         _event_generator(),
         media_type="text/event-stream",
         headers={
-            "Cache-Control": "no-cache",
+            "Cache-Control": "no-cache, no-transform",
             "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
         },
     )
-

@@ -29,14 +29,12 @@ class Settings(BaseSettings):
     embedding_model: str = Field(default="sentence-transformers/all-MiniLM-L6-v2", validation_alias="EMBEDDING_MODEL")
     embedding_dimension: int = Field(default=384, validation_alias="EMBEDDING_DIMENSION")
 
-    # MiniLM Semantic Layer Config (Phase L.4)
     minilm_enabled: bool = Field(default=True, validation_alias="MINILM_ENABLED")
     minilm_model: str = Field(default="sentence-transformers/all-MiniLM-L6-v2", validation_alias="MINILM_MODEL")
     minilm_similarity_weight: float = Field(default=0.20, validation_alias="MINILM_SIMILARITY_WEIGHT")
     minilm_max_candidates: int = Field(default=20, validation_alias="MINILM_MAX_CANDIDATES")
     minilm_timeout_seconds: float = Field(default=2.0, validation_alias="MINILM_TIMEOUT_SECONDS")
 
-    # FAISS Hybrid Candidate Retrieval Config (Phase L.5)
     faiss_enabled: bool = Field(default=True, validation_alias="FAISS_ENABLED")
     faiss_index_path: str = Field(default="./data/faiss/knowledge.index", validation_alias="FAISS_INDEX_PATH")
     faiss_mapping_path: str = Field(default="./data/faiss/knowledge_mapping.json", validation_alias="FAISS_MAPPING_PATH")
@@ -65,7 +63,6 @@ class Settings(BaseSettings):
     budget_utilization_warning_percent: float = Field(default=85.0, validation_alias="BUDGET_UTILIZATION_WARNING_PERCENT")
     investment_concentration_threshold: float = Field(default=50.0, validation_alias="INVESTMENT_CONCENTRATION_THRESHOLD")
 
-    # Market Data Provider Layer Config
     market_data_provider: str = Field(default="mock", validation_alias="MARKET_DATA_PROVIDER")
     stock_data_api_key: str | None = Field(default=None, validation_alias="STOCK_DATA_API_KEY")
     stock_data_provider: str = Field(default="mock", validation_alias="STOCK_DATA_PROVIDER")
@@ -78,7 +75,7 @@ class Settings(BaseSettings):
     market_data_cache_ttl_fx: int = Field(default=3600, validation_alias="MARKET_DATA_CACHE_TTL_FX")
     market_data_cache_ttl_index: int = Field(default=300, validation_alias="MARKET_DATA_CACHE_TTL_INDEX")
     market_data_cache_ttl_rate: int = Field(default=86400, validation_alias="MARKET_DATA_CACHE_TTL_RATE")
-    # Phase L.6 — Adaptive Retrieval Router & Fusion Config
+
     adaptive_retrieval_enabled: bool = Field(default=True, validation_alias="ADAPTIVE_RETRIEVAL_ENABLED")
     adaptive_default_pgvector_k: int = Field(default=20, validation_alias="ADAPTIVE_DEFAULT_PGVECTOR_K")
     adaptive_default_faiss_k: int = Field(default=20, validation_alias="ADAPTIVE_DEFAULT_FAISS_K")
@@ -90,9 +87,6 @@ class Settings(BaseSettings):
     adaptive_rrf_k_comparison: int = Field(default=40, validation_alias="ADAPTIVE_RRF_K_COMPARISON")
     adaptive_rrf_k_authority: int = Field(default=50, validation_alias="ADAPTIVE_RRF_K_AUTHORITY")
 
-    # Phase L.7.2 — Per-Intent Token Budget Configuration
-    # Each query type gets a calibrated max_tokens ceiling.
-    # The global safety max enforces an absolute upper bound regardless of intent.
     ai_max_tokens_casual: int = Field(default=128, validation_alias="AI_MAX_TOKENS_CASUAL")
     ai_max_tokens_simple_general: int = Field(default=256, validation_alias="AI_MAX_TOKENS_SIMPLE_GENERAL")
     ai_max_tokens_personal_lookup: int = Field(default=300, validation_alias="AI_MAX_TOKENS_PERSONAL_LOOKUP")
@@ -102,7 +96,6 @@ class Settings(BaseSettings):
     ai_max_tokens_analysis: int = Field(default=800, validation_alias="AI_MAX_TOKENS_ANALYSIS")
     ai_max_tokens_global_safety_max: int = Field(default=1024, validation_alias="AI_MAX_TOKENS_GLOBAL_SAFETY_MAX")
 
-    # Phase L.7.2 / Phase L.9.6 — Intelligent Response Cache & In-Flight Deduplication
     ai_cache_educational_enabled: bool = Field(default=True, validation_alias="AI_CACHE_EDUCATIONAL_ENABLED")
     ai_cache_educational_ttl_seconds: int = Field(default=3600, validation_alias="AI_CACHE_EDUCATIONAL_TTL_SECONDS")
     ai_cache_educational_max_entries: int = Field(default=200, validation_alias="AI_CACHE_EDUCATIONAL_MAX_ENTRIES")
@@ -114,28 +107,21 @@ class Settings(BaseSettings):
     ai_response_cache_knowledge_version: str = Field(default="v1", validation_alias="AI_RESPONSE_CACHE_KNOWLEDGE_VERSION")
     ai_response_cache_policy_version: str = Field(default="v1", validation_alias="AI_RESPONSE_CACHE_POLICY_VERSION")
 
-    # Phase L.7.2 — Prompt Size Control
-    # Maximum conversation history turns included in the prompt (not in DB fetch limit).
     ai_prompt_max_history_messages: int = Field(default=6, validation_alias="AI_PROMPT_MAX_HISTORY_MESSAGES")
 
-    # Phase L.7.3 — HTTP Connection Pool (configurable, replaces hard-coded values in HuggingFaceProvider)
     ai_http_max_connections: int = Field(default=20, validation_alias="AI_HTTP_MAX_CONNECTIONS")
     ai_http_max_keepalive_connections: int = Field(default=10, validation_alias="AI_HTTP_MAX_KEEPALIVE_CONNECTIONS")
     ai_http_keepalive_seconds: float = Field(default=30.0, validation_alias="AI_HTTP_KEEPALIVE_SECONDS")
-
-    # Phase L.7.3 — Retry Policy
-    # Maximum number of retries for transient provider failures (502, 503, 504, connection errors).
-    # Exponential backoff with jitter. Do NOT retry: 400, 401, 403, 429.
     ai_max_retries: int = Field(default=1, validation_alias="AI_MAX_RETRIES")
 
-    # Phase L.7.3 / L.9.5 — Streaming
-    # When true, enables SSE streaming preview from the LLM to the frontend.
-    # Final response is still validated by SafetyValidator before persistence.
-    # Keep false (default) in production until streaming is fully validated.
+    # Phase L.7.3 / L.9.8 — Streaming
     ai_streaming_enabled: bool = Field(default=False, validation_alias="AI_STREAMING_ENABLED")
     ai_streaming_default: bool = Field(default=True, validation_alias="AI_STREAMING_DEFAULT")
+    ai_streaming_first_enabled: bool = Field(default=True, validation_alias="AI_STREAMING_FIRST_ENABLED")
+    ai_streaming_fallback_enabled: bool = Field(default=True, validation_alias="AI_STREAMING_FALLBACK_ENABLED")
+    ai_streaming_heartbeat_seconds: float = Field(default=15.0, validation_alias="AI_STREAMING_HEARTBEAT_SECONDS")
+    ai_streaming_max_duration_seconds: int = Field(default=90, validation_alias="AI_STREAMING_MAX_DURATION_SECONDS")
 
-    # Phase L.7.4 — Adaptive LLM Inference Optimization
     ai_adaptive_inference_enabled: bool = Field(default=True, validation_alias="AI_ADAPTIVE_INFERENCE_ENABLED")
     ai_simple_max_tokens: int = Field(default=256, validation_alias="AI_SIMPLE_MAX_TOKENS")
     ai_moderate_max_tokens: int = Field(default=512, validation_alias="AI_MODERATE_MAX_TOKENS")
@@ -145,20 +131,14 @@ class Settings(BaseSettings):
     ai_max_personal_context_chars: int = Field(default=4000, validation_alias="AI_MAX_PERSONAL_CONTEXT_CHARS")
     ai_max_history_chars: int = Field(default=5000, validation_alias="AI_MAX_HISTORY_CHARS")
 
-    # Phase L.8 — Real-Time LLM Inference Optimization & Model Selection
     ai_model_routing_enabled: bool = Field(default=False, validation_alias="AI_MODEL_ROUTING_ENABLED")
     ai_fast_model: str = Field(default="meta-llama/Meta-Llama-3-8B-Instruct", validation_alias="AI_FAST_MODEL")
     ai_balanced_model: str = Field(default="meta-llama/Meta-Llama-3-8B-Instruct", validation_alias="AI_BALANCED_MODEL")
     ai_reasoning_model: str = Field(default="meta-llama/Meta-Llama-3-8B-Instruct", validation_alias="AI_REASONING_MODEL")
-    ai_allowed_models: str = Field(
-        default="meta-llama/Meta-Llama-3-8B-Instruct,meta-llama/Llama-3.2-1B-Instruct,meta-llama/Llama-3.2-3B-Instruct,Qwen/Qwen2.5-7B-Instruct",
-        validation_alias="AI_ALLOWED_MODELS",
-    )
+    ai_allowed_models: str = Field(default="meta-llama/Meta-Llama-3-8B-Instruct,meta-llama/Llama-3.2-1B-Instruct,meta-llama/Llama-3.2-3B-Instruct,Qwen/Qwen2.5-7B-Instruct", validation_alias="AI_ALLOWED_MODELS")
     ai_tokenizer_model: str = Field(default="meta-llama/Meta-Llama-3-8B-Instruct", validation_alias="AI_TOKENIZER_MODEL")
-    # Phase L.9.4 — Production Provider Readiness & Real Inference Validation
     ai_provider_readiness_fallback_model: str = Field(default="", validation_alias="AI_PROVIDER_READINESS_FALLBACK_MODEL")
 
-    # Phase L.9.7 — Intelligent Prompt Compression & Context Efficiency
     ai_prompt_compression_enabled: bool = Field(default=True, validation_alias="AI_PROMPT_COMPRESSION_ENABLED")
     ai_prompt_compression_mode: str = Field(default="adaptive", validation_alias="AI_PROMPT_COMPRESSION_MODE")
     ai_max_prompt_tokens: int = Field(default=2048, validation_alias="AI_MAX_PROMPT_TOKENS")
