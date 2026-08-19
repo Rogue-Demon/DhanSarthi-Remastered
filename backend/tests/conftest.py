@@ -35,11 +35,15 @@ def db_session() -> Session:
 
 @pytest.fixture(autouse=True)
 def reset_ai_caches():
-    """Ensure AI response cache and in-flight deduplicator are reset between tests."""
+    """Ensure AI response cache, in-flight deduplicator, and circuit breaker are reset between tests."""
     from app.ai.cache.response_cache import get_response_cache
     from app.ai.cache.inflight import get_inflight_deduplicator
+    from app.ai.resilience.circuit_breaker import get_llm_circuit_breaker
+
     get_response_cache().clear()
     get_inflight_deduplicator().clear()
+    get_llm_circuit_breaker().reset()
     yield
     get_response_cache().clear()
     get_inflight_deduplicator().clear()
+    get_llm_circuit_breaker().reset()

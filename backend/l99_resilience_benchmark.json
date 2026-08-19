@@ -1,0 +1,57 @@
+{
+  "benchmark_timestamp": "2026-08-19T09:42:23.180698+00:00",
+  "phase": "L.9.9",
+  "scenarios": {
+    "normal_path_overhead": {
+      "iterations": 5000,
+      "avg_overhead_us": 0.3,
+      "avg_overhead_ms": 0.0003,
+      "target_ms": 1.0,
+      "pass": true
+    },
+    "circuit_breaker_trip_and_recovery": {
+      "failure_threshold": 3,
+      "cooldown_seconds": 0.1,
+      "tripped_to_open": true,
+      "probed_to_half_open": true,
+      "recovered_to_closed": true,
+      "pass": true
+    },
+    "transient_retry_policy": {
+      "delays_seconds": [
+        0.055,
+        0.106,
+        0.206
+      ],
+      "strictly_bounded": true,
+      "deterministic_filtering_pass": true,
+      "pass": true
+    },
+    "dynamic_model_fallback": {
+      "model_attempts": [
+        "meta-llama/Meta-Llama-3-8B-Instruct",
+        "mistralai/Mistral-7B-Instruct-v0.3"
+      ],
+      "fallback_used": true,
+      "fallback_type": "MODEL_FALLBACK",
+      "pass": true
+    },
+    "personal_finance_zero_hallucination": {
+      "response_content": "I couldn't retrieve your financial data right now. I don't want to guess at your numbers. Please try again shortly.",
+      "llm_called": false,
+      "safe_fallback_used": true,
+      "pass": true
+    },
+    "secret_scrubbing": {
+      "original_redacted": true,
+      "secrets_leak_prevented": true,
+      "pass": true
+    }
+  },
+  "summary": {
+    "total_scenarios": 6,
+    "passed_scenarios": 6,
+    "all_scenarios_passed": true,
+    "circuit_breaker_overhead_ms": 0.0003
+  }
+}
