@@ -9,12 +9,29 @@
     "authenticated": true,
     "model_accessible": true,
     "test_generation": true,
-    "latency_ms": 5624.01,
+    "latency_ms": 5552.94,
     "error_code": null,
     "safe_error_message": null
   },
   "fallback_model": null,
   "fallback_result": null,
+  "routing_tiers": {
+    "fast": {
+      "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+      "configured": true,
+      "allowlisted": true
+    },
+    "balanced": {
+      "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+      "configured": true,
+      "allowlisted": true
+    },
+    "reasoning": {
+      "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+      "configured": true,
+      "allowlisted": true
+    }
+  },
   "overall_status": "READY",
-  "checked_at": "2026-08-19T06:32:41Z"
+  "checked_at": "2026-08-20T07:17:38Z"
 }
