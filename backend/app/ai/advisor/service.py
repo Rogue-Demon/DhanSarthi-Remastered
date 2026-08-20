@@ -67,8 +67,15 @@ from app.ai.cache import (
 
 
 from app.ai.rag.adaptive_router import AdaptiveRetrievalRouter
+from app.ai.schemas.retrieval_strategy import RetrievalExecutionPlan
 from app.ai.observability.latency import LatencyTracker
-from app.ai.inference.budget import AdaptiveTokenBudgetSelector
+from app.ai.inference.budget import (
+    AdaptiveTokenBudgetSelector,
+    BalancedWorkloadClassifier,
+    PersonalFastPathClassifier,
+    ReasoningWorkloadClassifier,
+)
+from app.ai.inference.config import InferenceComplexity, InferenceConfig
 from app.ai.inference.context_optimizer import LLMContextOptimizer
 from app.ai.inference.model_router import ModelRouter, ModelRoutingDecision
 from app.ai.evaluation.response_quality import ResponseQualityEvaluator, ResponseQualityResult
@@ -221,7 +228,29 @@ class AIAdvisorService:
 
             # Context Optimization & Trimming
             start_opt = time.perf_counter()
-            retrieved_docs = self._context_optimizer.optimize_rag_docs(retrieved_docs, inference_config, intent=intent, is_comparison=_is_comparison)
+            if inference_config.complexity == InferenceComplexity.COMPLEX or _op_str in ("PLAN", "PLANNING", "RECOMMEND", "PREDICT") or _scope_str == "PLANNING":
+                _w_cat, _, _ = ReasoningWorkloadClassifier.classify(
+                    query=request.message,
+                    intent=intent,
+                    execution_plan=_ep,
+                    sub_intent=understanding.sub_intent,
+                    temporal_references=understanding.temporal_references,
+                )
+            else:
+                _w_cat, _, _ = BalancedWorkloadClassifier.classify(
+                    query=request.message,
+                    intent=intent,
+                    execution_plan=_ep,
+                    sub_intent=understanding.sub_intent,
+                    temporal_references=understanding.temporal_references,
+                )
+            retrieved_docs = self._context_optimizer.optimize_rag_docs(
+                retrieved_docs,
+                inference_config,
+                intent=intent,
+                is_comparison=_is_comparison,
+                workload_category=_w_cat,
+            )
             if tracker:
                 tracker.record("context_optimization_ms", (time.perf_counter() - start_opt) * 1000.0)
 
@@ -433,16 +462,18 @@ class AIAdvisorService:
         resilience_metrics.circuit_state = self._resilience.get_circuit_state()
 
         # 1. Verify ownership — raises 404/403 on failure
-        conversation = self._conv.get_conversation(
-            conversation_id=conversation_id, user_id=user_id
-        )
+        with tracker.timer("ownership_check_ms"):
+            conversation = self._conv.get_conversation(
+                conversation_id=conversation_id, user_id=user_id
+            )
 
         # 2. Store user message (commit before LLM call)
-        with tracker.timer("persistence_ms"):
+        with tracker.timer("user_persistence_ms"):
             user_msg = self._conv.store_user_message(
                 conversation_id=conversation_id,
                 content=request.message,
             )
+        tracker.record("persistence_ms", tracker.breakdown.user_persistence_ms)
 
         # Auto-generate title from first message
         self._conv.update_title_from_first_message(conversation, request.message)
@@ -450,17 +481,19 @@ class AIAdvisorService:
         # 3. Financial context (always uses authenticated user_id)
         dash_failed = False
         full_facts = None
-        try:
-            full_facts = self._dash.build_dashboard(user_id=user_id)
-        except Exception as exc:
-            logger.warning(f"Could not retrieve financial context: {exc}")
-            dash_failed = True
+        with tracker.timer("financial_context_ms"):
+            try:
+                full_facts = self._dash.build_dashboard(user_id=user_id)
+            except Exception as exc:
+                logger.warning(f"Could not retrieve financial context: {exc}")
+                dash_failed = True
 
         # 4. Recent conversation history (excluding current message we just stored)
         history_limit = settings.ai_max_history_messages
-        recent_messages = self._conv.get_recent_messages(
-            conversation_id=conversation_id, limit=history_limit + 1
-        )
+        with tracker.timer("history_retrieval_ms"):
+            recent_messages = self._conv.get_recent_messages(
+                conversation_id=conversation_id, limit=history_limit + 1
+            )
         # Exclude the just-stored user message (last one)
         history = [m for m in recent_messages if m.id != user_msg.id]
 
@@ -565,38 +598,64 @@ class AIAdvisorService:
                 assistant_message=MessageResponse.model_validate(assistant_msg),
             )
 
-        # 5. Adaptive Retrieval Routing & Execution
-        retrieved_docs = []
-        retrieval_plan = self._adaptive_router.route(
-            query_understanding=understanding,
-            execution_plan=understanding.execution_plan,
-            retrieval_query=understanding.retrieval_query,
-            tracker=tracker,
+        # Phase L.11.2: Personal Fast-Path Evaluation
+        _ep = understanding.execution_plan
+        is_fast_path, fast_path_reason, fast_path_budget = PersonalFastPathClassifier.is_personal_fast_path(
+            intent=intent,
+            execution_plan=_ep,
+            sub_intent=understanding.sub_intent,
+            temporal_references=understanding.temporal_references,
+            query=request.message,
         )
-        if retrieval_plan.strategy != "NONE":
-            try:
-                retrieved_docs = await self._rag.retrieve(
-                    query=understanding.retrieval_query,
-                    retrieval_plan=retrieval_plan,
-                    tracker=tracker,
-                )
-            except Exception as rag_exc:
-                logger.warning(f"RAG retrieval failure: {rag_exc}. Continuing with degraded knowledge set.")
-                retrieved_docs = []
-                resilience_metrics.rag_degraded = True
-                if tracker:
-                    tracker.record_flag("rag_degraded", True)
+
+        # 5. Adaptive Retrieval Routing & Execution (Bypassed on Fast-Path)
+        retrieved_docs = []
+        if is_fast_path:
+            tracker.record_flag("personal_fast_path_used", True)
+            tracker.record_flag("general_rag_skipped", True)
+            tracker.record_str("fast_path_reason", fast_path_reason or "DIRECT_PERSONAL_LOOKUP")
+            retrieval_plan = RetrievalExecutionPlan(strategy="NONE")
+        else:
+            retrieval_plan = self._adaptive_router.route(
+                query_understanding=understanding,
+                execution_plan=_ep,
+                retrieval_query=understanding.retrieval_query,
+                tracker=tracker,
+            )
+            if retrieval_plan.strategy != "NONE":
+                try:
+                    retrieved_docs = await self._rag.retrieve(
+                        query=understanding.retrieval_query,
+                        retrieval_plan=retrieval_plan,
+                        tracker=tracker,
+                    )
+                except Exception as rag_exc:
+                    logger.warning(f"RAG retrieval failure: {rag_exc}. Continuing with degraded knowledge set.")
+                    retrieved_docs = []
+                    resilience_metrics.rag_degraded = True
+                    if tracker:
+                        tracker.record_flag("rag_degraded", True)
 
         # Financial intelligence
         financial_intelligence = None
         if self._intel is not None:
-            try:
-                financial_intelligence = self._intel.build_summary(user_id=user_id)
-            except Exception:
-                pass
+            with tracker.timer("financial_intelligence_ms"):
+                try:
+                    financial_intelligence = self._intel.build_summary(user_id=user_id)
+                except Exception:
+                    pass
 
-        # Retrieve live market data
-        live_market_data = await self._retrieve_live_market_data(request.message, user_id)
+        # Retrieve live market data (Bypassed on Fast-Path unless explicitly required)
+        requires_mkt = bool(_ep and getattr(_ep, "requires_market_data", False))
+        if is_fast_path and not requires_mkt:
+            live_market_data = None
+            tracker.record_flag("market_data_skipped", True)
+        else:
+            with tracker.timer("market_data_ms"):
+                live_market_data = await self._retrieve_live_market_data(request.message, user_id)
+
+        if is_fast_path:
+            tracker.record_flag("minimal_context_used", True)
 
         # 6. Build AIContext with history (uses resolved_query for contextual clarity)
         ai_context = self._builder.build_context(
@@ -609,7 +668,6 @@ class AIAdvisorService:
             tracker=tracker,
         )
         # Determine execution plan metadata for budget + cache decisions
-        _ep = understanding.execution_plan
         _scope_str = _ep.scope.value if _ep and _ep.scope else None
         _op_str = _ep.operation.value if _ep and _ep.operation else None
         _is_comparison = bool(_ep and _ep.comparison_info and _ep.comparison_info.is_comparison)
@@ -636,7 +694,29 @@ class AIAdvisorService:
             # Context Optimization & Trimming
             start_opt = time.perf_counter()
             history = self._context_optimizer.optimize_history(history, inference_config, intent=intent)
-            retrieved_docs = self._context_optimizer.optimize_rag_docs(retrieved_docs, inference_config, intent=intent, is_comparison=_is_comparison)
+            if inference_config.complexity == InferenceComplexity.COMPLEX or _op_str in ("PLAN", "PLANNING", "RECOMMEND", "PREDICT") or _scope_str == "PLANNING":
+                _w_cat, _, _ = ReasoningWorkloadClassifier.classify(
+                    query=request.message,
+                    intent=intent,
+                    execution_plan=_ep,
+                    sub_intent=understanding.sub_intent,
+                    temporal_references=understanding.temporal_references,
+                )
+            else:
+                _w_cat, _, _ = BalancedWorkloadClassifier.classify(
+                    query=request.message,
+                    intent=intent,
+                    execution_plan=_ep,
+                    sub_intent=understanding.sub_intent,
+                    temporal_references=understanding.temporal_references,
+                )
+            retrieved_docs = self._context_optimizer.optimize_rag_docs(
+                retrieved_docs,
+                inference_config,
+                intent=intent,
+                is_comparison=_is_comparison,
+                workload_category=_w_cat,
+            )
             if tracker:
                 tracker.record("context_optimization_ms", (time.perf_counter() - start_opt) * 1000.0)
 
@@ -650,6 +730,8 @@ class AIAdvisorService:
                 is_historical=_is_historical,
             )
 
+        tracker.record_count("adaptive_output_budget", max_tokens_budget)
+
         # 6. Build AIContext with optimized history & docs
         include_personal = True if not inference_config else self._context_optimizer.should_include_personal_context(intent, inference_config)
         ai_context = self._builder.build_context(
@@ -662,13 +744,14 @@ class AIAdvisorService:
             tracker=tracker,
         )
 
-        prompt = self._builder.build_prompt(
-            context=ai_context,
-            tracker=tracker,
-            intent=intent.value if intent else None,
-            scope=_scope_str,
-            config=inference_config,
-        )
+        with tracker.timer("prompt_build_ms"):
+            prompt = self._builder.build_prompt(
+                context=ai_context,
+                tracker=tracker,
+                intent=intent.value if intent else None,
+                scope=_scope_str,
+                config=inference_config,
+            )
 
         if inference_config and tracker:
             est_p, est_o, est_t = self._context_optimizer.estimate_tokens(prompt, inference_config.max_tokens)
@@ -690,29 +773,31 @@ class AIAdvisorService:
         _has_market = bool(live_market_data)
 
         # Check cache eligibility
-        is_cache_eligible = CacheEligibilityPolicy.is_eligible(
-            query=request.message,
-            intent=intent,
-            scope=_scope_str,
-            operation=_op_str,
-            has_personal_context=_has_personal or getattr(understanding, "requires_personal_data", False),
-            has_live_market_data=_has_market or getattr(understanding, "requires_market_data", False),
-            requires_financial_engine=getattr(understanding, "requires_personal_data", False),
-            requires_market_data=getattr(understanding, "requires_market_data", False),
-            is_ambiguous=getattr(understanding, "is_ambiguous", False),
-            is_adversarial=getattr(understanding, "is_adversarial", False),
-        )
+        with tracker.timer("cache_eligibility_ms"):
+            is_cache_eligible = CacheEligibilityPolicy.is_eligible(
+                query=request.message,
+                intent=intent,
+                scope=_scope_str,
+                operation=_op_str,
+                has_personal_context=_has_personal or getattr(understanding, "requires_personal_data", False),
+                has_live_market_data=_has_market or getattr(understanding, "requires_market_data", False),
+                requires_financial_engine=getattr(understanding, "requires_personal_data", False),
+                requires_market_data=getattr(understanding, "requires_market_data", False),
+                is_ambiguous=getattr(understanding, "is_ambiguous", False),
+                is_adversarial=getattr(understanding, "is_adversarial", False),
+            )
 
         cached_entry = None
         cache_key = ""
         if is_cache_eligible:
-            cache_key = CacheKeyBuilder.build_key(
-                query=understanding.retrieval_query or request.message,
-                model_id=routing_decision.model,
-                max_tokens_budget=max_tokens_budget,
-                scope=_scope_str,
-                operation=_op_str,
-            )
+            with tracker.timer("cache_key_ms"):
+                cache_key = CacheKeyBuilder.build_key(
+                    query=understanding.retrieval_query or request.message,
+                    model_id=routing_decision.model,
+                    max_tokens_budget=max_tokens_budget,
+                    scope=_scope_str,
+                    operation=_op_str,
+                )
             with tracker.timer("cache_lookup_ms"):
                 cached_entry = self._cache.get(cache_key)
 
@@ -955,26 +1040,28 @@ class AIAdvisorService:
             "latency": tracker.to_dict(),
         }
 
-        with tracker.timer("persistence_ms"):
+        with tracker.timer("assistant_persistence_ms"):
             assistant_msg = self._conv.store_assistant_message(
                 conversation_id=conversation_id,
                 content=raw_response,
                 metadata=assistant_metadata,
             )
+        tracker.record("persistence_ms", tracker.breakdown.user_persistence_ms + tracker.breakdown.assistant_persistence_ms)
 
-        self._observability.record_request_telemetry(
-            request_id=req_id,
-            conversation_id=conversation_id,
-            latency_breakdown=tracker.breakdown,
-            understanding=understanding,
-            quality_metadata=assistant_metadata.get("quality"),
-            resilience_metadata=assistant_metadata.get("resilience"),
-            routing_decision=routing_decision,
-            streaming_enabled=False,
-            personal_boundary_checked=bool(understanding.requires_personal_data if understanding else False),
-            personal_boundary_passed=True,
-            pipeline_events=event_tracker.get_events(),
-        )
+        with tracker.timer("telemetry_record_ms"):
+            self._observability.record_request_telemetry(
+                request_id=req_id,
+                conversation_id=conversation_id,
+                latency_breakdown=tracker.breakdown,
+                understanding=understanding,
+                quality_metadata=assistant_metadata.get("quality"),
+                resilience_metadata=assistant_metadata.get("resilience"),
+                routing_decision=routing_decision,
+                streaming_enabled=False,
+                personal_boundary_checked=bool(understanding.requires_personal_data if understanding else False),
+                personal_boundary_passed=True,
+                pipeline_events=event_tracker.get_events(),
+            )
 
         return SendMessageResponse(
             conversation_id=conversation_id,
@@ -1025,30 +1112,34 @@ class AIAdvisorService:
         resilience_metrics = ResilienceMetrics()
         resilience_metrics.circuit_state = self._resilience.get_circuit_state()
 
-        conversation = self._conv.get_conversation(
-            conversation_id=conversation_id, user_id=user_id
-        )
+        with tracker.timer("ownership_check_ms"):
+            conversation = self._conv.get_conversation(
+                conversation_id=conversation_id, user_id=user_id
+            )
 
-        with tracker.timer("persistence_ms"):
+        with tracker.timer("user_persistence_ms"):
             user_msg = self._conv.store_user_message(
                 conversation_id=conversation_id,
                 content=request.message,
             )
+        tracker.record("persistence_ms", tracker.breakdown.user_persistence_ms)
 
         self._conv.update_title_from_first_message(conversation, request.message)
 
         dash_failed = False
         full_facts = None
-        try:
-            full_facts = self._dash.build_dashboard(user_id=user_id)
-        except Exception as exc:
-            logger.warning(f"Could not retrieve financial context in stream: {exc}")
-            dash_failed = True
+        with tracker.timer("financial_context_ms"):
+            try:
+                full_facts = self._dash.build_dashboard(user_id=user_id)
+            except Exception as exc:
+                logger.warning(f"Could not retrieve financial context in stream: {exc}")
+                dash_failed = True
 
         history_limit = settings.ai_max_history_messages
-        recent_messages = self._conv.get_recent_messages(
-            conversation_id=conversation_id, limit=history_limit + 1
-        )
+        with tracker.timer("history_retrieval_ms"):
+            recent_messages = self._conv.get_recent_messages(
+                conversation_id=conversation_id, limit=history_limit + 1
+            )
         history = [m for m in recent_messages if m.id != user_msg.id]
 
         understanding = self._understanding.analyze(request.message, history=history, tracker=tracker)
@@ -1169,35 +1260,64 @@ class AIAdvisorService:
                 yield f"event: complete\ndata: {json.dumps({'message_id': asst_msg.id, 'status': 'completed'})}\n\n"
             return
 
-        retrieved_docs = []
-        retrieval_plan = self._adaptive_router.route(
-            query_understanding=understanding,
-            execution_plan=understanding.execution_plan,
-            retrieval_query=understanding.retrieval_query,
-            tracker=tracker,
+        # Phase L.11.2: Personal Fast-Path Evaluation
+        _ep = understanding.execution_plan
+        is_fast_path, fast_path_reason, fast_path_budget = PersonalFastPathClassifier.is_personal_fast_path(
+            intent=intent,
+            execution_plan=_ep,
+            sub_intent=understanding.sub_intent,
+            temporal_references=understanding.temporal_references,
+            query=request.message,
         )
-        if retrieval_plan.strategy != "NONE":
-            try:
-                retrieved_docs = await self._rag.retrieve(
-                    query=understanding.retrieval_query,
-                    retrieval_plan=retrieval_plan,
-                    tracker=tracker,
-                )
-            except Exception as rag_exc:
-                logger.warning(f"RAG retrieval failure in stream: {rag_exc}. Continuing degraded.")
-                retrieved_docs = []
-                resilience_metrics.rag_degraded = True
-                if tracker:
-                    tracker.record_flag("rag_degraded", True)
 
+        # 5. Adaptive Retrieval Routing & Execution (Bypassed on Fast-Path)
+        retrieved_docs = []
+        if is_fast_path:
+            tracker.record_flag("personal_fast_path_used", True)
+            tracker.record_flag("general_rag_skipped", True)
+            tracker.record_str("fast_path_reason", fast_path_reason or "DIRECT_PERSONAL_LOOKUP")
+            retrieval_plan = RetrievalExecutionPlan(strategy="NONE")
+        else:
+            retrieval_plan = self._adaptive_router.route(
+                query_understanding=understanding,
+                execution_plan=_ep,
+                retrieval_query=understanding.retrieval_query,
+                tracker=tracker,
+            )
+            if retrieval_plan.strategy != "NONE":
+                try:
+                    retrieved_docs = await self._rag.retrieve(
+                        query=understanding.retrieval_query,
+                        retrieval_plan=retrieval_plan,
+                        tracker=tracker,
+                    )
+                except Exception as rag_exc:
+                    logger.warning(f"RAG retrieval failure in stream: {rag_exc}. Continuing degraded.")
+                    retrieved_docs = []
+                    resilience_metrics.rag_degraded = True
+                    if tracker:
+                        tracker.record_flag("rag_degraded", True)
+
+        # Financial intelligence
         financial_intelligence = None
         if self._intel is not None:
-            try:
-                financial_intelligence = self._intel.build_summary(user_id=user_id)
-            except Exception:
-                pass
+            with tracker.timer("financial_intelligence_ms"):
+                try:
+                    financial_intelligence = self._intel.build_summary(user_id=user_id)
+                except Exception:
+                    pass
 
-        live_market_data = await self._retrieve_live_market_data(request.message, user_id)
+        # Retrieve live market data (Bypassed on Fast-Path unless explicitly required)
+        requires_mkt = bool(_ep and getattr(_ep, "requires_market_data", False))
+        if is_fast_path and not requires_mkt:
+            live_market_data = None
+            tracker.record_flag("market_data_skipped", True)
+        else:
+            with tracker.timer("market_data_ms"):
+                live_market_data = await self._retrieve_live_market_data(request.message, user_id)
+
+        if is_fast_path:
+            tracker.record_flag("minimal_context_used", True)
 
         ai_context = self._builder.build_context(
             question=understanding.resolved_query or request.message,
@@ -1209,7 +1329,6 @@ class AIAdvisorService:
             tracker=tracker,
         )
 
-        _ep = understanding.execution_plan
         _scope_str = _ep.scope.value if _ep and _ep.scope else None
         _op_str = _ep.operation.value if _ep and _ep.operation else None
         _is_comparison = bool(_ep and _ep.comparison_info and _ep.comparison_info.is_comparison)
@@ -1236,7 +1355,29 @@ class AIAdvisorService:
             # Context Optimization & Trimming
             start_opt = time.perf_counter()
             history = self._context_optimizer.optimize_history(history, inference_config, intent=intent)
-            retrieved_docs = self._context_optimizer.optimize_rag_docs(retrieved_docs, inference_config, intent=intent, is_comparison=_is_comparison)
+            if inference_config.complexity == InferenceComplexity.COMPLEX or _op_str in ("PLAN", "PLANNING", "RECOMMEND", "PREDICT") or _scope_str == "PLANNING":
+                _w_cat, _, _ = ReasoningWorkloadClassifier.classify(
+                    query=request.message,
+                    intent=intent,
+                    execution_plan=_ep,
+                    sub_intent=understanding.sub_intent,
+                    temporal_references=understanding.temporal_references,
+                )
+            else:
+                _w_cat, _, _ = BalancedWorkloadClassifier.classify(
+                    query=request.message,
+                    intent=intent,
+                    execution_plan=_ep,
+                    sub_intent=understanding.sub_intent,
+                    temporal_references=understanding.temporal_references,
+                )
+            retrieved_docs = self._context_optimizer.optimize_rag_docs(
+                retrieved_docs,
+                inference_config,
+                intent=intent,
+                is_comparison=_is_comparison,
+                workload_category=_w_cat,
+            )
             if tracker:
                 tracker.record("context_optimization_ms", (time.perf_counter() - start_opt) * 1000.0)
 
@@ -1250,6 +1391,8 @@ class AIAdvisorService:
                 is_historical=_is_historical,
             )
 
+        tracker.record_count("adaptive_output_budget", max_tokens_budget)
+
         include_personal = True if not inference_config else self._context_optimizer.should_include_personal_context(intent, inference_config)
         ai_context = self._builder.build_context(
             question=understanding.resolved_query or request.message,
@@ -1261,13 +1404,14 @@ class AIAdvisorService:
             tracker=tracker,
         )
 
-        prompt = self._builder.build_prompt(
-            context=ai_context,
-            tracker=tracker,
-            intent=intent.value if intent else None,
-            scope=_scope_str,
-            config=inference_config,
-        )
+        with tracker.timer("prompt_build_ms"):
+            prompt = self._builder.build_prompt(
+                context=ai_context,
+                tracker=tracker,
+                intent=intent.value if intent else None,
+                scope=_scope_str,
+                config=inference_config,
+            )
 
         with tracker.timer("model_selection_ms"):
             _ep = getattr(understanding, "execution_plan", None)
@@ -1292,29 +1436,31 @@ class AIAdvisorService:
         ]
 
         # Check cache eligibility
-        is_cache_eligible = CacheEligibilityPolicy.is_eligible(
-            query=request.message,
-            intent=intent,
-            scope=_scope_str,
-            operation=_op_str,
-            has_personal_context=bool(ai_context.user_financial_context and self._builder._has_any_financial_data(ai_context.user_financial_context)) or getattr(understanding, "requires_personal_data", False),
-            has_live_market_data=bool(live_market_data) or getattr(understanding, "requires_market_data", False),
-            requires_financial_engine=getattr(understanding, "requires_personal_data", False),
-            requires_market_data=getattr(understanding, "requires_market_data", False),
-            is_ambiguous=getattr(understanding, "is_ambiguous", False),
-            is_adversarial=getattr(understanding, "is_adversarial", False),
-        )
+        with tracker.timer("cache_eligibility_ms"):
+            is_cache_eligible = CacheEligibilityPolicy.is_eligible(
+                query=request.message,
+                intent=intent,
+                scope=_scope_str,
+                operation=_op_str,
+                has_personal_context=bool(ai_context.user_financial_context and self._builder._has_any_financial_data(ai_context.user_financial_context)) or getattr(understanding, "requires_personal_data", False),
+                has_live_market_data=bool(live_market_data) or getattr(understanding, "requires_market_data", False),
+                requires_financial_engine=getattr(understanding, "requires_personal_data", False),
+                requires_market_data=getattr(understanding, "requires_market_data", False),
+                is_ambiguous=getattr(understanding, "is_ambiguous", False),
+                is_adversarial=getattr(understanding, "is_adversarial", False),
+            )
 
         cached_entry = None
         cache_key = ""
         if is_cache_eligible:
-            cache_key = CacheKeyBuilder.build_key(
-                query=understanding.retrieval_query or request.message,
-                model_id=routing_decision.model,
-                max_tokens_budget=max_tokens_budget,
-                scope=_scope_str,
-                operation=_op_str,
-            )
+            with tracker.timer("cache_key_ms"):
+                cache_key = CacheKeyBuilder.build_key(
+                    query=understanding.retrieval_query or request.message,
+                    model_id=routing_decision.model,
+                    max_tokens_budget=max_tokens_budget,
+                    scope=_scope_str,
+                    operation=_op_str,
+                )
             with tracker.timer("cache_lookup_ms"):
                 cached_entry = self._cache.get(cache_key)
 
@@ -1538,26 +1684,28 @@ class AIAdvisorService:
             "resilience": resilience_metrics.to_metadata_dict(),
             "latency": tracker.to_dict(),
         }
-        with tracker.timer("persistence_ms"):
+        with tracker.timer("assistant_persistence_ms"):
             asst_msg = self._conv.store_assistant_message(
                 conversation_id=conversation_id,
                 content=raw_response,
                 metadata=assistant_metadata,
             )
+        tracker.record("persistence_ms", tracker.breakdown.user_persistence_ms + tracker.breakdown.assistant_persistence_ms)
 
-        self._observability.record_request_telemetry(
-            request_id=req_id,
-            conversation_id=conversation_id,
-            latency_breakdown=tracker.breakdown,
-            understanding=understanding,
-            quality_metadata=assistant_metadata.get("quality"),
-            resilience_metadata=assistant_metadata.get("resilience"),
-            routing_decision=routing_decision,
-            streaming_enabled=True,
-            personal_boundary_checked=bool(understanding.requires_personal_data if understanding else False),
-            personal_boundary_passed=True,
-            pipeline_events=event_tracker.get_events(),
-        )
+        with tracker.timer("telemetry_record_ms"):
+            self._observability.record_request_telemetry(
+                request_id=req_id,
+                conversation_id=conversation_id,
+                latency_breakdown=tracker.breakdown,
+                understanding=understanding,
+                quality_metadata=assistant_metadata.get("quality"),
+                resilience_metadata=assistant_metadata.get("resilience"),
+                routing_decision=routing_decision,
+                streaming_enabled=True,
+                personal_boundary_checked=bool(understanding.requires_personal_data if understanding else False),
+                personal_boundary_passed=True,
+                pipeline_events=event_tracker.get_events(),
+            )
 
         if emit_sse:
             yield f"event: metadata\ndata: {json.dumps({'request_id': req_id, 'citations': citations_meta, 'quality': {'overall_score': round(quality_result.overall_score, 2), 'passed': quality_result.overall_pass, 'retry_used': retry_used, 'dimensions': quality_result.dimensions}, 'latency': tracker.to_dict(), 'selected_model': routing_decision.model, 'tokens_per_second': tracker.breakdown.tokens_per_second or 0.0})}\n\n"

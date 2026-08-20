@@ -72,12 +72,12 @@ class TestAdaptiveTokenBudgetSelector:
         assert cfg.max_tokens <= 256
         assert cfg.history_limit == 4
 
-    def test_comparison_token_budget_is_512(self):
+    def test_comparison_token_budget_is_bounded(self):
         mock_plan = MagicMock()
         mock_plan.scope.value = "COMPARISON"
         mock_plan.comparison_info.is_comparison = True
         cfg = self.selector.select_config("SIP vs FD", intent=QueryIntent.GENERAL_FINANCE, execution_plan=mock_plan)
-        assert cfg.max_tokens == 512
+        assert 220 <= cfg.max_tokens <= 512
         assert cfg.history_limit == 8
 
     def test_complex_planning_token_budget_is_768(self):

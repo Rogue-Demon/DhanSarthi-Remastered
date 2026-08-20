@@ -68,24 +68,37 @@ class LLMContextOptimizer:
         config: InferenceConfig,
         intent: Optional[QueryIntent] = None,
         is_comparison: bool = False,
+        workload_category: Optional[str] = None,
     ) -> List[RetrievedDocument]:
         """
         Select relevant RAG knowledge chunks and enforce character budget.
-        Preserves document citation identity metadata.
+        Preserves document citation identity metadata (document_id, title, source, authority, source_url).
         """
         if not docs:
             return []
 
-        # 1. Determine target document count based on query complexity/intent
+        # 1. Determine target document count based on query complexity/intent/workload
         if intent in (QueryIntent.CASUAL, QueryIntent.PERSONAL_FINANCE):
             return []  # CASUAL and pure PERSONAL_FINANCE do not use RAG context
 
-        if config.complexity == InferenceComplexity.SIMPLE and not is_comparison:
+        if workload_category in ("SHORT_DEFINITION", "BANKING"):
+            target_count = 2  # Concise 1-2 authoritative sources for simple definitions
+        elif workload_category == "TAX_REGULATORY":
+            target_count = 3  # 2-3 authoritative sources for tax & regulatory rules
+        elif is_comparison or workload_category == "COMPARISON":
+            target_count = 3  # 2-3 sources for direct entity comparisons
+        elif workload_category == "COMPLEX_SIMPLE":
+            target_count = 3  # 3 authoritative sources for focused complex queries
+        elif workload_category == "COMPLEX_ANALYSIS":
+            target_count = 4  # 4 sources for multi-goal / portfolio analysis
+        elif workload_category in ("DEEP_PLANNING", "REGULATORY_COMPLEX"):
+            target_count = min(len(docs), 5)  # Up to 5 comprehensive sources for deep planning
+        elif config.complexity == InferenceComplexity.SIMPLE and not is_comparison:
             target_count = 2  # Prefer strongest 1-2 sources for simple definitions
         elif is_comparison:
             target_count = 4  # Allow 3-4 sources for comparisons
         else:
-            target_count = min(len(docs), 5)
+            target_count = min(len(docs), 4)
 
         selected = docs[:target_count]
 

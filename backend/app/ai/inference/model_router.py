@@ -58,6 +58,7 @@ class ModelRouter:
           - If AI_MODEL_ROUTING_ENABLED=false, unconditionally returns settings.ai_model.
           - Never returns a model outside the trusted server allowlist (AI_ALLOWED_MODELS).
           - Does not alter RAG, Financial Engine, or Safety Validator contracts.
+          - Preserves quality gates: complex planning, tax, and comparisons require BALANCED or REASONING.
         """
         complexity = config.complexity if config else InferenceComplexity.MODERATE
         max_tokens = config.max_tokens if config else settings.ai_max_tokens
@@ -74,25 +75,69 @@ class ModelRouter:
                 temperature=temperature,
             )
 
-        # 2. Complexity & Intent-based candidate selection
+        # 2. Extract structured signals from execution plan
         op_str = execution_plan.operation.value if (execution_plan and execution_plan.operation) else None
+        scope_str = execution_plan.scope.value if (execution_plan and execution_plan.scope) else None
+        is_comparison = bool(execution_plan and execution_plan.comparison_info and execution_plan.comparison_info.is_comparison)
+        
+        # Check if query is tax / regulatory
+        is_tax_regulatory = False
+        if execution_plan and getattr(execution_plan, "entities", None):
+            is_tax_regulatory = any(
+                getattr(e, "entity_type", None) and getattr(e.entity_type, "value", "") == "tax_category"
+                for e in execution_plan.entities
+            )
+        if "80C" in query.upper() or "TAX" in query.upper() or "SECTION" in query.upper():
+            is_tax_regulatory = True
 
-        if intent == QueryIntent.CASUAL or complexity == InferenceComplexity.SIMPLE:
+        # 3. Workload-based deterministic routing logic
+        # 3a. Complex Planning & Multi-step Financial Analysis -> REASONING tier
+        if op_str in ("PLAN", "PLANNING", "RECOMMEND", "PREDICT") or complexity == InferenceComplexity.COMPLEX or scope_str == "PLANNING":
+            candidate = self.reasoning_model
+            latency_class = "REASONING"
+            reason = f"COMPLEX_PLANNING_ROUTING ({op_str or complexity.value})"
+
+        # 3b. Comparison, Tax/Regulatory, Historical, or Moderate queries -> BALANCED tier minimum
+        elif is_comparison or op_str == "COMPARE" or scope_str == "COMPARISON":
+            candidate = self.balanced_model
+            latency_class = "BALANCED"
+            reason = "COMPARISON_QUERY_BALANCED_ROUTING"
+
+        elif is_tax_regulatory:
+            candidate = self.balanced_model
+            latency_class = "BALANCED"
+            reason = "TAX_REGULATORY_BALANCED_ROUTING"
+
+        # 3c. Casual greetings and metadata -> FAST tier
+        elif intent == QueryIntent.CASUAL or scope_str == "CASUAL":
+            candidate = self.fast_model
+            latency_class = "FAST"
+            reason = "CASUAL_QUERY_FAST_ROUTING"
+
+        # 3d. Direct Personal Lookups -> FAST tier
+        elif (
+            intent == QueryIntent.PERSONAL_FINANCE
+            and scope_str == "PERSONAL_LOOKUP"
+            and op_str in ("LOOKUP", "CHECK", "TRACK", "SUMMARIZE", "EXPLAIN")
+            and not is_comparison
+        ):
+            candidate = self.fast_model
+            latency_class = "FAST"
+            reason = f"PERSONAL_LOOKUP_FAST_ROUTING ({op_str})"
+
+        # 3e. Simple General Queries -> FAST tier
+        elif complexity == InferenceComplexity.SIMPLE and not is_comparison and not is_tax_regulatory:
             candidate = self.fast_model
             latency_class = "FAST"
             reason = f"SIMPLE_QUERY_FAST_ROUTING ({complexity.value})"
 
-        elif op_str == "PLANNING" or complexity == InferenceComplexity.COMPLEX:
-            candidate = self.reasoning_model
-            latency_class = "REASONING"
-            reason = f"COMPLEX_REASONING_ROUTING ({complexity.value})"
-
+        # 3f. Default fallback -> BALANCED tier
         else:
             candidate = self.balanced_model
             latency_class = "BALANCED"
-            reason = f"MODERATE_QUERY_BALANCED_ROUTING ({complexity.value})"
+            reason = f"DEFAULT_BALANCED_ROUTING ({complexity.value})"
 
-        # 3. Validate candidate model against trusted server allowlist
+        # 4. Validate candidate model against trusted server allowlist
         selected_model = self._validate_model(candidate)
 
         return ModelRoutingDecision(
@@ -103,6 +148,20 @@ class ModelRouter:
             max_tokens=max_tokens,
             temperature=temperature,
         )
+
+    def get_fallback_model(self, current_model: str, failed_models: Optional[Set[str]] = None) -> Optional[str]:
+        """
+        Determine the next model candidate in the resilience hierarchy:
+        FAST -> BALANCED -> REASONING -> None (Safe Fallback).
+        """
+        failed = failed_models or set()
+        failed.add(current_model)
+
+        tier_order = [self.fast_model, self.balanced_model, self.reasoning_model, self.primary_model]
+        for candidate in tier_order:
+            if candidate not in failed and candidate in self.allowed_models:
+                return candidate
+        return None
 
     def _validate_model(self, candidate_model: str) -> str:
         """Ensure candidate model is present in server-configured allowlist."""
