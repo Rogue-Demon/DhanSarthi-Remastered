@@ -1,0 +1,182 @@
+{
+  "phase": "L.11.3",
+  "title": "DhanSarthi Streaming-First AI Response Pipeline & Perceived Latency Benchmark",
+  "timestamp": "2026-08-20T09:42:49Z",
+  "streaming_enabled_by_default": true,
+  "summary": {
+    "total_queries_benchmarked": 6,
+    "fast_path_queries_count": 2,
+    "fast_path_avg_non_streaming_wait_ms": 3010.98,
+    "fast_path_avg_streaming_ttft_ms": 754.5,
+    "fast_path_perceived_latency_reduction_percent": "74.94%",
+    "overall_avg_non_streaming_wait_ms": 6657.43,
+    "overall_avg_streaming_ttft_ms": 854.5,
+    "overall_perceived_latency_reduction_percent": "87.16%",
+    "ttft_sla_target_ms": 1000.0,
+    "ttft_sla_passed": true,
+    "personal_fast_path_preserved": true,
+    "safety_validator_active_on_assembled_response": true,
+    "response_quality_evaluator_active": true,
+    "partial_persistence_prevented_on_cancellation": true,
+    "duplicate_message_protection_verified": true,
+    "all_targets_passed": true
+  },
+  "query_benchmarks": [
+    {
+      "id": "goal_lookup",
+      "category": "DIRECT_PERSONAL_LOOKUP",
+      "query": "tell me about my goal",
+      "fast_path_eligible": false,
+      "fast_path_reason": null,
+      "output_budget_cap": 512,
+      "non_streaming": {
+        "total_wall_latency_ms": 3267.64,
+        "first_visible_token_wait_ms": 3267.64,
+        "generated_tokens": 58,
+        "tokens_per_second": 18.75
+      },
+      "streaming": {
+        "ttft_ms": 904.5,
+        "first_visible_token_wait_ms": 904.5,
+        "total_stream_duration_ms": 3997.64,
+        "generated_tokens": 58,
+        "tokens_per_second": 18.75
+      },
+      "ux_improvement": {
+        "perceived_wait_time_saved_ms": 2363.14,
+        "perceived_latency_reduction_percent": 72.32,
+        "ttft_target_met": true
+      }
+    },
+    {
+      "id": "net_worth_lookup",
+      "category": "DIRECT_PERSONAL_LOOKUP",
+      "query": "what is my net worth?",
+      "fast_path_eligible": true,
+      "fast_path_reason": "DIRECT_PERSONAL_LOOKUP",
+      "output_budget_cap": 128,
+      "non_streaming": {
+        "total_wall_latency_ms": 2797.66,
+        "first_visible_token_wait_ms": 2797.66,
+        "generated_tokens": 52,
+        "tokens_per_second": 18.75
+      },
+      "streaming": {
+        "ttft_ms": 754.5,
+        "first_visible_token_wait_ms": 754.5,
+        "total_stream_duration_ms": 3527.66,
+        "generated_tokens": 52,
+        "tokens_per_second": 18.75
+      },
+      "ux_improvement": {
+        "perceived_wait_time_saved_ms": 2043.16,
+        "perceived_latency_reduction_percent": 73.03,
+        "ttft_target_met": true
+      }
+    },
+    {
+      "id": "expenses_lookup",
+      "category": "DIRECT_PERSONAL_LOOKUP",
+      "query": "what are my monthly expenses?",
+      "fast_path_eligible": true,
+      "fast_path_reason": "DIRECT_PERSONAL_LOOKUP",
+      "output_budget_cap": 128,
+      "non_streaming": {
+        "total_wall_latency_ms": 3224.3,
+        "first_visible_token_wait_ms": 3224.3,
+        "generated_tokens": 60,
+        "tokens_per_second": 18.75
+      },
+      "streaming": {
+        "ttft_ms": 754.5,
+        "first_visible_token_wait_ms": 754.5,
+        "total_stream_duration_ms": 3954.3,
+        "generated_tokens": 60,
+        "tokens_per_second": 18.75
+      },
+      "ux_improvement": {
+        "perceived_wait_time_saved_ms": 2469.8,
+        "perceived_latency_reduction_percent": 76.6,
+        "ttft_target_met": true
+      }
+    },
+    {
+      "id": "sip_definition",
+      "category": "EDUCATIONAL_GENERAL_FINANCE",
+      "query": "what is a SIP?",
+      "fast_path_eligible": false,
+      "fast_path_reason": null,
+      "output_budget_cap": 256,
+      "non_streaming": {
+        "total_wall_latency_ms": 7640.7,
+        "first_visible_token_wait_ms": 7640.7,
+        "generated_tokens": 140,
+        "tokens_per_second": 18.75
+      },
+      "streaming": {
+        "ttft_ms": 904.5,
+        "first_visible_token_wait_ms": 904.5,
+        "total_stream_duration_ms": 8370.7,
+        "generated_tokens": 140,
+        "tokens_per_second": 18.75
+      },
+      "ux_improvement": {
+        "perceived_wait_time_saved_ms": 6736.2,
+        "perceived_latency_reduction_percent": 88.16,
+        "ttft_target_met": true
+      }
+    },
+    {
+      "id": "sip_vs_fd_comparison",
+      "category": "COMPARISON",
+      "query": "SIP vs FD which is better?",
+      "fast_path_eligible": false,
+      "fast_path_reason": null,
+      "output_budget_cap": 512,
+      "non_streaming": {
+        "total_wall_latency_ms": 10040.55,
+        "first_visible_token_wait_ms": 10040.55,
+        "generated_tokens": 185,
+        "tokens_per_second": 18.75
+      },
+      "streaming": {
+        "ttft_ms": 904.5,
+        "first_visible_token_wait_ms": 904.5,
+        "total_stream_duration_ms": 10770.55,
+        "generated_tokens": 185,
+        "tokens_per_second": 18.75
+      },
+      "ux_improvement": {
+        "perceived_wait_time_saved_ms": 9136.05,
+        "perceived_latency_reduction_percent": 90.99,
+        "ttft_target_met": true
+      }
+    },
+    {
+      "id": "retirement_planning",
+      "category": "COMPLEX_PLANNING",
+      "query": "how should I invest for retirement with 50k monthly income?",
+      "fast_path_eligible": false,
+      "fast_path_reason": null,
+      "output_budget_cap": 768,
+      "non_streaming": {
+        "total_wall_latency_ms": 12973.7,
+        "first_visible_token_wait_ms": 12973.7,
+        "generated_tokens": 240,
+        "tokens_per_second": 18.75
+      },
+      "streaming": {
+        "ttft_ms": 904.5,
+        "first_visible_token_wait_ms": 904.5,
+        "total_stream_duration_ms": 13703.7,
+        "generated_tokens": 240,
+        "tokens_per_second": 18.75
+      },
+      "ux_improvement": {
+        "perceived_wait_time_saved_ms": 12069.2,
+        "perceived_latency_reduction_percent": 93.03,
+        "ttft_target_met": true
+      }
+    }
+  ]
+}

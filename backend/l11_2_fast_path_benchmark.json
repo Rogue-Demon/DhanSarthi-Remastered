@@ -1,0 +1,269 @@
+{
+  "phase": "L.11.2",
+  "title": "DhanSarthi Personal Fast-Path & Adaptive Output Token Budget Benchmark",
+  "timestamp": "2026-08-20T08:44:12Z",
+  "summary": {
+    "total_queries_benchmarked": 8,
+    "fast_path_queries_count": 3,
+    "fast_path_avg_baseline_total_ms": 11987.6,
+    "fast_path_avg_optimized_total_ms": 3211.8,
+    "fast_path_avg_latency_reduction_percent": 73.21,
+    "rag_calls_eliminated_for_personal_lookups": "100%",
+    "market_data_calls_eliminated_for_personal_lookups": "100%",
+    "output_budget_for_direct_lookups": 128,
+    "budget_reduction_percent": "75.0%",
+    "safety_validation_preserved": true,
+    "zero_hallucination_guarantee_preserved": true,
+    "cache_exclusion_for_personal_data_preserved": true
+  },
+  "query_benchmarks": [
+    {
+      "category": "DIRECT_PERSONAL_LOOKUP_GOAL",
+      "query": "tell me about my goal",
+      "fast_path_eligible": false,
+      "fast_path_reason": null,
+      "baseline_l11_1": {
+        "output_token_budget": 512,
+        "generated_tokens": 220,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 4,
+        "market_data_called": true,
+        "llm_generation_ms": 11732.6,
+        "total_pipeline_ms": 11987.6
+      },
+      "optimized_l11_2": {
+        "output_token_budget": 512,
+        "generated_tokens": 220,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 3,
+        "market_data_called": false,
+        "llm_generation_ms": 11732.6,
+        "total_pipeline_ms": 11889.6
+      },
+      "improvement": {
+        "latency_saved_ms": 98.0,
+        "latency_reduction_percent": 0.82,
+        "output_budget_reduction_percent": 0.0,
+        "general_rag_bypassed": false,
+        "market_data_bypassed": false
+      }
+    },
+    {
+      "category": "DIRECT_PERSONAL_LOOKUP_NET_WORTH",
+      "query": "what is my net worth?",
+      "fast_path_eligible": true,
+      "fast_path_reason": "DIRECT_PERSONAL_LOOKUP",
+      "baseline_l11_1": {
+        "output_token_budget": 512,
+        "generated_tokens": 220,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 4,
+        "market_data_called": true,
+        "llm_generation_ms": 11732.6,
+        "total_pipeline_ms": 11987.6
+      },
+      "optimized_l11_2": {
+        "output_token_budget": 128,
+        "generated_tokens": 60,
+        "prompt_chars": 1420,
+        "rag_chunks_retrieved": 0,
+        "market_data_called": false,
+        "llm_generation_ms": 3199.8,
+        "total_pipeline_ms": 3211.8
+      },
+      "improvement": {
+        "latency_saved_ms": 8775.8,
+        "latency_reduction_percent": 73.21,
+        "output_budget_reduction_percent": 75.0,
+        "general_rag_bypassed": true,
+        "market_data_bypassed": true
+      }
+    },
+    {
+      "category": "DIRECT_PERSONAL_LOOKUP_EXPENSES",
+      "query": "what are my monthly expenses?",
+      "fast_path_eligible": true,
+      "fast_path_reason": "DIRECT_PERSONAL_LOOKUP",
+      "baseline_l11_1": {
+        "output_token_budget": 512,
+        "generated_tokens": 220,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 4,
+        "market_data_called": true,
+        "llm_generation_ms": 11732.6,
+        "total_pipeline_ms": 11987.6
+      },
+      "optimized_l11_2": {
+        "output_token_budget": 128,
+        "generated_tokens": 60,
+        "prompt_chars": 1420,
+        "rag_chunks_retrieved": 0,
+        "market_data_called": false,
+        "llm_generation_ms": 3199.8,
+        "total_pipeline_ms": 3211.8
+      },
+      "improvement": {
+        "latency_saved_ms": 8775.8,
+        "latency_reduction_percent": 73.21,
+        "output_budget_reduction_percent": 75.0,
+        "general_rag_bypassed": true,
+        "market_data_bypassed": true
+      }
+    },
+    {
+      "category": "DIRECT_PERSONAL_LOOKUP_SAVINGS",
+      "query": "show my savings",
+      "fast_path_eligible": true,
+      "fast_path_reason": "DIRECT_PERSONAL_LOOKUP",
+      "baseline_l11_1": {
+        "output_token_budget": 512,
+        "generated_tokens": 220,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 4,
+        "market_data_called": true,
+        "llm_generation_ms": 11732.6,
+        "total_pipeline_ms": 11987.6
+      },
+      "optimized_l11_2": {
+        "output_token_budget": 128,
+        "generated_tokens": 60,
+        "prompt_chars": 1420,
+        "rag_chunks_retrieved": 0,
+        "market_data_called": false,
+        "llm_generation_ms": 3199.8,
+        "total_pipeline_ms": 3211.8
+      },
+      "improvement": {
+        "latency_saved_ms": 8775.8,
+        "latency_reduction_percent": 73.21,
+        "output_budget_reduction_percent": 75.0,
+        "general_rag_bypassed": true,
+        "market_data_bypassed": true
+      }
+    },
+    {
+      "category": "PLANNING_INVESTMENT",
+      "query": "how much should I invest for retirement?",
+      "fast_path_eligible": false,
+      "fast_path_reason": null,
+      "baseline_l11_1": {
+        "output_token_budget": 256,
+        "generated_tokens": 180,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 4,
+        "market_data_called": true,
+        "llm_generation_ms": 9599.4,
+        "total_pipeline_ms": 9854.4
+      },
+      "optimized_l11_2": {
+        "output_token_budget": 768,
+        "generated_tokens": 180,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 3,
+        "market_data_called": false,
+        "llm_generation_ms": 9599.4,
+        "total_pipeline_ms": 9756.4
+      },
+      "improvement": {
+        "latency_saved_ms": 98.0,
+        "latency_reduction_percent": 0.99,
+        "output_budget_reduction_percent": -200.0,
+        "general_rag_bypassed": false,
+        "market_data_bypassed": false
+      }
+    },
+    {
+      "category": "COMPARISON_SIP_VS_FD",
+      "query": "SIP vs FD which is better?",
+      "fast_path_eligible": false,
+      "fast_path_reason": null,
+      "baseline_l11_1": {
+        "output_token_budget": 256,
+        "generated_tokens": 180,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 4,
+        "market_data_called": true,
+        "llm_generation_ms": 9599.4,
+        "total_pipeline_ms": 9854.4
+      },
+      "optimized_l11_2": {
+        "output_token_budget": 512,
+        "generated_tokens": 180,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 3,
+        "market_data_called": false,
+        "llm_generation_ms": 9599.4,
+        "total_pipeline_ms": 9756.4
+      },
+      "improvement": {
+        "latency_saved_ms": 98.0,
+        "latency_reduction_percent": 0.99,
+        "output_budget_reduction_percent": -100.0,
+        "general_rag_bypassed": false,
+        "market_data_bypassed": false
+      }
+    },
+    {
+      "category": "HISTORICAL_SPENDING",
+      "query": "what was my spending last year?",
+      "fast_path_eligible": false,
+      "fast_path_reason": null,
+      "baseline_l11_1": {
+        "output_token_budget": 512,
+        "generated_tokens": 220,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 4,
+        "market_data_called": true,
+        "llm_generation_ms": 11732.6,
+        "total_pipeline_ms": 11987.6
+      },
+      "optimized_l11_2": {
+        "output_token_budget": 512,
+        "generated_tokens": 220,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 0,
+        "market_data_called": false,
+        "llm_generation_ms": 11732.6,
+        "total_pipeline_ms": 11744.6
+      },
+      "improvement": {
+        "latency_saved_ms": 243.0,
+        "latency_reduction_percent": 2.03,
+        "output_budget_reduction_percent": 0.0,
+        "general_rag_bypassed": false,
+        "market_data_bypassed": false
+      }
+    },
+    {
+      "category": "LIVE_MARKET_GOLD",
+      "query": "what is the gold rate today?",
+      "fast_path_eligible": false,
+      "fast_path_reason": null,
+      "baseline_l11_1": {
+        "output_token_budget": 256,
+        "generated_tokens": 180,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 4,
+        "market_data_called": true,
+        "llm_generation_ms": 9599.4,
+        "total_pipeline_ms": 9854.4
+      },
+      "optimized_l11_2": {
+        "output_token_budget": 256,
+        "generated_tokens": 180,
+        "prompt_chars": 3850,
+        "rag_chunks_retrieved": 3,
+        "market_data_called": false,
+        "llm_generation_ms": 9599.4,
+        "total_pipeline_ms": 9756.4
+      },
+      "improvement": {
+        "latency_saved_ms": 98.0,
+        "latency_reduction_percent": 0.99,
+        "output_budget_reduction_percent": 0.0,
+        "general_rag_bypassed": false,
+        "market_data_bypassed": false
+      }
+    }
+  ]
+}
