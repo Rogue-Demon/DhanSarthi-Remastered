@@ -331,15 +331,53 @@ class AIContextBuilder:
                 f"```json\n{market_str}\n```\n\n"
             )
 
-        # ── Response guidance: intent-aware ───────────────────────────────────
+        # ── Response guidance: intent-aware & workload-tailored ────────────────
         scope_upper = (scope or "").upper()
         intent_upper = (intent or "").upper()
-        is_simple = (
-            intent_upper in ("CASUAL",)
-            or scope_upper in ("CASUAL", "PERSONAL_LOOKUP")
-        )
-        if is_simple:
+        q_lower = (context.question or "").lower()
+
+        is_tax = "80c" in q_lower or "tax" in q_lower or "tds" in q_lower or "section" in q_lower
+        is_comparison = " vs " in q_lower or "compare" in q_lower or scope_upper == "COMPARISON"
+
+        if scope_upper == "PERSONAL_LOOKUP":
+            response_guidance = (
+                "Response Guidance:\n"
+                "  - Answer the user's question directly, clearly, and concisely in 1–3 short sentences using ONLY the supplied ground-truth financial facts.\n"
+                "  - Do not invent missing information. If a goal or metric is not configured in the user profile, clearly state that.\n"
+                "  - Do not add generic educational sections, disclaimers, or unsolicited advice.\n"
+                "  - Remain strictly direct, accurate, and grounded."
+            )
+        elif intent_upper == "CASUAL" or scope_upper == "CASUAL":
             response_guidance = "Response Guidance: Be concise, friendly, and direct. No need for structured markdown sections."
+        elif is_tax:
+            response_guidance = (
+                "Response Guidance:\n"
+                "  - Provide an accurate, factual explanation of the tax provision or regulatory section in 2–4 concise paragraphs/bullet points.\n"
+                "  - State official limits, eligible investments, and tax benefits clearly based on authoritative knowledge.\n"
+                "  - Include necessary regulatory disclaimers concisely without bulky filler."
+            )
+        elif is_comparison:
+            response_guidance = (
+                "Response Guidance:\n"
+                "  - Provide a compact, objective comparison highlighting key differences: Returns, Risk, Liquidity, and Taxation.\n"
+                "  - Summarize the best-fit scenario for each option in 1–2 concluding sentences.\n"
+                "  - Keep formatting clear and concise without unnecessary conversational filler."
+            )
+        elif intent_upper == "GENERAL_FINANCE" or scope_upper == "EDUCATIONAL":
+            response_guidance = (
+                "Response Guidance:\n"
+                "  - Provide a clear, concise, and accurate explanation of the financial concept in 2–4 sentences.\n"
+                "  - Highlight how it works and its primary benefit or risk.\n"
+                "  - Avoid long multi-section essays or redundant conversational boilerplate."
+            )
+        elif scope_upper in ("PLANNING", "PERSONAL_ANALYSIS") or "plan" in q_lower or "strategy" in q_lower:
+            response_guidance = (
+                "Response Guidance (Complex Planning & Strategy):\n"
+                "  - Provide a direct, actionable financial strategy addressing the user's specific planning query.\n"
+                "  - Structure with: 1) Strategy & Allocation, 2) Key Calculations & Assumptions, 3) Action Steps, 4) Risks & Caveats.\n"
+                "  - Use facts from User Financial Facts as absolute ground truth. Do not invent financial numbers.\n"
+                "  - Avoid repeating the user's entire profile or lengthy conversational preamble. Focus on direct, high-value analysis."
+            )
         else:
             response_guidance = (
                 "Response Guidance:\n"

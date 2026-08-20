@@ -37,8 +37,28 @@ class LatencyBreakdown(BaseModel):
     time_to_first_byte_ms: Optional[float] = Field(default=None)
     time_to_first_token_ms: Optional[float] = Field(default=None)
     safety_validation_ms: float = Field(default=0.0)
+    # Phase L.11.1 Stage Profiling Metrics
+    ownership_check_ms: float = Field(default=0.0)
+    user_persistence_ms: float = Field(default=0.0)
+    financial_context_ms: float = Field(default=0.0)
+    history_retrieval_ms: float = Field(default=0.0)
+    financial_intelligence_ms: float = Field(default=0.0)
+    market_data_ms: float = Field(default=0.0)
+    prompt_build_ms: float = Field(default=0.0)
+    cache_eligibility_ms: float = Field(default=0.0)
+    cache_key_ms: float = Field(default=0.0)
+    assistant_persistence_ms: float = Field(default=0.0)
     persistence_ms: float = Field(default=0.0)
+    telemetry_record_ms: float = Field(default=0.0)
     total_ms: float = Field(default=0.0)
+
+    # Phase L.11.2 Fast-Path & Adaptive Token Budget Metrics
+    personal_fast_path_used: bool = Field(default=False)
+    general_rag_skipped: bool = Field(default=False)
+    market_data_skipped: bool = Field(default=False)
+    minimal_context_used: bool = Field(default=False)
+    adaptive_output_budget: int = Field(default=0)
+    fast_path_reason: Optional[str] = Field(default=None)
 
     pgvector_used: bool = Field(default=False)
     faiss_used: bool = Field(default=False)
